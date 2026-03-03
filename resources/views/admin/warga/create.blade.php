@@ -156,6 +156,27 @@
                         <input type="number" name="rw" class="form-control" placeholder="01" value="{{ old('rw') }}" required>
                     </div>
                 </div>
+
+                <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">E. Informasi Rekening Bank</6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Bank</label>
+                        <select name="nama_bank" class="form-select">
+                            <option value="">-- Pilih Bank (Kosongkan jika ada) --</option>
+                            <option value="BRI">BRI (Bank Rakyat Indonesia)</option>
+                            <option value="BNI">BNI (Bank Negara Indonesia)</option>
+                            <option value="Mandiri">Mandiri</option>
+                            <option value="BCA">BCA (Bank Central Asia)</option>
+                            <option value="Bank Jatim">Bank Jatim</option>
+                            <option value="BSI">BSI (Bank Syariah Indonesia)</option>
+                            <option value="Bank Muamalat">Bank Muamalat</option>
+                            <option value="BTPN Syariah">BTPN Syariah (Bank Tabungan Pensiunan Nasional)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nomor Rekening</label>
+                        <input type="number name="no_rekening" class="form_control" value="{{ old('no_rekening') }}" placeholder="Contoh : 901xxxxxxxxx">
+                    </div>
                 
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">Simpan Data Warga</button>

@@ -55,7 +55,8 @@ class WargaController extends Controller
             'alamat_lengkap' => 'required',
             'rt' => 'required',
             'rw' => 'required',
-            // golongan_darah boleh kosong (nullable)
+            'nama_bank' => 'nullable|string',
+            'no_rekening' => 'nullable|numeric'
         ]);
 
         Warga::create($request->all());

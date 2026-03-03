@@ -16,6 +16,9 @@ class WargaImport implements ToModel, WithHeadingRow
         $nik = str_replace("'", "", $row['nik']);
         $no_kk = str_replace("'", "", $row['no_kk']);
 
+        //2. Cek Rekening
+        $no_rekening = isset($row['no_rekening']) ? str_replace("'", "", $row['no_rekening']) : null;
+
         // 2. PERBAIKI FORMAT TANGGAL
         // Cek apakah tanggalnya berupa angka Excel (misal: 31118)
         $tanggal_lahir = $row['tanggal_lahir'];
@@ -41,6 +44,8 @@ class WargaImport implements ToModel, WithHeadingRow
             'rt'                => $row['rt'],
             'rw'                => $row['rw'],
             'golongan_darah'    => $row['golongan_darah'],
+            'nama_bank'         => $row['nama_bank'] ?? null,
+            'no_rekening'       => $no_rekening,
         ]);
     }
 }

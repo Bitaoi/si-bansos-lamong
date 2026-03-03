@@ -36,6 +36,10 @@ return new class extends Migration
         $table->string('rw', 3);
         $table->string('golongan_darah', 5)->nullable(); // A, B, AB, O, -
 
+        // 5. Nomor Rekening
+        $table->string('nama_bank')->nullable();
+        $table->string('no_rekening')->nullable();
+
         $table->timestamps();
     });
 }

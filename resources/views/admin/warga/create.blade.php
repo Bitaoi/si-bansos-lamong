@@ -3,20 +3,34 @@
 <head>
     <title>Tambah Warga - SI Bansos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
+        .card { border-radius: 10px; border: none; }
+        .card-header { border-radius: 10px 10px 0 0 !important; padding: 1rem 1.5rem; }
+        .form-label { font-weight: 500; color: #495057; font-size: 0.9rem; margin-bottom: 0.4rem;}
+        .form-control, .form-select { border-radius: 6px; padding: 0.6rem 0.8rem; border: 1px solid #ced4da; }
+        .form-control:focus, .form-select:focus { border-color: #86b7fe; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); }
+        h6.text-primary { font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.85rem; margin-top: 1.5rem; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
 <div class="container mt-5 mb-5" style="max-width: 900px;">
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Tambah Data Warga</h3>
-        <a href="{{ route('warga.index') }}" class="btn btn-secondary">Kembali</a>
+        <h3 class="fw-bold text-dark">Tambah Data Warga</h3>
+        <a href="{{ route('warga.index') }}" class="btn btn-secondary px-4">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Formulir Biodata Penduduk</h5>
+            <h5 class="mb-0 fw-bold">Formulir Biodata Penduduk</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -48,7 +62,7 @@
                     <input type="text" name="nama_lengkap" class="form-control" value="{{ old('nama_lengkap') }}" placeholder="Sesuai KTP" required>
                 </div>
 
-                <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">B. Data Pribadi</h6>
+                <h6 class="text-primary border-bottom pb-2 mb-3">B. Data Pribadi</h6>
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Tempat Lahir</label>
@@ -99,7 +113,7 @@
                     </div>
                 </div>
 
-                <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">C. Status Sosial</h6>
+                <h6 class="text-primary border-bottom pb-2 mb-3">C. Status Sosial</h6>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Pendidikan Terakhir</label>
@@ -141,7 +155,7 @@
                     </div>
                 </div>
 
-                <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">D. Alamat Domisili</h6>
+                <h6 class="text-primary border-bottom pb-2 mb-3">D. Alamat Domisili</h6>
                 <div class="mb-3">
                     <label class="form-label">Alamat Lengkap (Jalan/Dusun)</label>
                     <textarea name="alamat_lengkap" class="form-control" rows="2" placeholder="Nama Jalan, Nomor Rumah, Dusun" required>{{ old('alamat_lengkap') }}</textarea>
@@ -157,35 +171,35 @@
                     </div>
                 </div>
 
-                <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">E. Informasi Rekening Bank</6>
+                <h6 class="text-primary border-bottom pb-2 mb-3">E. Informasi Rekening Bank</h6>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Nama Bank</label>
                         <select name="nama_bank" class="form-select">
-                            <option value="">-- Pilih Bank (Kosongkan jika ada) --</option>
+                            <option value="">-- Pilih Bank (Kosongkan jika tidak ada) --</option>
                             <option value="BRI">BRI (Bank Rakyat Indonesia)</option>
                             <option value="BNI">BNI (Bank Negara Indonesia)</option>
                             <option value="Mandiri">Mandiri</option>
                             <option value="BCA">BCA (Bank Central Asia)</option>
                             <option value="Bank Jatim">Bank Jatim</option>
                             <option value="BSI">BSI (Bank Syariah Indonesia)</option>
-                            <option value="Bank Muamalat">Bank Muamalat</option>
-                            <option value="BTPN Syariah">BTPN Syariah (Bank Tabungan Pensiunan Nasional)</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Nomor Rekening</label>
-                        <input type="number name="no_rekening" class="form_control" value="{{ old('no_rekening') }}" placeholder="Contoh : 901xxxxxxxxx">
+                        <input type="text" name="no_rekening" class="form-control" value="{{ old('no_rekening') }}" placeholder="Contoh: 1234xxxx">
                     </div>
+                </div>
                 
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">Simpan Data Warga</button>
-                    <a href="{{ route('warga.index') }}" class="btn btn-light border">Batal</a>
+                <div class="d-grid gap-2 mt-5 mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">Simpan Data Warga</button>
+                    <a href="{{ route('warga.index') }}" class="btn btn-light border text-muted">Batal</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

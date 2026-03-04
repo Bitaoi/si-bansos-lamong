@@ -15,11 +15,11 @@
             <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Kembali</a>
             
             <a href="{{ route('warga.template') }}" class="btn btn-info text-white ms-2">
-                📄 Download Template
+                 Download Template
             </a>
 
             <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                📥 Import Excel
+                 Import Excel
             </button>
 
             <a href="{{ route('warga.create') }}" class="btn btn-primary ms-2">+ Tambah Manual</a>

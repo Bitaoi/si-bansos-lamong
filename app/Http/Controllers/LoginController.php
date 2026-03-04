@@ -7,51 +7,46 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // 1. Menampilkan Halaman Login
-    public function index()
-    {
-        return view('auth.login');
-    }
+    // Hapus function index() karena kita pakai Modal di Home
 
-    // 2. Proses Login (Verifikasi)
+    // 1. PROSES LOGIN
     public function authenticate(Request $request)
     {
-        // Validasi input form
         $credentials = $request->validate([
             'username' => ['required'],
             'password' => ['required'],
         ]);
 
-        // Coba login menggunakan Auth Laravel
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Cek Role user untuk mengarahkan ke Dashboard yang benar
-            $user = Auth::user();
+            $role = Auth::user()->role;
 
-            if ($user->role === 'Admin') {
+            // Arahkan sesuai Role
+            if ($role === 'Admin') {
                 return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'RT') {
+            } elseif ($role === 'RT') {
                 return redirect()->intended('/rt/dashboard');
             }
 
-            // Jika role tidak dikenali
-            return redirect()->intended('/');
+            // Jika role aneh, tendang keluar
+            Auth::logout();
+            return back()->withErrors(['login_error' => 'Akses ditolak. Peran tidak dikenali.']);
         }
 
-        // Jika login gagal (Skenario Gagal Gambar 3.3)
+        // JIKA GAGAL: Kembali ke Home dengan Error khusus 'login_error'
         return back()->withErrors([
-            'username' => 'Username atau password salah.',
+            'login_error' => 'Username atau Password salah!',
         ])->onlyInput('username');
     }
 
-    // 3. Proses Logout
+    // 2. PROSES LOGOUT
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/'); // Kembali ke Halaman Depan
     }
 }

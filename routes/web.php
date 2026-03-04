@@ -4,11 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WargaController; 
+use App\Http\Controllers\HomeController;
 
 // Halaman awal ke login
-Route::get('/', function () {
-    return redirect('/login');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Route Login & Logout
 Route::get('/login', [LoginController::class, 'index'])->name('login');

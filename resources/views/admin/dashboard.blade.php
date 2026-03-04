@@ -60,12 +60,12 @@
                 <div class="card-header fw-bold">Menu Pengelolaan Data</div>
                 <div class="card-body">
                     <a href="{{ route('warga.index') }}" class="btn btn-outline-primary btn-lg me-2">
-                        📂 Kelola Data Warga
+                         Kelola Data Warga
                     </a>
                     
-                    <button class="btn btn-outline-secondary btn-lg me-2" disabled>
-                        🎁 Kelola Jenis Bansos (Segera)
-                    </button>
+                    <a href="{{ route('jenis-bansos.index') }}" class="btn btn-outline-primary btn-lg me-2">
+                        <i class="fas fa-gift"></i> Kelola Jenis Bansos
+                    </a>
                 </div>
             </div>
         </div>

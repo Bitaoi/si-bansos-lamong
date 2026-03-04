@@ -13,9 +13,8 @@ return new class extends Migration
 {
     Schema::create('penyalurans', function (Blueprint $table) {
         $table->id('id_penyaluran');
-        // Relasi One to One dengan Pengajuan [cite: 1093]
         $table->unsignedBigInteger('id_pengajuan')->unique();
-        $table->foreign('id_pengajuan')->references('id_pengajuan')->on('pengajuans')->onDelete('cascade');
+        $table->foreign('id_pengajuan')->references('id')->on('pengajuans')->onDelete('cascade');
 
         $table->date('tgl_terima');
         $table->string('foto_bukti', 255);

@@ -6,34 +6,36 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
-{
-    Schema::create('pengajuans', function (Blueprint $table) {
-        $table->id('id_pengajuan');
-        // Foreign Key ke Warga (NIK) [cite: 1088]
-        $table->string('nik', 16);
-        $table->foreign('nik')->references('nik')->on('wargas')->onDelete('cascade');
+    {
+        Schema::create('pengajuans', function (Blueprint $table) {
+            $table->id(); // ID Pengajuan
+            
+            // 1. Relasi ke Warga (NIK)
+            $table->string('nik', 16);
+            $table->foreign('nik')->references('nik')->on('wargas')->onDelete('cascade');
 
-        // Foreign Key ke Jenis Bansos [cite: 1091]
-        $table->unsignedBigInteger('id_bansos');
-        $table->foreign('id_bansos')->references('id_bansos')->on('jenis_bansos');
+            // 2. Relasi ke Jenis Bansos 
+            // (Mengarah ke kolom 'id' di tabel jenis_bansos yang sudah kita perbaiki sebelumnya)
+            $table->unsignedBigInteger('id_bansos');
+            $table->foreign('id_bansos')->references('id')->on('jenis_bansos')->onDelete('cascade');
+            
+            // 3. Relasi ke User / RT Pengusul (PERBAIKAN UTAMA DISINI)
+            // Karena tabel users pakai 'id_user', maka references-nya WAJIB 'id_user' juga.
+            $table->unsignedBigInteger('id_user_pengusul');
+            $table->foreign('id_user_pengusul')->references('id_user')->on('users')->onDelete('cascade');
 
-        // Foreign Key ke User (RT Pengusul) [cite: 1085]
-        $table->unsignedBigInteger('id_user_pengusul');
-        $table->foreign('id_user_pengusul')->references('id_user')->on('users');
+            $table->date('tgl_pengajuan');
+            
+            // Status & Dokumen
+            $table->enum('status_verifikasi_admin', ['Proses', 'Layak', 'Tidak Layak'])->default('Proses');
+            $table->string('file_dokumen_pendukung')->nullable(); 
+            $table->text('keterangan_ditolak')->nullable();
+            
+            $table->timestamps();
+        });
+    }
 
-        $table->date('tgl_pengajuan');
-        $table->string('status_verifikasi_admin', 20)->default('Proses'); // Default status
-        $table->string('file_dokumen_pendukung')->nullable(); // Tambahan dari ERD Gambar 3.16 
-        $table->timestamps();
-    });
-}
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pengajuans');

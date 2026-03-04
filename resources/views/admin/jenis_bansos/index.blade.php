@@ -35,7 +35,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td><strong>{{ $item->nama_bansos }}</strong></td>
-                        <td>{{ $item->kriteria }}</td>
+                        <td>{{ $item->kriteria_penerima }}</td>
                         <td>
                             <form action="{{ route('jenis-bansos.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin hapus bansos ini?')">
                                 <a href="{{ route('jenis-bansos.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>

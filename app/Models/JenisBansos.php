@@ -11,20 +11,20 @@ class JenisBansos extends Model
 
     protected $table = 'jenis_bansos';
 
-    // KITA HAPUS baris 'protected $primaryKey' 
-    // Karena default Laravel sudah otomatis mendeteksi kolom 'id' sebagai primary key.
-
+    // Daftarkan semua kolom baru dari migration/form di sini
     protected $fillable = [
         'nama_bansos',
-        'kriteria',
+        'kode_bansos',
+        'sumber_dana',
+        'deskripsi',
+        'kriteria_penerima', // Ganti 'kriteria' jadi ini
+        'syarat_dtks',
+        'batas_penghasilan',
+        'bentuk_bantuan',
+        'nominal',
+        'frekuensi',
+        'tahun_anggaran',
+        'kuota_penerima',
+        'status',
     ];
-
-    // Relasi ke Pengajuan kita simpan dulu (di-comment), 
-    // Nanti kita aktifkan setelah Model Pengajuan dibuat agar tidak error.
-    /*
-    public function pengajuans()
-    {
-        return $this->hasMany(Pengajuan::class);
-    }
-    */
 }

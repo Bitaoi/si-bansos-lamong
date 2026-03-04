@@ -24,17 +24,30 @@ class JenisBansosController extends Controller
         return view('admin.jenis_bansos.create');
     }
 
-    // 3. SIMPAN DATA
+    // 3. SIMPAN DATA (PERBAIKAN UTAMA DISINI)
     public function store(Request $request)
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
+        // Validasi sesuai name="" di form create.blade.php
         $request->validate([
-            'nama_bansos' => 'required|string|max:100',
-            'kriteria' => 'required|string',
+            'nama_bansos'       => 'required|string|max:100',
+            'sumber_dana'       => 'required|string',
+            'bentuk_bantuan'    => 'required|string',
+            'nominal'           => 'required|string',
+            'frekuensi'         => 'required|string',
+            'kriteria_penerima' => 'required|string', // Jangan pakai 'kriteria' lagi
+            'tahun_anggaran'    => 'required|numeric',
+            'status'            => 'required|in:Aktif,Non-Aktif',
+            // Field lain boleh nullable, jadi tidak wajib divalidasi 'required'
         ]);
 
-        JenisBansos::create($request->all());
+        // Cek Checkbox Syarat DTKS (Karena checkbox kalau tidak dicentang tidak mengirim data)
+        $data = $request->all();
+        $data['syarat_dtks'] = $request->has('syarat_dtks') ? 1 : 0;
+
+        // Simpan
+        JenisBansos::create($data);
 
         return redirect()->route('jenis-bansos.index')->with('success', 'Jenis Bansos berhasil ditambahkan!');
     }
@@ -48,18 +61,29 @@ class JenisBansosController extends Controller
         return view('admin.jenis_bansos.edit', compact('bansos'));
     }
 
-    // 5. UPDATE DATA
+    // 5. UPDATE DATA (PERBAIKAN JUGA DISINI)
     public function update(Request $request, $id)
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
         $request->validate([
-            'nama_bansos' => 'required|string|max:100',
-            'kriteria' => 'required|string',
+            'nama_bansos'       => 'required|string|max:100',
+            'sumber_dana'       => 'required|string',
+            'bentuk_bantuan'    => 'required|string',
+            'nominal'           => 'required|string',
+            'frekuensi'         => 'required|string',
+            'kriteria_penerima' => 'required|string',
+            'tahun_anggaran'    => 'required|numeric',
+            'status'            => 'required|in:Aktif,Non-Aktif',
         ]);
 
         $bansos = JenisBansos::findOrFail($id);
-        $bansos->update($request->all());
+        
+        // Handle checkbox update
+        $data = $request->all();
+        $data['syarat_dtks'] = $request->has('syarat_dtks') ? 1 : 0;
+
+        $bansos->update($data);
 
         return redirect()->route('jenis-bansos.index')->with('success', 'Data berhasil diperbarui!');
     }

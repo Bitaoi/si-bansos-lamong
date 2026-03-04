@@ -6,24 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
 {
     Schema::create('jenis_bansos', function (Blueprint $table) {
-        $table->id('id_bansos'); // Primary Key Auto Increment [cite: 1068]
-        $table->string('nama_bansos', 50);
-        $table->integer('kuota');
-        $table->string('periode', 20);
-        $table->text('keterangan')->nullable();
+        $table->id();
+        // 1. Identitas
+        $table->string('nama_bansos'); 
+        $table->string('kode_bansos', 10)->nullable(); // Baru (Contoh: PKH)
+        $table->string('sumber_dana'); // Pusat/Provinsi/Kab/Desa
+        $table->text('deskripsi')->nullable(); // Baru
+
+        // 2. Kriteria
+        $table->text('kriteria_penerima'); 
+        $table->boolean('syarat_dtks')->default(false); // Baru (Wajib DTKS?)
+        $table->bigInteger('batas_penghasilan')->nullable(); // Baru
+
+        // 3. Logistik
+        $table->string('bentuk_bantuan'); // Tunai/Barang
+        $table->string('nominal'); // "300.000" atau "10 Kg"
+        $table->string('frekuensi'); // Bulanan/Tahunan
+
+        // 4. Admin
+        $table->year('tahun_anggaran'); // Baru
+        $table->integer('kuota_penerima')->default(0); // Baru
+        $table->enum('status', ['Aktif', 'Non-Aktif'])->default('Aktif');
+        
         $table->timestamps();
     });
 }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('jenis_bansos');

@@ -1,111 +1,241 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SI Bansos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        
+        /* Sidebar Styling (Sama dengan RT) */
+        .sidebar { min-height: 100vh; background: #1e293b; color: white; }
+        .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { background: #0d6efd; color: white; }
+        .nav-link i { width: 24px; display: inline-block; }
+        .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; }
+
+        /* Card Styling */
+        .stat-card { border: none; border-radius: 12px; transition: transform 0.2s; background: white; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .icon-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        /* Table Styling */
+        .table-custom thead th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1">Admin Desa Lamong</span>
-        <form action="/logout" method="POST" class="d-flex">
-            @csrf
-            <button class="btn btn-danger btn-sm" type="submit">Logout</button>
-        </form>
-    </div>
-</nav>
-
-<div class="container">
-    <h3 class="mb-4">Dashboard Utama</h3>
-
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Pengajuan</h5>
-                    <p class="card-text display-4">{{ $totalPengajuan }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Menunggu Verifikasi</h5>
-                    <p class="card-text display-4">{{ $menungguVerifikasi }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Penerima Layak</h5>
-                    <p class="card-text display-4">{{ $penerimaLayak }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-secondary mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Sisa Kuota</h5>
-                    <p class="card-text display-4">{{ $sisaKuota }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header fw-bold">Menu Pengelolaan Data</div>
-                <div class="card-body">
-                    <a href="{{ route('warga.index') }}" class="btn btn-outline-primary btn-lg me-2">
-                         Kelola Data Warga
+<div class="container-fluid">
+    <div class="row">
+        
+        <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white">
+                <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
+            </h5>
+            
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link active">
+                        <i class="bi bi-grid-fill"></i> Dashboard
                     </a>
-                    
-                    <a href="{{ route('jenis-bansos.index') }}" class="btn btn-outline-primary btn-lg me-2">
-                        <i class="fas fa-gift"></i> Kelola Jenis Bansos
+                </li>
+                
+                <div class="sidebar-heading mt-3">Master Data</div>
+                <li class="nav-item">
+                    <a href="{{ route('warga.index') }}" class="nav-link">
+                        <i class="bi bi-people-fill"></i> Data Warga
                     </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link">
+                        <i class="bi bi-gift-fill"></i> Jenis Bansos
+                    </a>
+                </li>
+
+                <div class="sidebar-heading mt-3">Transaksi</div>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-file-earmark-text-fill"></i> Verifikasi Pengajuan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-truck"></i> Penyaluran
+                    </a>
+                </li>
+
+                <li class="nav-item mt-5">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link bg-danger text-white w-100 text-start border-0 shadow-sm">
+                            <i class="bi bi-box-arrow-right"></i> Keluar
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-md-9 col-lg-10 p-4">
+            
+            <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>Dashboard Admin</h5>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-sm btn-danger"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
+            </div>
+
+            <div class="card border-0 shadow-sm bg-white mb-4 rounded-4 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="fw-bold text-dark mb-1">Halo, Administrator!</h2>
+                            <p class="mb-0 text-muted fs-5">
+                                Pantau dan kelola penyaluran bantuan sosial Desa Lamong dengan mudah.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end d-none d-md-block">
+                             <i class="bi bi-bar-chart-line text-primary opacity-25" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header fw-bold">5 Pengajuan Terbaru</div>
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>NIK</th>
-                        <th>Nama Warga</th>
-                        <th>Jenis Bantuan</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($pengajuanTerbaru as $p)
-                    <tr>
-                        <td>{{ $p->tgl_pengajuan->format('d-m-Y') }}</td>
-                        <td>{{ $p->nik }}</td>
-                        <td>{{ $p->warga->nama_lengkap ?? '-' }}</td>
-                        <td>{{ $p->jenisBansos->nama_bansos ?? '-' }}</td>
-                        <td>
-                            <span class="badge bg-{{ $p->status_verifikasi_admin == 'Layak' ? 'success' : ($p->status_verifikasi_admin == 'Proses' ? 'warning' : 'danger') }}">
-                                {{ $p->status_verifikasi_admin }}
-                            </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="text-center">Belum ada data pengajuan.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+            <div class="row g-3 mb-4">
+                
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2"> <div class="card stat-card shadow-sm h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <div class="icon-circle bg-secondary bg-opacity-10 text-secondary mb-2">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <h6 class="text-muted small mb-1 text-uppercase fw-bold">Penduduk</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $totalWarga }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+                    <div class="card stat-card shadow-sm h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <div class="icon-circle bg-primary bg-opacity-10 text-primary mb-2">
+                                    <i class="bi bi-send-fill"></i>
+                                </div>
+                                <h6 class="text-muted small mb-1 text-uppercase fw-bold">Total Usulan</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $totalPengajuan }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+                    <div class="card stat-card shadow-sm h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <div class="icon-circle bg-warning bg-opacity-10 text-warning mb-2">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                                <h6 class="text-muted small mb-1 text-uppercase fw-bold">Verifikasi</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $menungguVerifikasi }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+                    <div class="card stat-card shadow-sm h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <div class="icon-circle bg-success bg-opacity-10 text-success mb-2">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <h6 class="text-muted small mb-1 text-uppercase fw-bold">Siap Salur</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $penerimaLayak }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+                    <div class="card stat-card shadow-sm h-100 bg-info bg-opacity-10">
+                        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-info-emphasis small mb-1 text-uppercase fw-bold">Sisa Kuota Global</h6>
+                                <h2 class="fw-bold mb-0 text-info-emphasis">{{ $sisaKuota }}</h2>
+                            </div>
+                            <div class="icon-circle bg-white text-info">
+                                <i class="bi bi-pie-chart-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>5 Pengajuan Terbaru</h6>
+                    <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">Lihat Semua</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Tanggal</th>
+                                    <th>Nama Warga</th>
+                                    <th>Jenis Bansos</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($pengajuanTerbaru as $item)
+                                <tr>
+                                    <td class="ps-4 text-muted small">{{ $item->tgl_pengajuan }}</td>
+                                    <td class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {{ $item->jenisBansos->nama_bansos ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($item->status_verifikasi_admin == 'Proses')
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Proses</span>
+                                        @elseif($item->status_verifikasi_admin == 'Layak')
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Layak</span>
+                                        @else
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Ditolak</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="#" class="btn btn-sm btn-light text-primary"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                        Belum ada pengajuan baru.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -53,7 +53,7 @@
                         <label class="form-label">Sumber Dana</label>
                         <select name="sumber_dana" class="form-select" required>
                             <option value="">-- Pilih Sumber --</option>
-                            <option value="Pusat" {{ $bansos->sumber_dana == 'Pusat' ? 'selected' : '' }}>Pemerintah Pusat (Kemensos)</option>
+                            <option value="Pusat" {{ $bansos->sumber_dana == 'Pusat' ? 'selected' : '' }}>KEMENSOS</option>
                             <option value="Provinsi" {{ $bansos->sumber_dana == 'Provinsi' ? 'selected' : '' }}>Pemerintah Provinsi</option>
                             <option value="Kabupaten" {{ $bansos->sumber_dana == 'Kabupaten' ? 'selected' : '' }}>Pemerintah Kabupaten</option>
                             <option value="Dana Desa" {{ $bansos->sumber_dana == 'Dana Desa' ? 'selected' : '' }}>Dana Desa</option>

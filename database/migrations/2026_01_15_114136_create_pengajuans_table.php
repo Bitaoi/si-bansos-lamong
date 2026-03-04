@@ -27,6 +27,16 @@ return new class extends Migration
 
             $table->date('tgl_pengajuan');
             
+            // Pengajuan Bantuan
+            $table->text('alasan_pengajuan'); 
+            $table->decimal('estimasi_penghasilan', 15, 2); 
+            $table->json('checklist_kriteria')->nullable(); // Menyimpan checklist (Lansia, Sewa, dll)
+
+            // bukti fisik
+            $table->string('foto_ktp_kk')->nullable();
+            $table->string('foto_rumah_depan')->nullable();
+            $table->string('foto_rumah_dalam')->nullable();
+            
             // Status & Dokumen
             $table->enum('status_verifikasi_admin', ['Proses', 'Layak', 'Tidak Layak'])->default('Proses');
             $table->string('file_dokumen_pendukung')->nullable(); 

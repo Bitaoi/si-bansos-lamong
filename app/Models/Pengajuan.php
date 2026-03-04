@@ -10,47 +10,46 @@ class Pengajuan extends Model
     use HasFactory;
 
     protected $table = 'pengajuans';
-    protected $primaryKey = 'id_pengajuan';
 
+    // TAMBAHKAN SEMUA KOLOM BARU KE SINI
     protected $fillable = [
         'nik',
         'id_bansos',
         'id_user_pengusul',
         'tgl_pengajuan',
-        'status_verifikasi_admin', // Proses, Layak, Tidak Layak
-        'file_dokumen_pendukung',
+        
+        // Kolom Baru
+        'alasan_pengajuan',
+        'estimasi_penghasilan',
+        'checklist_kriteria', // Akan disimpan sebagai JSON
+        'foto_ktp_kk',
+        'foto_rumah_depan',
+        'foto_rumah_dalam',
+        
+        'status_verifikasi_admin',
+        'keterangan_ditolak'
     ];
 
-    // Agar tgl_pengajuan otomatis dianggap sebagai Tanggal oleh Laravel
+    // Opsional: Casting agar checklist otomatis jadi Array saat diambil
     protected $casts = [
-        'tgl_pengajuan' => 'date',
+        'checklist_kriteria' => 'array',
+        'tgl_pengajuan' => 'date'
     ];
 
-    // --- RELASI (BelongsTo) ---
+    // ================= RELASI =================
 
-    // Milik Warga siapa?
     public function warga()
     {
         return $this->belongsTo(Warga::class, 'nik', 'nik');
     }
 
-    // Jenis Bansos apa?
     public function jenisBansos()
     {
-        return $this->belongsTo(JenisBansos::class, 'id_bansos', 'id_bansos');
+        return $this->belongsTo(JenisBansos::class, 'id_bansos', 'id');
     }
 
-    // Siapa RT pengusulnya?
-    public function userPengusul()
+    public function pengusul()
     {
-        return $this->belongsTo(User::class, 'id_user_pengusul', 'id_user');
-    }
-
-    // --- RELASI (HasOne) ---
-    
-    
-    public function penyaluran()
-    {
-        return $this->hasOne(Penyaluran::class, 'id_pengajuan', 'id_pengajuan');
+        return $this->belongsTo(User::class, 'id_user_pengusul', 'id');
     }
 }

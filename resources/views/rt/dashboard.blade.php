@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('pengajuan.create') }}" class="nav-link">
                         <i class="bi bi-file-earmark-plus-fill"></i> Pengajuan Baru
                     </a>
                 </li>
@@ -160,7 +160,7 @@
                 <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="#" class="btn btn-outline-primary w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
+                            <a href="{{ route('pengajuan.create') }}" class="btn btn-outline-primary w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
                                 <i class="bi bi-plus-circle-fill fs-4 me-3"></i> 
                                 <div>
                                     <div>Buat Pengajuan Bansos</div>
@@ -184,6 +184,20 @@
         </div>
     </div>
 </div>
+
+@if(session('success'))
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast show bg-success text-white" role="alert">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto"><i class="bi bi-check-circle-fill me-2"></i>Berhasil!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                {{ session('success') }}
+            </div>
+        </div>
+    </div>
+@endif
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

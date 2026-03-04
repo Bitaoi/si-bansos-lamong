@@ -11,7 +11,6 @@ class Pengajuan extends Model
 
     protected $table = 'pengajuans';
 
-    // TAMBAHKAN SEMUA KOLOM BARU KE SINI
     protected $fillable = [
         'nik',
         'id_bansos',
@@ -30,7 +29,6 @@ class Pengajuan extends Model
         'keterangan_ditolak'
     ];
 
-    // Opsional: Casting agar checklist otomatis jadi Array saat diambil
     protected $casts = [
         'checklist_kriteria' => 'array',
         'tgl_pengajuan' => 'date'
@@ -50,6 +48,8 @@ class Pengajuan extends Model
 
     public function pengusul()
     {
-        return $this->belongsTo(User::class, 'id_user_pengusul', 'id');
+        // PERBAIKAN DISINI:
+        // Parameter ke-3 diganti dari 'id' menjadi 'id_user'
+        return $this->belongsTo(User::class, 'id_user_pengusul', 'id_user');
     }
 }

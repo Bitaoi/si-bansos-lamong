@@ -78,11 +78,35 @@
                     
                     <li class="nav-item ms-3">
                         @auth
-                            <a href="{{ url('/admin/dashboard') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-                                <i class="bi bi-speedometer2"></i> Dashboard Admin
-                            </a>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle rounded-pill px-4 fw-bold border-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-2"></i> {{ Auth::user()->username }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 rounded-3">
+                                    <li>
+                                        @if(Auth::user()->role == 'Admin')
+                                            <a class="dropdown-item py-2 rounded-2" href="{{ route('admin.dashboard') }}">
+                                                <i class="bi bi-speedometer2 me-2 text-primary"></i> Dashboard Admin
+                                            </a>
+                                        @else
+                                            <a class="dropdown-item py-2 rounded-2" href="{{ route('rt.dashboard') }}">
+                                                <i class="bi bi-grid-fill me-2 text-primary"></i> Dashboard RT
+                                            </a>
+                                        @endif
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item py-2 text-danger rounded-2">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Keluar
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                         @else
-                            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
                                 <i class="bi bi-lock-fill me-1"></i> Masuk Sistem
                             </button>
                         @endauth
@@ -103,6 +127,7 @@
     </section>
 
     <div class="container" style="margin-top: -100px;">
+        
         <div class="row g-4 mb-5" id="statistik">
             <div class="col-md-4">
                 <div class="stat-card p-4">
@@ -192,7 +217,6 @@
         </div>
     </footer>
 
-
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -210,7 +234,6 @@
                         <div class="alert alert-danger py-2 small text-center mb-3 shadow-sm border-0">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $errors->first('login_error') }}
                         </div>
-                        
                         <script>
                             window.addEventListener('DOMContentLoaded', (event) => {
                                 var myModal = new bootstrap.Modal(document.getElementById('loginModal'));
@@ -280,8 +303,6 @@
 
         // 2. CHART BANSOS (BAR CHART)
         const ctxBansos = document.getElementById('bansosChart').getContext('2d');
-        
-        // Ambil data dari Controller Laravel
         const labels = @json($labelBansos); 
         const dataTotal = @json($dataBansos);
 

@@ -10,7 +10,7 @@
     <style>
         body { background-color: #f3f4f6; font-family: sans-serif; }
         
-        /* Sidebar Styling (Sama dengan RT) */
+        /* Sidebar Styling */
         .sidebar { min-height: 100vh; background: #1e293b; color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
         .nav-link:hover, .nav-link.active { background: #0d6efd; color: white; }
@@ -57,11 +57,13 @@
                 </li>
 
                 <div class="sidebar-heading mt-3">Transaksi</div>
+                
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-file-earmark-text-fill"></i> Verifikasi Pengajuan
+                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.index') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
                     </a>
                 </li>
+                
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-truck"></i> Penyaluran
@@ -107,7 +109,8 @@
 
             <div class="row g-3 mb-4">
                 
-                <div class="col-12 col-md-6 col-lg-4 col-xl-2"> <div class="card stat-card shadow-sm h-100">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2"> 
+                    <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3">
                             <div class="d-flex flex-column align-items-center text-center">
                                 <div class="icon-circle bg-secondary bg-opacity-10 text-secondary mb-2">
@@ -181,7 +184,7 @@
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>5 Pengajuan Terbaru</h6>
-                    <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">Lihat Semua</a>
+                    <a href="{{ route('verifikasi.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Lihat Semua</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -215,7 +218,7 @@
                                         @endif
                                     </td>
                                     <td class="text-end pe-4">
-                                        <a href="#" class="btn btn-sm btn-light text-primary"><i class="bi bi-eye"></i></a>
+                                        <a href="{{ route('verifikasi.index') }}" class="btn btn-sm btn-light text-primary"><i class="bi bi-eye"></i></a>
                                     </td>
                                 </tr>
                                 @empty

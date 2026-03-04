@@ -42,6 +42,13 @@ Route::middleware(['auth'])->group(function () {
     // --- MANAJEMEN JENIS BANSOS ---
     Route::resource('/admin/jenis-bansos', JenisBansosController::class);
 
+    //--- VERIFIKASI PENGAJUAN ---
+    Route::get('/admin/verifikasi', [App\Http\Controllers\VerifikasiController::class, 'index'])
+        ->name('verifikasi.index');
+
+    Route::put('/admin/verifikasi/{id}', [App\Http\Controllers\VerifikasiController::class, 'update'])
+        ->name('verifikasi.update');
+
 
     // ====================================================
     // 2. AREA KHUSUS RT (Update Terbaru)

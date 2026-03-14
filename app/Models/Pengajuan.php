@@ -16,15 +16,12 @@ class Pengajuan extends Model
         'id_bansos',
         'id_user_pengusul',
         'tgl_pengajuan',
-        
-        // Kolom Baru
         'alasan_pengajuan',
         'estimasi_penghasilan',
-        'checklist_kriteria', // Akan disimpan sebagai JSON
+        'checklist_kriteria',
         'foto_ktp_kk',
         'foto_rumah_depan',
         'foto_rumah_dalam',
-        
         'status_verifikasi_admin',
         'keterangan_ditolak'
     ];
@@ -43,13 +40,17 @@ class Pengajuan extends Model
 
     public function jenisBansos()
     {
+        // PERBAIKAN DISINI:
+        // Parameter ke-3 dikembalikan ke 'id' (sesuai database)
+        // Parameter ke-2 tetap 'id_bansos' (Foreign Key di tabel pengajuan)
         return $this->belongsTo(JenisBansos::class, 'id_bansos', 'id');
     }
 
     public function pengusul()
     {
-        // PERBAIKAN DISINI:
-        // Parameter ke-3 diganti dari 'id' menjadi 'id_user'
+        // Kalau User sudah fix pakai id_user, biarkan ini.
+        // Tapi kalau User juga pakai id default, ubah jadi 'id'.
+        // Berdasarkan chat sebelumnya, User pakai 'id_user', jadi ini biarkan.
         return $this->belongsTo(User::class, 'id_user_pengusul', 'id_user');
     }
 }

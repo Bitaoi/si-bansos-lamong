@@ -28,6 +28,21 @@
                 <a href="{{ route('rt.dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
             </div>
 
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Pengajuan Gagal Dikirim!</h6>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
             <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 

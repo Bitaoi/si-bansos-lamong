@@ -13,7 +13,7 @@ class PengajuanController extends Controller
     // 1. TAMPILKAN FORM
     public function create()
     {
-        // Hanya ambil bansos yang Aktif
+        // Ambil bansos yang Aktif saja
         $bansos = JenisBansos::where('status', 'Aktif')->get();
         return view('rt.pengajuan.create', compact('bansos'));
     }
@@ -23,13 +23,11 @@ class PengajuanController extends Controller
     {
         $keyword = $request->keyword;
         
-        // Cari berdasarkan NIK atau Nama
         $warga = Warga::where('nik', $keyword)
                     ->orWhere('nama_lengkap', 'LIKE', "%{$keyword}%")
                     ->first();
 
         if ($warga) {
-            // Hitung Jumlah Anggota Keluarga (berdasarkan No KK yang sama)
             $jumlahAnggota = Warga::where('no_kk', $warga->no_kk)->count();
 
             return response()->json([
@@ -47,7 +45,7 @@ class PengajuanController extends Controller
         return response()->json(['status' => 'not_found']);
     }
 
-    // 3. SIMPAN PENGAJUAN
+    // 3. SIMPAN PENGAJUAN (PERBAIKAN UTAMA DISINI)
     public function store(Request $request)
     {
         $request->validate([
@@ -55,9 +53,9 @@ class PengajuanController extends Controller
             'id_bansos' => 'required',
             'alasan' => 'required|string',
             'penghasilan' => 'required|numeric',
-            'foto_ktp' => 'required|image|max:2048', // Maks 2MB
+            'foto_ktp' => 'required|image|max:2048', 
             'foto_rumah_depan' => 'required|image|max:2048',
-            'checklist' => 'array' // Array checklist
+            'checklist' => 'nullable|array' 
         ]);
 
         // Upload Foto
@@ -65,20 +63,25 @@ class PengajuanController extends Controller
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
         $pathDalam = $request->file('foto_rumah_dalam') ? $request->file('foto_rumah_dalam')->store('pengajuan/rumah', 'public') : null;
 
+        // PERBAIKAN: Gunakan Auth::user()->id_user secara eksplisit
+        // Agar tidak salah ambil kolom 'id' default
+        $idPengusul = Auth::user()->id_user;
+
         Pengajuan::create([
             'nik' => $request->nik,
             'id_bansos' => $request->id_bansos,
-            'id_user_pengusul' => Auth::id(), // ID Pak RT yang login
+            'id_user_pengusul' => $idPengusul, // <--- INI KUNCINYA
             'tgl_pengajuan' => now(),
             'alasan_pengajuan' => $request->alasan,
             'estimasi_penghasilan' => $request->penghasilan,
-            'checklist_kriteria' => json_encode($request->checklist), // Simpan array checklist jadi JSON
+            'checklist_kriteria' => $request->checklist ?? [], 
             'foto_ktp_kk' => $pathKtp,
             'foto_rumah_depan' => $pathDepan,
             'foto_rumah_dalam' => $pathDalam,
             'status_verifikasi_admin' => 'Proses'
         ]);
 
-        return redirect()->route('rt.dashboard')->with('success', 'Pengajuan berhasil dikirim ke Desa!');
+        // Redirect dengan Pesan Sukses
+        return redirect()->route('rt.dashboard')->with('success', 'Berhasil! Data pengajuan bantuan telah dikirim.');
     }
 }

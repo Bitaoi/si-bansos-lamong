@@ -23,7 +23,10 @@ class Pengajuan extends Model
         'foto_rumah_depan',
         'foto_rumah_dalam',
         'status_verifikasi_admin',
-        'keterangan_ditolak'
+        'keterangan_ditolak',
+        'berkas_observasi',
+        'catatan_observasi',
+        'berita_acara_musdes',
     ];
 
     protected $casts = [

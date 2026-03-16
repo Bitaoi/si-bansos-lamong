@@ -6,223 +6,235 @@
     <title>Verifikasi Pengajuan - Admin SI Bansos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
     <style>
         body { background-color: #f3f4f6; font-family: sans-serif; }
         .sidebar { min-height: 100vh; background: #1e293b; color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
         .nav-link:hover, .nav-link.active { background: #0d6efd; color: white; }
         .nav-link i { width: 24px; display: inline-block; }
-        .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; }
+        .table-custom thead th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
         
-        /* Table & Badge */
-        .table-custom thead th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        .table-custom tbody td { vertical-align: middle; padding: 1rem 0.75rem; font-size: 0.95rem; }
-        .badge-status { padding: 6px 12px; border-radius: 50px; font-weight: 600; font-size: 0.75rem; }
+        /* Stepper CSS */
+        .stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; }
+        .stepper::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 3px; background: #e2e8f0; z-index: 1; }
+        .step { position: relative; z-index: 2; text-align: center; background: white; padding: 0 10px; flex: 1; }
+        .step-icon { width: 35px; height: 35px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .step.active .step-icon { background: #0d6efd; color: white; border-color: #dbeafe; }
+        .step.completed .step-icon { background: #198754; color: white; border-color: #d1e7dd; }
+        .step.rejected .step-icon { background: #dc3545; color: white; border-color: #f8d7da; }
+        .step-label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+        .step.active .step-label { color: #0d6efd; }
+        .step.completed .step-label { color: #198754; }
         
-        /* Modal Photo */
-        .img-evidence { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
-        .checklist-item { background: #f8f9fa; padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; font-size: 0.9rem; border-left: 4px solid #0d6efd; }
+        .img-evidence { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .timeline-doc { border-left: 3px solid #0d6efd; padding-left: 15px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-
 <div class="container-fluid">
     <div class="row">
-        
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
-            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white">
-                <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
-            </h5>
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white"><i class="bi bi-shield-lock-fill me-2"></i>ADMIN</h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
                 <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
-                <div class="sidebar-heading mt-3">Transaksi</div>
-                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link active"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan</a></li>
+                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link active"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button class="nav-link bg-danger text-white w-100 text-start border-0"><i class="bi bi-box-arrow-right"></i> Keluar</button>
+                        @csrf <button class="nav-link bg-danger text-white w-100 text-start border-0"><i class="bi bi-box-arrow-right"></i> Keluar</button>
                     </form>
                 </li>
             </ul>
         </div>
 
         <div class="col-md-9 col-lg-10 p-4">
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold mb-1">Verifikasi Pengajuan</h4>
-                    <p class="text-muted mb-0">Tinjau usulan bantuan dari RT sebelum disalurkan.</p>
-                </div>
-            </div>
+            <h4 class="fw-bold mb-4">Verifikasi Pengajuan (Birokrasi)</h4>
 
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+                <div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}</div>
             @endif
 
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-custom table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-4">Tgl Pengajuan</th>
-                                    <th>Nama Warga (NIK)</th>
-                                    <th>Jenis Bansos</th>
-                                    <th>Pengusul (RT)</th>
-                                    <th>Status</th>
-                                    <th class="text-end pe-4">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($pengajuans as $item)
-                                <tr>
-                                    <td class="ps-4 text-muted small">{{ \Carbon\Carbon::parse($item->tgl_pengajuan)->format('d M Y') }}</td>
-                                    <td>
-                                        <div class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</div>
-                                        <small class="text-muted">{{ $item->nik }}</small>
-                                    </td>
-                                    <td><span class="badge bg-light text-primary border">{{ $item->jenisBansos->nama_bansos ?? '-' }}</span></td>
-                                    <td>
-                                        <div class="small fw-bold">{{ $item->pengusul->nama_lengkap ?? '-' }}</div>
-                                        <small class="text-muted">Wilayah: {{ $item->pengusul->wilayah_rt_rw ?? '-' }}</small>
-                                    </td>
-                                    <td>
-                                        @if($item->status_verifikasi_admin == 'Proses')
-                                            <span class="badge bg-warning text-dark badge-status"><i class="bi bi-hourglass-split"></i> Menunggu Review</span>
-                                        @elseif($item->status_verifikasi_admin == 'Layak')
-                                            <span class="badge bg-success badge-status"><i class="bi bi-check-circle"></i> Disetujui</span>
-                                        @else
-                                            <span class="badge bg-danger badge-status"><i class="bi bi-x-circle"></i> Ditolak</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">
-                                            <i class="bi bi-eye-fill me-1"></i> Detail & Aksi
-                                        </button>
-                                    </td>
-                                </tr>
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Pemohon</th>
+                                <th>Bansos</th>
+                                <th>Tahapan Saat Ini</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($pengajuans as $item)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</div>
+                                    <small class="text-muted">RT: {{ $item->pengusul->wilayah_rt_rw ?? '-' }}</small>
+                                </td>
+                                <td><span class="badge bg-light text-primary border">{{ $item->jenisBansos->nama_bansos ?? '-' }}</span></td>
+                                <td>
+                                    @php
+                                        $badges = [
+                                            'Proses' => ['bg-secondary', '1. Menunggu Tindakan'],
+                                            'Verifikasi Lapangan' => ['bg-warning text-dark', '2. Sedang Observasi'],
+                                            'Menunggu Musdes' => ['bg-info text-dark', '3. Menunggu Musdes'],
+                                            'Siap Keputusan' => ['bg-primary', '4. Siap Putusan Akhir'],
+                                            'Layak' => ['bg-success', 'Selesai - Layak'],
+                                            'Tidak Layak' => ['bg-danger', 'Selesai - Ditolak'],
+                                        ];
+                                        $currentBadge = $badges[$item->status_verifikasi_admin] ?? ['bg-dark', $item->status_verifikasi_admin];
+                                    @endphp
+                                    <span class="badge {{ $currentBadge[0] }}">{{ $currentBadge[1] }}</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">Review Data</button>
+                                </td>
+                            </tr>
 
-                                <div class="modal fade" id="modalDetail{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header bg-primary text-white">
-                                                <h5 class="modal-title fw-bold">Detail Pengajuan #{{ $item->id }}</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <div class="modal fade" id="modalDetail{{ $item->id }}" tabindex="-1">
+                                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-light">
+                                            <h5 class="modal-title fw-bold">Review Berkas #{{ $item->id }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body p-4">
+                                            
+                                            <div class="stepper mb-5 px-3">
+                                                @php $s = $item->status_verifikasi_admin; @endphp
+                                                <div class="step {{ in_array($s, ['Proses','Verifikasi Lapangan','Menunggu Musdes','Siap Keputusan','Layak','Tidak Layak']) ? 'completed' : 'active' }}">
+                                                    <div class="step-icon"><i class="bi bi-1-circle"></i></div>
+                                                    <div class="step-label">Pengajuan RT</div>
+                                                </div>
+                                                <div class="step {{ in_array($s, ['Menunggu Musdes','Siap Keputusan','Layak','Tidak Layak']) ? 'completed' : ($s == 'Verifikasi Lapangan' ? 'active' : '') }}">
+                                                    <div class="step-icon"><i class="bi bi-2-circle"></i></div>
+                                                    <div class="step-label">Observasi Lapangan</div>
+                                                </div>
+                                                <div class="step {{ in_array($s, ['Siap Keputusan','Layak','Tidak Layak']) ? 'completed' : ($s == 'Menunggu Musdes' ? 'active' : '') }}">
+                                                    <div class="step-icon"><i class="bi bi-3-circle"></i></div>
+                                                    <div class="step-label">Musdes</div>
+                                                </div>
+                                                <div class="step {{ $s == 'Layak' ? 'completed' : ($s == 'Tidak Layak' ? 'rejected' : ($s == 'Siap Keputusan' ? 'active' : '')) }}">
+                                                    <div class="step-icon"><i class="bi bi-check2-all"></i></div>
+                                                    <div class="step-label">Finalisasi</div>
+                                                </div>
                                             </div>
-                                            <div class="modal-body p-4">
-                                                
-                                                <div class="row g-4">
-                                                    <div class="col-md-6 border-end">
-                                                        <h6 class="fw-bold text-primary mb-3">DATA PEMOHON</h6>
-                                                        <table class="table table-sm table-borderless">
-                                                            <tr><td class="text-muted">Nama:</td><td class="fw-bold">{{ $item->warga->nama_lengkap }}</td></tr>
-                                                            <tr><td class="text-muted">NIK:</td><td>{{ $item->nik }}</td></tr>
-                                                            <tr><td class="text-muted">Alamat:</td><td>{{ $item->warga->alamat_lengkap }}</td></tr>
-                                                            <tr><td class="text-muted">Estimasi Pendapatan:</td><td class="fw-bold text-success">Rp {{ number_format($item->estimasi_penghasilan, 0, ',', '.') }}</td></tr>
-                                                        </table>
 
-                                                        <h6 class="fw-bold text-primary mb-3 mt-4">ALASAN & KRITERIA</h6>
-                                                        <div class="bg-light p-3 rounded mb-3 border">
-                                                            <i class="bi bi-quote text-secondary me-2"></i>
-                                                            <em>{{ $item->alasan_pengajuan }}</em>
+                                            <div class="row g-4">
+                                                <div class="col-md-7 border-end">
+                                                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
+                                                    <div class="row mb-3">
+                                                        <div class="col-6"><small class="text-muted d-block">Nama Lengkap</small><strong>{{ $item->warga->nama_lengkap }}</strong></div>
+                                                        <div class="col-6"><small class="text-muted d-block">NIK</small><strong>{{ $item->nik }}</strong></div>
+                                                    </div>
+                                                    <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light p-2 rounded"><em>{{ $item->alasan_pengajuan }}</em></div></div>
+                                                    
+                                                    <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-camera-fill me-2"></i>FOTO LAMPIRAN RT</h6>
+                                                    <div class="row g-2">
+                                                        <div class="col-4"><a href="{{ asset('storage/'.$item->foto_ktp_kk) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_ktp_kk) }}" class="img-evidence"></a></div>
+                                                        <div class="col-4"><a href="{{ asset('storage/'.$item->foto_rumah_depan) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence"></a></div>
+                                                        <div class="col-4">
+                                                            @if($item->foto_rumah_dalam) <a href="{{ asset('storage/'.$item->foto_rumah_dalam) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence"></a>
+                                                            @else <div class="bg-light h-100 d-flex align-items-center justify-content-center border text-muted small">Tanpa Foto Dalam</div> @endif
                                                         </div>
-                                                        
-                                                        @if($item->checklist_kriteria && is_array($item->checklist_kriteria))
-                                                            @foreach($item->checklist_kriteria as $kriteria)
-                                                                <div class="checklist-item">{{ $kriteria }}</div>
-                                                            @endforeach
-                                                        @elseif($item->checklist_kriteria && is_string($item->checklist_kriteria))
-                                                            <div class="checklist-item">{{ $item->checklist_kriteria }}</div>
-                                                        @else
-                                                            <small class="text-muted">- Tidak ada checklist -</small>
+                                                    </div>
+
+                                                    @if($item->berkas_observasi || $item->berita_acara_musdes)
+                                                        <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-folder-check me-2"></i>ARSIP DOKUMEN</h6>
+                                                        @if($item->berkas_observasi)
+                                                            <div class="timeline-doc border-primary bg-primary bg-opacity-10 p-2 rounded mb-2">
+                                                                <strong><i class="bi bi-file-earmark-pdf text-danger"></i> Hasil Observasi</strong><br>
+                                                                <small class="text-muted">Catatan: {{ $item->catatan_observasi ?? '-' }}</small><br>
+                                                                <a href="{{ asset('storage/'.$item->berkas_observasi) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">Lihat Berkas</a>
+                                                            </div>
                                                         @endif
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold text-primary mb-3">BUKTI FISIK</h6>
-                                                        <div class="mb-3">
-                                                            <label class="small text-muted mb-1">Foto KTP & KK</label>
-                                                            <img src="{{ asset('storage/'.$item->foto_ktp_kk) }}" class="img-evidence" alt="KTP">
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-6">
-                                                                <label class="small text-muted mb-1">Rumah Depan</label>
-                                                                <img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence" alt="Rumah">
+                                                        @if($item->berita_acara_musdes)
+                                                            <div class="timeline-doc border-success bg-success bg-opacity-10 p-2 rounded">
+                                                                <strong><i class="bi bi-file-earmark-pdf text-danger"></i> Berita Acara Musdes</strong><br>
+                                                                <a href="{{ asset('storage/'.$item->berita_acara_musdes) }}" target="_blank" class="btn btn-sm btn-outline-success mt-1">Lihat Berkas BA</a>
                                                             </div>
-                                                            <div class="col-6">
-                                                                <label class="small text-muted mb-1">Rumah Dalam</label>
-                                                                @if($item->foto_rumah_dalam)
-                                                                    <img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence" alt="Dalam">
-                                                                @else
-                                                                    <div class="bg-light border rounded h-100 d-flex align-items-center justify-content-center text-muted small">Tidak ada foto</div>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                        @endif
+                                                    @endif
                                                 </div>
 
-                                            </div>
-                                            <div class="modal-footer bg-light justify-content-between">
-                                                <div class="text-muted small fst-italic">
-                                                    Diajukan oleh: {{ $item->pengusul->nama_lengkap }} ({{ \Carbon\Carbon::parse($item->tgl_pengajuan)->diffForHumans() }})
-                                                </div>
+                                                <div class="col-md-5 bg-light p-3 rounded">
+                                                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-sliders me-2"></i>PANEL KENDALI TAHAPAN</h6>
+                                                    
+                                                    @if($item->status_verifikasi_admin == 'Proses')
+                                                        <div class="alert alert-secondary small">Data baru masuk. Silakan teruskan ke Dinsos untuk dilakukan survei lapangan.</div>
+                                                        <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
+                                                            @csrf @method('PUT') <input type="hidden" name="tahap" value="jadwal_observasi">
+                                                            <button type="submit" class="btn btn-warning w-100 fw-bold"><i class="bi bi-cursor-fill me-2"></i>Jadwalkan Observasi Lapangan</button>
+                                                        </form>
+                                                    
+                                                    @elseif($item->status_verifikasi_admin == 'Verifikasi Lapangan')
+                                                        <div class="alert alert-warning small">Status: Menunggu hasil lapangan. Unggah bukti jika survei selesai.</div>
+                                                        <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
+                                                            @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_observasi">
+                                                            <div class="mb-3">
+                                                                <label class="small fw-bold">Unggah Bukti Observasi (Foto/PDF) <span class="text-danger">*</span></label>
+                                                                <input type="file" name="berkas_observasi" class="form-control form-control-sm" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="small fw-bold">Catatan Petugas</label>
+                                                                <textarea name="catatan_observasi" class="form-control form-control-sm" rows="2"></textarea>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-upload me-2"></i>Simpan Hasil Observasi</button>
+                                                        </form>
 
-                                                @if($item->status_verifikasi_admin == 'Proses')
-                                                    <div class="d-flex gap-2">
-                                                        <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
-                                                            @csrf @method('PUT')
-                                                            <input type="hidden" name="status" value="Tidak Layak">
-                                                            <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin MENOLAK pengajuan ini?')">
-                                                                <i class="bi bi-x-circle me-1"></i> TOLAK (Tidak Layak)
-                                                            </button>
+                                                    @elseif($item->status_verifikasi_admin == 'Menunggu Musdes')
+                                                        <div class="alert alert-info small">Observasi selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
+                                                        <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
+                                                            @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_musdes">
+                                                            <div class="mb-3">
+                                                                <label class="small fw-bold">Unggah Berita Acara Musdes <span class="text-danger">*</span></label>
+                                                                <input type="file" name="berita_acara_musdes" class="form-control form-control-sm" required>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-unlock-fill me-2"></i>Unggah & Buka Kunci Final</button>
                                                         </form>
-                                                        
+
+                                                    @elseif($item->status_verifikasi_admin == 'Siap Keputusan')
+                                                        <div class="alert alert-success small"><i class="bi bi-unlock-fill me-1"></i> Berkas lengkap. Kunci keputusan telah dibuka.</div>
                                                         <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
-                                                            @csrf @method('PUT')
-                                                            <input type="hidden" name="status" value="Layak">
-                                                            <button type="submit" class="btn btn-success" onclick="return confirm('Yakin data valid dan DISETUJUI?')">
-                                                                <i class="bi bi-check-circle me-1"></i> SETUJUI (Layak)
-                                                            </button>
+                                                            @csrf @method('PUT') <input type="hidden" name="tahap" value="final">
+                                                            
+                                                            <div class="mb-3">
+                                                                <label class="small fw-bold">Jika Ditolak, beri alasan:</label>
+                                                                <textarea name="keterangan_ditolak" class="form-control form-control-sm" rows="2" placeholder="Isi jika akan menolak data ini..."></textarea>
+                                                            </div>
+
+                                                            <div class="d-flex gap-2">
+                                                                <button type="submit" name="status" value="Tidak Layak" class="btn btn-danger w-50" onclick="return confirm('Tolak pengajuan ini?')"><i class="bi bi-x-circle"></i> TOLAK</button>
+                                                                <button type="submit" name="status" value="Layak" class="btn btn-success w-50" onclick="return confirm('Setujui pengajuan ini?')"><i class="bi bi-check-circle"></i> SETUJUI</button>
+                                                            </div>
                                                         </form>
-                                                    </div>
-                                                @else
-                                                    <button class="btn btn-secondary" disabled>Sudah Diverifikasi</button>
-                                                @endif
+
+                                                    @else
+                                                        <div class="alert alert-light text-center border">
+                                                            <i class="bi bi-shield-check fs-1 text-success d-block mb-2"></i>
+                                                            <h6 class="fw-bold">Tahapan Selesai</h6>
+                                                            <p class="small mb-0">Status Akhir: <strong>{{ $item->status_verifikasi_admin }}</strong></p>
+                                                        </div>
+                                                    @endif
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
-                                        Belum ada pengajuan masuk.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                            </div>
+                            @empty
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Belum ada pengajuan.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                
-                @if($pengajuans->hasPages())
-                    <div class="card-footer bg-white py-3">
-                        {{ $pengajuans->links() }}
-                    </div>
-                @endif
             </div>
-
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

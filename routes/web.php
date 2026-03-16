@@ -65,4 +65,6 @@ Route::middleware(['auth'])->group(function () {
     // API Internal untuk Cari Warga (AJAX)
     Route::get('/rt/api/warga', [PengajuanController::class, 'searchWarga'])->name('api.warga.search');
 
+    Route::get('/rt/warga', [App\Http\Controllers\WargaController::class, 'indexRT'])->name('rt.warga.index');
+
 });

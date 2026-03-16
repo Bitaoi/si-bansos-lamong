@@ -39,7 +39,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('rt.warga.index') }}" class="nav-link">
                         <i class="bi bi-people-fill"></i> Data Warga RT
                     </a>
                 </li>
@@ -175,8 +175,8 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if($item->status_verifikasi_admin == 'Proses')
-                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Menunggu Admin</span>
+                                        @if(in_array($item->status_verifikasi_admin, ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan']))
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> {{ $item->status_verifikasi_admin }}</span>
                                         @elseif($item->status_verifikasi_admin == 'Layak')
                                             <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Disetujui</span>
                                         @else
@@ -211,7 +211,7 @@
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="#" class="btn btn-outline-dark w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
+                            <a href="{{ route('rt.warga.index') }}" class="btn btn-outline-dark w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
                                 <i class="bi bi-search fs-4 me-3"></i> 
                                 <div>
                                     <div>Cek Data Warga</div>

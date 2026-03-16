@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('foto_rumah_dalam')->nullable();
             
             // Status & Dokumen
-            $table->enum('status_verifikasi_admin', ['Proses', 'Layak', 'Tidak Layak'])->default('Proses');
+            $table->enum('status_verifikasi_admin', ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan', 'Layak', 'Tidak Layak'])->default('Proses');
             $table->string('file_dokumen_pendukung')->nullable(); 
             $table->text('keterangan_ditolak')->nullable();
             

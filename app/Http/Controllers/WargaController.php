@@ -182,4 +182,31 @@ class WargaController extends Controller
             return redirect()->route('warga.index')->with('error', 'Gagal import: ' . $e->getMessage());
         }
     }
+
+    // =================================================================
+    // 9. DAFTAR WARGA KHUSUS RT (Filter Otomatis Wilayah)
+    // =================================================================
+    public function indexRT()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'RT') { abort(403); }
+
+        // 1. Pecah format wilayah (Contoh: "001/005" menjadi RT "001" dan RW "005")
+        $wilayah = explode('/', $user->wilayah_rt_rw);
+        $rt = $wilayah[0] ?? '';
+        $rw = $wilayah[1] ?? '';
+
+        // 2. Query Filter: Hanya ambil warga yang RT dan RW-nya cocok
+        // (Bisa juga ditambahkan toleransi jika format Excel warga berupa integer seperti "1" alih-alih "001")
+        $wargas = Warga::where(function($query) use ($rt) {
+                            $query->where('rt', $rt)->orWhere('rt', (int)$rt);
+                       })
+                       ->where(function($query) use ($rw) {
+                            $query->where('rw', $rw)->orWhere('rw', (int)$rw);
+                       })
+                       ->latest()
+                       ->paginate(10);
+
+        return view('rt.warga.index', compact('wargas', 'rt', 'rw'));
+    }
 }

@@ -12,6 +12,11 @@
         .step-number { width: 30px; height: 30px; background: #0d6efd; color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
         .form-section-title { font-weight: 700; color: #334155; margin-bottom: 20px; display: flex; align-items: center; }
         .readonly-input { background-color: #e9ecef; cursor: not-allowed; }
+        
+        /* Tambahan style untuk kotak 14 Kriteria */
+        .kriteria-box { transition: all 0.2s ease-in-out; cursor: pointer; }
+        .kriteria-box:hover { background-color: #e0f2fe !important; border-color: #bae6fd !important; }
+        .form-check-input:checked + .form-check-label { font-weight: bold; color: #0369a1; }
     </style>
 </head>
 <body>
@@ -39,9 +44,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
-            <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
 
             <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -120,30 +122,43 @@
 
                 <div class="card mb-4">
                     <div class="card-body p-4">
-                        <h5 class="form-section-title"><span class="step-number">3</span> Checklist Kriteria</h5>
-                        <p class="text-muted small">Centang kondisi yang sesuai dengan warga tersebut:</p>
+                        <h5 class="form-section-title"><span class="step-number">3</span> Penilaian Kelayakan (14 Kriteria Kemiskinan)</h5>
+                        
+                        <div class="alert alert-warning mb-4">
+                            <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Instruksi Penting:</strong><br> 
+                            Berikan tanda centang (<i class="bi bi-check-square-fill mx-1"></i>) <b>HANYA JIKA</b> kondisi tersebut benar-benar dialami oleh keluarga warga yang bersangkutan. Sistem akan otomatis menghitung nilai Desil kelayakan berdasarkan jumlah jawaban 'Ya'.
+                        </div>
 
-                        <div class="row">
+                        <div class="row g-3">
+                            @php
+                                $kriteria_list = [
+                                    'Luas lantai bangunan tempat tinggal kurang dari 8m² per orang.',
+                                    'Jenis lantai tempat tinggal terbuat dari tanah/bambu/kayu murahan.',
+                                    'Jenis dinding tempat tinggal dari bambu/rumbia/kayu berkualitas rendah.',
+                                    'Tidak memiliki fasilitas buang air besar (MCK) sendiri.',
+                                    'Sumber penerangan rumah tangga tidak menggunakan listrik (PLN).',
+                                    'Sumber air minum berasal dari sumur/mata air tidak terlindung/sungai.',
+                                    'Bahan bakar untuk memasak sehari-hari adalah kayu bakar/arang.',
+                                    'Hanya mengkonsumsi daging/susu/ayam dalam satu kali seminggu.',
+                                    'Hanya membeli satu stel pakaian baru dalam setahun.',
+                                    'Hanya sanggup makan sebanyak satu atau dua kali dalam sehari.',
+                                    'Tidak sanggup membayar biaya pengobatan di puskesmas/poliklinik.',
+                                    'Sumber penghasilan KK adalah petani gurem, buruh bangunan/perkebunan, atau pendapatan di bawah Rp 600.000/bulan.',
+                                    'Pendidikan tertinggi Kepala Keluarga: Tidak sekolah / Tidak tamat SD.',
+                                    'Tidak memiliki tabungan/barang yang mudah dijual bernilai minimal Rp 500.000 (seperti motor, emas, ternak).'
+                                ];
+                            @endphp
+
+                            @foreach($kriteria_list as $index => $kriteria)
                             <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="checklist[]" value="Lansia/Disabilitas" id="check1">
-                                    <label class="form-check-label" for="check1">Memiliki tanggungan Lansia/Disabilitas</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="checklist[]" value="Rumah Sewa/Bukan Milik" id="check2">
-                                    <label class="form-check-label" for="check2">Rumah Kontrak/Sewa/Bukan Milik Sendiri</label>
-                                </div>
+                                <label class="form-check p-3 border rounded h-100 bg-light kriteria-box d-flex align-items-start" for="kriteria{{ $index }}">
+                                    <input class="form-check-input mt-1 ms-1 me-3 border-secondary" type="checkbox" name="checklist[]" value="{{ $kriteria }}" id="kriteria{{ $index }}">
+                                    <span class="form-check-label small" style="cursor:pointer;">
+                                        <strong>{{ $index + 1 }}.</strong> {{ $kriteria }}
+                                    </span>
+                                </label>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="checklist[]" value="Tidak Punya Kendaraan" id="check3">
-                                    <label class="form-check-label" for="check3">Tidak memiliki kendaraan roda empat (Mobil)</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="checklist[]" value="Penyakit Menahun" id="check4">
-                                    <label class="form-check-label" for="check4">Anggota keluarga ada yang sakit menahun</label>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -164,18 +179,18 @@
                                 <div class="form-text small">Wajib diisi.</div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Foto Rumah (Bagian Dalam)</label>
+                                <label class="form-label fw-bold">Foto Rumah (Bagian Dalam)</label>
                                 <input type="file" name="foto_rumah_dalam" class="form-control" accept="image/*">
-                                <div class="form-text small">Opsional.</div>
+                                <div class="form-text small">Opsional, tapi sangat disarankan.</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-                    <button type="reset" class="btn btn-light border px-4">Reset</button>
-                    <button type="submit" class="btn btn-primary px-5 btn-lg fw-bold">
-                        <i class="bi bi-send-fill me-2"></i> KIRIM PENGAJUAN
+                    <button type="reset" class="btn btn-light border px-4">Reset Form</button>
+                    <button type="submit" class="btn btn-primary px-5 btn-lg fw-bold shadow-sm">
+                        <i class="bi bi-send-fill me-2"></i> SIMPAN & HITUNG KELAYAKAN
                     </button>
                 </div>
 
@@ -186,6 +201,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Fungsi AJAX Pencarian NIK
     function cariWarga() {
         let keyword = document.getElementById('searchKeyword').value;
         if(!keyword) {
@@ -193,15 +209,11 @@
             return;
         }
 
-        // Panggil API Search Laravel
         fetch(`{{ route('api.warga.search') }}?keyword=${keyword}`)
             .then(response => response.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Tampilkan Area Hasil
                     document.getElementById('resultArea').style.display = 'block';
-                    
-                    // Isi Form Otomatis
                     document.getElementById('nik').value = data.data.nik;
                     document.getElementById('nama').value = data.data.nama;
                     document.getElementById('no_kk').value = data.data.no_kk;
@@ -210,7 +222,7 @@
                 } else {
                     alert('Data warga tidak ditemukan! Pastikan nama atau NIK benar.');
                     document.getElementById('resultArea').style.display = 'none';
-                    document.getElementById('nik').value = ''; // Reset
+                    document.getElementById('nik').value = '';
                 }
             })
             .catch(error => {

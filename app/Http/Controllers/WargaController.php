@@ -209,4 +209,36 @@ class WargaController extends Controller
 
         return view('rt.warga.index', compact('wargas', 'rt', 'rw'));
     }
+
+    // =================================================================
+    // PENILAIAN SPK DESIL OLEH ADMIN
+    // =================================================================
+    public function updateDesil(Request $request, $nik)
+    {
+        if (Auth::user()->role !== 'Admin') { abort(403); }
+
+        $warga = Warga::findOrFail($id);
+
+        // Ambil data checklist
+        $daftarCentang = $request->checklist ?? [];
+        $totalSkor = count($daftarCentang); 
+        
+        // Logika IF-ELSE Penentuan Desil
+        if ($totalSkor >= 11) {
+            $desil = 1; // Sangat Miskin
+        } elseif ($totalSkor >= 8 && $totalSkor <= 10) {
+            $desil = 2; // Miskin
+        } elseif ($totalSkor >= 5 && $totalSkor <= 7) {
+            $desil = 3; // Hampir Miskin
+        } else {
+            $desil = 4; // Tidak Miskin / Rentan
+        }
+
+        // Update database
+        $warga->update(['desil' => $desil]);
+
+        $kategori = ['1' => 'Sangat Miskin', '2' => 'Miskin', '3' => 'Hampir Miskin', '4' => 'Rentan/Mampu'];
+        
+        return back()->with('success', "Penilaian berhasil! Warga a.n {$warga->nama_lengkap} ditetapkan sebagai Desil {$desil} ({$kategori[$desil]}).");
+    }
 }

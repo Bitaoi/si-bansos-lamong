@@ -132,7 +132,15 @@
                                 <tr>
                                     <td class="ps-4 fw-bold text-primary">{{ $warga->nik }}</td>
                                     <td>
-                                        <div class="fw-bold text-dark">{{ $warga->nama_lengkap }}</div>
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                            {{ $warga->nama_lengkap }}
+                                            @if($warga->desil)
+                                                @php
+                                                    $warna = $warga->desil == 1 ? 'danger' : ($warga->desil == 2 ? 'warning text-dark' : ($warga->desil == 3 ? 'info text-dark' : 'secondary'));
+                                                @endphp
+                                                <span class="badge bg-{{ $warna }} rounded-pill" style="font-size: 0.7rem;">Desil {{ $warga->desil }}</span>
+                                            @endif
+                                        </div>
                                         <small class="text-muted">{{ $warga->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
                                     </td>
                                     <td>{{ Str::limit($warga->alamat_lengkap, 30) }}</td>
@@ -140,6 +148,11 @@
                                     <td>{{ $warga->pekerjaan }}</td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-1">
+                                            
+                                            <button type="button" class="btn btn-action btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesil{{ $warga->nik }}" title="Hitung Kelayakan (Desil)">
+                                                <i class="bi bi-calculator"></i>
+                                            </button>
+
                                             <a href="{{ route('warga.edit', $warga->nik) }}" class="btn btn-action btn-warning text-white btn-sm" title="Edit">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
@@ -153,6 +166,65 @@
                                         </div>
                                     </td>
                                 </tr>
+
+                                <div class="modal fade" id="modalDesil{{ $warga->nik }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title fw-bold"><i class="bi bi-calculator me-2"></i>Penilaian Kelayakan (Desil)</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ route('warga.update_desil', $warga->nik) }}" method="POST">
+                                                @csrf @method('PUT')
+                                                <div class="modal-body p-4 text-start">
+                                                    <div class="alert alert-light border mb-4">
+                                                        Nama: <strong>{{ $warga->nama_lengkap }}</strong><br>
+                                                        NIK: <strong>{{ $warga->nik }}</strong><br>
+                                                        Desil Saat Ini: <span class="badge bg-dark">{{ $warga->desil ? 'Desil '.$warga->desil : 'Belum Dinilai' }}</span>
+                                                    </div>
+
+                                                    <p class="small text-muted mb-3">Centang kondisi di bawah ini untuk menghitung ulang skor kelayakan warga secara otomatis berdasarkan 14 Kriteria Kemiskinan BPS/DTSEN.</p>
+
+                                                    <div class="row g-2">
+                                                        @php
+                                                            $kriteria_list = [
+                                                                'Luas lantai bangunan tempat tinggal kurang dari 8m² per orang.',
+                                                                'Jenis lantai tempat tinggal terbuat dari tanah/bambu/kayu murahan.',
+                                                                'Jenis dinding tempat tinggal dari bambu/rumbia/kayu berkualitas rendah.',
+                                                                'Tidak memiliki fasilitas buang air besar (MCK) sendiri.',
+                                                                'Sumber penerangan rumah tangga tidak menggunakan listrik (PLN).',
+                                                                'Sumber air minum berasal dari sumur/mata air tidak terlindung/sungai.',
+                                                                'Bahan bakar untuk memasak sehari-hari adalah kayu bakar/arang.',
+                                                                'Hanya mengkonsumsi daging/susu/ayam dalam satu kali seminggu.',
+                                                                'Hanya membeli satu stel pakaian baru dalam setahun.',
+                                                                'Hanya sanggup makan sebanyak satu atau dua kali dalam sehari.',
+                                                                'Tidak sanggup membayar biaya pengobatan di puskesmas/poliklinik.',
+                                                                'Sumber penghasilan KK adalah petani gurem, buruh bangunan/perkebunan, atau pendapatan di bawah Rp 600.000/bulan.',
+                                                                'Pendidikan tertinggi Kepala Keluarga: Tidak sekolah / Tidak tamat SD.',
+                                                                'Tidak memiliki tabungan/barang yang mudah dijual bernilai minimal Rp 500.000.'
+                                                            ];
+                                                        @endphp
+
+                                                        @foreach($kriteria_list as $index => $kriteria)
+                                                        <div class="col-md-6">
+                                                            <label class="form-check p-2 border rounded h-100 bg-light text-wrap" style="cursor:pointer;">
+                                                                <input class="form-check-input mt-1 ms-1 me-2" type="checkbox" name="checklist[]" value="{{ $kriteria }}">
+                                                                <span class="form-check-label small" style="font-size: 0.8rem;">
+                                                                    {{ $index + 1 }}. {{ $kriteria }}
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-save-fill me-1"></i> Simpan & Update Desil</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
@@ -187,7 +259,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Pilih File Excel (.xlsx)</label>
+                        <label class="form-label">Pilih File Excel (.xlsx / .csv)</label>
                         <input type="file" name="file" class="form-control" required>
                         <small class="text-muted">Pastikan format sesuai template.</small>
                     </div>

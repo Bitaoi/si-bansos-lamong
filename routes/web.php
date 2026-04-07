@@ -49,6 +49,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/verifikasi/{id}', [App\Http\Controllers\VerifikasiController::class, 'update'])
         ->name('verifikasi.update');
 
+    Route::put('/admin/warga/{id}/desil', [App\Http\Controllers\WargaController::class, 'updateDesil'])->name('warga.update_desil');
+
+    // --- MANAJEMEN AKUN RT ---
+    Route::get('/admin/rt', [App\Http\Controllers\UserController::class, 'indexRT'])->name('admin.rt.index');
+    Route::get('/admin/rt/create', [App\Http\Controllers\UserController::class, 'createRT'])->name('admin.rt.create');
+    Route::post('/admin/rt', [App\Http\Controllers\UserController::class, 'storeRT'])->name('admin.rt.store');
+    Route::delete('/admin/rt/{id}', [App\Http\Controllers\UserController::class, 'destroyRT'])->name('admin.rt.destroy');
+
 
     // ====================================================
     // 2. AREA KHUSUS RT (Update Terbaru)
@@ -66,5 +74,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rt/api/warga', [PengajuanController::class, 'searchWarga'])->name('api.warga.search');
 
     Route::get('/rt/warga', [App\Http\Controllers\WargaController::class, 'indexRT'])->name('rt.warga.index');
+    
 
 });

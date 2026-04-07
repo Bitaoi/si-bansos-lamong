@@ -21,7 +21,7 @@ class Warga extends Model
         'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama',
         'pendidikan', 'pekerjaan', 'status_kawin', 'hubungan_keluarga',
         'kewarganegaraan', 'alamat_lengkap', 'rt', 'rw', 'golongan_darah',
-        'nama_bank', 'no_rekening'
+        'nama_bank', 'no_rekening', 'desil'
     ];
 
     protected $casts = [

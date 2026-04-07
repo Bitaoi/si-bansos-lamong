@@ -148,7 +148,8 @@
                         <label class="form-label">Sumber Dana</label>
                         <select name="sumber_dana" class="form-select" required>
                             <option value="">-- Pilih Sumber --</option>
-                            <option value="Pusat">KEMENSOS</option>
+                            <option value="Pusat">(APBN) KEMENSOS</option>
+                            <option value="Badan Kependidikan">(APBN) KEMENDIKBUD</option>
                             <option value="Provinsi">Pemerintah Provinsi</option>
                             <option value="Kabupaten">Pemerintah Kabupaten</option>
                             <option value="Dana Desa">Dana Desa</option>

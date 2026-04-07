@@ -45,7 +45,7 @@ class PengajuanController extends Controller
         return response()->json(['status' => 'not_found']);
     }
 
-    // 3. SIMPAN PENGAJUAN (PERBAIKAN UTAMA DISINI)
+    // 3. SIMPAN PENGAJUAN & HITUNG SKOR (SPK DESIL)
     public function store(Request $request)
     {
         $request->validate([
@@ -63,25 +63,63 @@ class PengajuanController extends Controller
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
         $pathDalam = $request->file('foto_rumah_dalam') ? $request->file('foto_rumah_dalam')->store('pengajuan/rumah', 'public') : null;
 
-        // PERBAIKAN: Gunakan Auth::user()->id_user secara eksplisit
-        // Agar tidak salah ambil kolom 'id' default
+        // =========================================================
+        // PROSES SPK: SKORING & PENENTUAN DESIL
+        // =========================================================
+        
+        // Ambil data checklist (jika kosong, jadikan array kosong)
+        $daftarCentang = $request->checklist ?? [];
+        
+        // Hitung total kriteria yang dicentang "Ya"
+        $totalSkor = count($daftarCentang); 
+        
+        $desil = 4; // Default: Desil 4 (Tidak Miskin / Rentan)
+        
+        // Logika IF-ELSE Penentuan Desil
+        if ($totalSkor >= 11) {
+            $desil = 1; // Sangat Miskin
+        } elseif ($totalSkor >= 8 && $totalSkor <= 10) {
+            $desil = 2; // Miskin
+        } elseif ($totalSkor >= 5 && $totalSkor <= 7) {
+            $desil = 3; // Hampir Miskin
+        } else {
+            $desil = 4; // Tidak Miskin / Rentan
+        }
+
+        // UPDATE DATA WARGA: Simpan hasil skor Desil ke tabel warga
+        Warga::where('nik', $request->nik)->update([
+            'desil' => $desil
+        ]);
+
+        // =========================================================
+        // SIMPAN DATA PENGAJUAN
+        // =========================================================
+        
+        // Ambil ID RT yang login
         $idPengusul = Auth::user()->id_user;
 
         Pengajuan::create([
             'nik' => $request->nik,
             'id_bansos' => $request->id_bansos,
-            'id_user_pengusul' => $idPengusul, // <--- INI KUNCINYA
+            'id_user_pengusul' => $idPengusul,
             'tgl_pengajuan' => now(),
             'alasan_pengajuan' => $request->alasan,
             'estimasi_penghasilan' => $request->penghasilan,
-            'checklist_kriteria' => $request->checklist ?? [], 
+            'checklist_kriteria' => $daftarCentang, // Simpan array checklist
             'foto_ktp_kk' => $pathKtp,
             'foto_rumah_depan' => $pathDepan,
             'foto_rumah_dalam' => $pathDalam,
             'status_verifikasi_admin' => 'Proses'
         ]);
 
-        // Redirect dengan Pesan Sukses
-        return redirect()->route('rt.dashboard')->with('success', 'Berhasil! Data pengajuan bantuan telah dikirim.');
+        // =========================================================
+        // KEMBALI KE DASHBOARD DENGAN NOTIFIKASI DINAMIS
+        // =========================================================
+        
+        // Buat pesan dinamis agar RT langsung tahu hasilnya
+        $kategori = ['1' => 'Sangat Miskin', '2' => 'Miskin', '3' => 'Hampir Miskin', '4' => 'Rentan/Mampu'];
+        $teksKategori = $kategori[$desil];
+
+        return redirect()->route('rt.dashboard')->with('success', "Berhasil! Pengajuan terkirim. Berdasarkan $totalSkor kriteria yang Anda centang, warga ini masuk kategori Desil $desil ($teksKategori).");
     }
 }

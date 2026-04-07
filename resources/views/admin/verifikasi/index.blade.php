@@ -23,11 +23,10 @@
         .step.completed .step-icon { background: #198754; color: white; border-color: #d1e7dd; }
         .step.rejected .step-icon { background: #dc3545; color: white; border-color: #f8d7da; }
         .step-label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
-        .step.active .step-label { color: #0d6efd; }
-        .step.completed .step-label { color: #198754; }
         
-        .img-evidence { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .img-evidence { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; cursor: zoom-in;}
         .timeline-doc { border-left: 3px solid #0d6efd; padding-left: 15px; margin-bottom: 15px; }
+        .kriteria-list li { margin-bottom: 8px; font-size: 0.85rem; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
     </style>
 </head>
 <body>
@@ -37,6 +36,7 @@
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white"><i class="bi bi-shield-lock-fill me-2"></i>ADMIN</h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Manajemen Akun RT</a></li>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
                 <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
                 <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link active"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="col-md-9 col-lg-10 p-4">
-            <h4 class="fw-bold mb-4">Verifikasi Pengajuan (Birokrasi)</h4>
+            <h4 class="fw-bold mb-4">Verifikasi Kelayakan Pengajuan</h4>
 
             @if(session('success'))
                 <div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}</div>
@@ -62,6 +62,7 @@
                             <tr>
                                 <th class="ps-4">Pemohon</th>
                                 <th>Bansos</th>
+                                <th>Skor Kelayakan</th>
                                 <th>Tahapan Saat Ini</th>
                                 <th class="text-end pe-4">Aksi</th>
                             </tr>
@@ -74,6 +75,22 @@
                                     <small class="text-muted">RT: {{ $item->pengusul->wilayah_rt_rw ?? '-' }}</small>
                                 </td>
                                 <td><span class="badge bg-light text-primary border">{{ $item->jenisBansos->nama_bansos ?? '-' }}</span></td>
+                                
+                                <td>
+                                    @php
+                                        $desil = $item->warga->desil ?? 4;
+                                        $warnaDesil = '';
+                                        $teksDesil = '';
+                                        
+                                        if($desil == 1) { $warnaDesil = 'bg-danger'; $teksDesil = 'Sangat Miskin'; }
+                                        elseif($desil == 2) { $warnaDesil = 'bg-warning text-dark'; $teksDesil = 'Miskin'; }
+                                        elseif($desil == 3) { $warnaDesil = 'bg-info text-dark'; $teksDesil = 'Hampir Miskin'; }
+                                        else { $warnaDesil = 'bg-secondary'; $teksDesil = 'Rentan/Mampu'; }
+                                    @endphp
+                                    <span class="badge {{ $warnaDesil }} fs-6">Desil {{ $desil }}</span><br>
+                                    <small class="text-muted" style="font-size: 0.7rem;">{{ $teksDesil }}</small>
+                                </td>
+
                                 <td>
                                     @php
                                         $badges = [
@@ -89,7 +106,7 @@
                                     <span class="badge {{ $currentBadge[0] }}">{{ $currentBadge[1] }}</span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">Review Data</button>
+                                    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}"><i class="bi bi-search me-1"></i> Review</button>
                                 </td>
                             </tr>
 
@@ -124,13 +141,31 @@
 
                                             <div class="row g-4">
                                                 <div class="col-md-7 border-end">
-                                                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <h6 class="fw-bold text-primary mb-0"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
+                                                        <span class="badge {{ $warnaDesil }} px-3 py-2 fs-6 shadow-sm">Kategori: {{ $teksDesil }} (Desil {{ $desil }})</span>
+                                                    </div>
+                                                    
                                                     <div class="row mb-3">
                                                         <div class="col-6"><small class="text-muted d-block">Nama Lengkap</small><strong>{{ $item->warga->nama_lengkap }}</strong></div>
                                                         <div class="col-6"><small class="text-muted d-block">NIK</small><strong>{{ $item->nik }}</strong></div>
                                                     </div>
                                                     <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light p-2 rounded"><em>{{ $item->alasan_pengajuan }}</em></div></div>
                                                     
+                                                    <h6 class="fw-bold text-danger mb-2 mt-4"><i class="bi bi-card-checklist me-2"></i>Kondisi Warga (Laporan RT)</h6>
+                                                    <div class="bg-light p-3 rounded mb-3 border">
+                                                        @if(is_array($item->checklist_kriteria) && count($item->checklist_kriteria) > 0)
+                                                            <ul class="list-unstyled mb-0 kriteria-list text-danger">
+                                                                @foreach($item->checklist_kriteria as $kriteria)
+                                                                    <li><i class="bi bi-check-square-fill me-2"></i> {{ $kriteria }}</li>
+                                                                @endforeach
+                                                            </ul>
+                                                            <div class="mt-2 text-end small fw-bold">Total: {{ count($item->checklist_kriteria) }} Kondisi Terpenuhi</div>
+                                                        @else
+                                                            <div class="text-muted small italic">Tidak ada kondisi kemiskinan yang dicentang oleh RT.</div>
+                                                        @endif
+                                                    </div>
+
                                                     <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-camera-fill me-2"></i>FOTO LAMPIRAN RT</h6>
                                                     <div class="row g-2">
                                                         <div class="col-4"><a href="{{ asset('storage/'.$item->foto_ktp_kk) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_ktp_kk) }}" class="img-evidence"></a></div>
@@ -226,7 +261,7 @@
                                 </div>
                             </div>
                             @empty
-                            <tr><td colspan="4" class="text-center py-5 text-muted">Belum ada pengajuan.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted">Belum ada pengajuan.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

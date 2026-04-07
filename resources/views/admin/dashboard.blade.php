@@ -44,6 +44,12 @@
                     </a>
                 </li>
                 
+                <li class="nav-item">
+                    <a href="{{ route('admin.rt.index') }}" class="nav-link">
+                        <i class="bi bi-person-badge-fill"></i> Manajemen Akun RT
+                    </a>
+                </li>
+                
                 <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item">
                     <a href="{{ route('warga.index') }}" class="nav-link">
@@ -201,7 +207,7 @@
                             <tbody>
                                 @forelse($pengajuanTerbaru as $item)
                                 <tr>
-                                    <td class="ps-4 text-muted small">{{ $item->tgl_pengajuan }}</td>
+                                    <td class="ps-4 text-muted small">{{ \Carbon\Carbon::parse($item->tgl_pengajuan)->format('d M Y') }}</td>
                                     <td class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</td>
                                     <td>
                                         <span class="badge bg-light text-dark border">
@@ -209,8 +215,8 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if($item->status_verifikasi_admin == 'Proses')
-                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Proses</span>
+                                        @if(in_array($item->status_verifikasi_admin, ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan']))
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> {{ $item->status_verifikasi_admin }}</span>
                                         @elseif($item->status_verifikasi_admin == 'Layak')
                                             <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Layak</span>
                                         @else

@@ -217,9 +217,10 @@ class WargaController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        $warga = Warga::findOrFail($id);
+        // Ganti findOrFail($id) menjadi pencarian berdasarkan NIK
+        $warga = Warga::where('nik', $nik)->firstOrFail();
 
-        // Ambil data checklist
+        // Ambil data checklist dari modal
         $daftarCentang = $request->checklist ?? [];
         $totalSkor = count($daftarCentang); 
         
@@ -234,7 +235,7 @@ class WargaController extends Controller
             $desil = 4; // Tidak Miskin / Rentan
         }
 
-        // Update database
+        // Update angka desil ke database
         $warga->update(['desil' => $desil]);
 
         $kategori = ['1' => 'Sangat Miskin', '2' => 'Miskin', '3' => 'Hampir Miskin', '4' => 'Rentan/Mampu'];

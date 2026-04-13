@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/verifikasi/{id}', [App\Http\Controllers\VerifikasiController::class, 'update'])
         ->name('verifikasi.update');
 
-    Route::put('/admin/warga/{id}/desil', [App\Http\Controllers\WargaController::class, 'updateDesil'])->name('warga.update_desil');
+    Route::put('/admin/warga/{nik}/desil', [App\Http\Controllers\WargaController::class, 'updateDesil'])->name('warga.update_desil');
 
     // --- MANAJEMEN AKUN RT ---
     Route::get('/admin/rt', [App\Http\Controllers\UserController::class, 'indexRT'])->name('admin.rt.index');

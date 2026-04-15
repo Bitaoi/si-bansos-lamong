@@ -56,4 +56,11 @@ class Pengajuan extends Model
         // Berdasarkan chat sebelumnya, User pakai 'id_user', jadi ini biarkan.
         return $this->belongsTo(User::class, 'id_user_pengusul', 'id_user');
     }
+
+    public function surveiEkonomi()
+    {
+        // Karena pengajuan bisa memiliki 1 hasil survei, kita gunakan hasOne
+        // Asumsi di tabel survei_ekonomis foreign key-nya adalah 'pengajuan_id'
+        return $this->hasOne(surveiEkonomi::class, 'pengajuan_id', 'id');
+    }
 }

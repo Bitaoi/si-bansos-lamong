@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pengajuan;
+use App\Models\SurveiEkonomi; // Tambahkan ini untuk memanggil model Survei
 use Illuminate\Support\Facades\Auth;
 
 class VerifikasiController extends Controller
@@ -12,7 +13,9 @@ class VerifikasiController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        $pengajuans = Pengajuan::with(['warga', 'jenisBansos', 'pengusul'])
+        // Tambahkan 'surveiEkonomi' pada eager loading agar bisa menampilkan 
+        // skor dan desil di tabel dashboard verifikasi (jika sudah diisi)
+        $pengajuans = Pengajuan::with(['warga', 'jenisBansos', 'pengusul', 'surveiEkonomi'])
                         ->orderBy('created_at', 'desc')
                         ->paginate(10);
 
@@ -29,24 +32,76 @@ class VerifikasiController extends Controller
         // TAHAP 1: Jadwalkan Observasi
         if ($tahap == 'jadwal_observasi') {
             $pengajuan->update(['status_verifikasi_admin' => 'Verifikasi Lapangan']);
-            return back()->with('success', 'Status diubah: Menunggu Verifikasi Lapangan Dinsos.');
+            return back()->with('success', 'Status diubah: Menunggu Verifikasi Lapangan (Ground Check).');
         }
         
-        // TAHAP 2: Input Hasil Observasi Lapangan
+        // TAHAP 2: Sensus Lokal & Otomatisasi Skoring PMT (Desil)
         elseif ($tahap == 'hasil_observasi') {
+            // 1. Validasi input form radio button
             $request->validate([
-                'berkas_observasi' => 'required|file|mimes:jpg,png,pdf|max:2048',
+                'jenis_lantai' => 'required|string',
+                'jenis_dinding' => 'required|string',
+                'sumber_air' => 'required|string',
+                'daya_listrik' => 'required|string',
+                'kepemilikan_aset' => 'required|string',
+                'berkas_observasi' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // Opsional, jaga-jaga kalau mau lampirkan foto rumah
                 'catatan_observasi' => 'nullable|string'
             ]);
             
-            $path = $request->file('berkas_observasi')->store('verifikasi/observasi', 'public');
+            // 2. Logika Kalkulasi PMT (Bobot Skor)
+            // Pastikan value (Tanah, Bambu, dll) sama persis dengan value di form HTML/Blade kamu
+            $bobotLantai = ['Tanah' => 20, 'Semen' => 10, 'Keramik' => 5];
+            $bobotDinding = ['Bambu' => 20, 'Kayu' => 10, 'Tembok' => 5];
+            $bobotListrik = ['Tidak Ada' => 25, '450W' => 15, '900W' => 5];
+            $bobotAset = ['Tidak Ada' => 15, 'Motor/Kulkas' => 5];
+
+            // Tambahkan fallback "?? 0" agar tidak error jika ada value yang tidak cocok
+            $skorLantai = $bobotLantai[$request->jenis_lantai] ?? 0;
+            $skorDinding = $bobotDinding[$request->jenis_dinding] ?? 0;
+            $skorListrik = $bobotListrik[$request->daya_listrik] ?? 0;
+            $skorAset = $bobotAset[$request->kepemilikan_aset] ?? 0;
+
+            $totalSkor = $skorLantai + $skorDinding + $skorListrik + $skorAset;
+
+            // 3. Tentukan Label Desil
+            if($totalSkor >= 65) { $desil = 1; }
+            elseif($totalSkor >= 45) { $desil = 2; }
+            elseif($totalSkor >= 30) { $desil = 3; }
+            else { $desil = 4; }
+
+            // 4. Simpan ke tabel survei_ekonomis
+            // Menggunakan updateOrCreate agar jika admin salah input dan submit ulang, 
+            // datanya diupdate, bukan membuat baris ganda.
+            SurveiEkonomi::updateOrCreate(
+                ['pengajuan_id' => $id],
+                [
+                    'jenis_lantai' => $request->jenis_lantai,
+                    'jenis_dinding' => $request->jenis_dinding,
+                    'sumber_air' => $request->sumber_air,
+                    'daya_listrik' => $request->daya_listrik,
+                    'kepemilikan_aset' => $request->kepemilikan_aset,
+                    'total_skor' => $totalSkor,
+                    'desil_hasil' => $desil
+                ]
+            );
+
+            // 5. Simpan file foto/berkas jika dilampirkan (kode lamamu tetap jalan)
+            $path = null;
+            if ($request->hasFile('berkas_observasi')) {
+                $path = $request->file('berkas_observasi')->store('verifikasi/observasi', 'public');
+            }
             
+            // 6. Update status Pengajuan & Desil Warga
             $pengajuan->update([
-                'berkas_observasi' => $path,
+                'berkas_observasi' => $path ?? $pengajuan->berkas_observasi,
                 'catatan_observasi' => $request->catatan_observasi,
                 'status_verifikasi_admin' => 'Menunggu Musdes'
             ]);
-            return back()->with('success', 'Hasil observasi lapangan berhasil diunggah.');
+
+            // Set desil warga secara otomatis
+            $pengajuan->warga->update(['desil' => $desil]);
+
+            return back()->with('success', "Sensus tersimpan! Warga mendapat Skor $totalSkor (Desil $desil) dan status berlanjut ke Menunggu Musdes.");
         }
         
         // TAHAP 3: Input Berita Acara Musdes

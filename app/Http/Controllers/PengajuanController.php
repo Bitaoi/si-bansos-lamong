@@ -45,9 +45,10 @@ class PengajuanController extends Controller
         return response()->json(['status' => 'not_found']);
     }
 
-    // 3. SIMPAN PENGAJUAN & HITUNG SKOR (SPK DESIL)
+    // 3. SIMPAN PENGAJUAN (TANPA HITUNG DESIL)
     public function store(Request $request)
     {
+        // Validasi bersih, tanpa array checklist
         $request->validate([
             'nik' => 'required|exists:wargas,nik',
             'id_bansos' => 'required',
@@ -55,7 +56,7 @@ class PengajuanController extends Controller
             'penghasilan' => 'required|numeric',
             'foto_ktp' => 'required|image|max:2048', 
             'foto_rumah_depan' => 'required|image|max:2048',
-            'checklist' => 'nullable|array' 
+            'foto_rumah_dalam' => 'nullable|image|max:2048'
         ]);
 
         // Upload Foto
@@ -63,41 +64,10 @@ class PengajuanController extends Controller
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
         $pathDalam = $request->file('foto_rumah_dalam') ? $request->file('foto_rumah_dalam')->store('pengajuan/rumah', 'public') : null;
 
-        // =========================================================
-        // PROSES SPK: SKORING & PENENTUAN DESIL
-        // =========================================================
-        
-        // Ambil data checklist (jika kosong, jadikan array kosong)
-        $daftarCentang = $request->checklist ?? [];
-        
-        // Hitung total kriteria yang dicentang "Ya"
-        $totalSkor = count($daftarCentang); 
-        
-        $desil = 4; // Default: Desil 4 (Tidak Miskin / Rentan)
-        
-        // Logika IF-ELSE Penentuan Desil
-        if ($totalSkor >= 11) {
-            $desil = 1; // Sangat Miskin
-        } elseif ($totalSkor >= 8 && $totalSkor <= 10) {
-            $desil = 2; // Miskin
-        } elseif ($totalSkor >= 5 && $totalSkor <= 7) {
-            $desil = 3; // Hampir Miskin
-        } else {
-            $desil = 4; // Tidak Miskin / Rentan
-        }
-
-        // UPDATE DATA WARGA: Simpan hasil skor Desil ke tabel warga
-        Warga::where('nik', $request->nik)->update([
-            'desil' => $desil
-        ]);
-
-        // =========================================================
-        // SIMPAN DATA PENGAJUAN
-        // =========================================================
-        
         // Ambil ID RT yang login
-        $idPengusul = Auth::user()->id_user;
+        $idPengusul = Auth::user()->id_user ?? Auth::id();
 
+        // Simpan Data Pengajuan Awal
         Pengajuan::create([
             'nik' => $request->nik,
             'id_bansos' => $request->id_bansos,
@@ -105,21 +75,13 @@ class PengajuanController extends Controller
             'tgl_pengajuan' => now(),
             'alasan_pengajuan' => $request->alasan,
             'estimasi_penghasilan' => $request->penghasilan,
-            'checklist_kriteria' => $daftarCentang, // Simpan array checklist
+            'checklist_kriteria' => [], // Dikosongkan karena form kriteria dipindah ke Admin
             'foto_ktp_kk' => $pathKtp,
             'foto_rumah_depan' => $pathDepan,
             'foto_rumah_dalam' => $pathDalam,
-            'status_verifikasi_admin' => 'Proses'
+            'status_verifikasi_admin' => 'Proses' // Menunggu tindakan Admin
         ]);
 
-        // =========================================================
-        // KEMBALI KE DASHBOARD DENGAN NOTIFIKASI DINAMIS
-        // =========================================================
-        
-        // Buat pesan dinamis agar RT langsung tahu hasilnya
-        $kategori = ['1' => 'Sangat Miskin', '2' => 'Miskin', '3' => 'Hampir Miskin', '4' => 'Rentan/Mampu'];
-        $teksKategori = $kategori[$desil];
-
-        return redirect()->route('rt.dashboard')->with('success', "Berhasil! Pengajuan terkirim. Berdasarkan $totalSkor kriteria yang Anda centang, warga ini masuk kategori Desil $desil ($teksKategori).");
+        return redirect()->route('rt.dashboard')->with('success', "Usulan berhasil dikirim! Menunggu verifikasi lapangan dan perhitungan Desil oleh Admin Desa.");
     }
 }

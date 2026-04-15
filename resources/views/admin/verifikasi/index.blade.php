@@ -152,6 +152,13 @@
                                                     </div>
                                                     <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light p-2 rounded"><em>{{ $item->alasan_pengajuan }}</em></div></div>
                                                     
+                                                    @if($item->surveiEkonomi)
+                                                    <div class="alert alert-info py-2 my-3 small border-0 d-flex justify-content-between align-items-center">
+                                                        <span><strong>Skor Kelayakan (PMT):</strong> {{ $item->surveiEkonomi->total_skor }} Poin</span>
+                                                        <i class="bi bi-calculator-fill fs-5"></i>
+                                                    </div>
+                                                    @endif
+
                                                     <h6 class="fw-bold text-danger mb-2 mt-4"><i class="bi bi-card-checklist me-2"></i>Kondisi Warga (Laporan RT)</h6>
                                                     <div class="bg-light p-3 rounded mb-3 border">
                                                         @if(is_array($item->checklist_kriteria) && count($item->checklist_kriteria) > 0)
@@ -205,22 +212,72 @@
                                                         </form>
                                                     
                                                     @elseif($item->status_verifikasi_admin == 'Verifikasi Lapangan')
-                                                        <div class="alert alert-warning small">Status: Menunggu hasil lapangan. Unggah bukti jika survei selesai.</div>
+                                                        <div class="alert alert-warning small border-0 mb-3"><i class="bi bi-info-circle me-1"></i> Silakan isi form Sensus Ekonomi (PMT) berdasarkan hasil lapangan untuk penentuan Desil otomatis.</div>
                                                         <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                                             @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_observasi">
-                                                            <div class="mb-3">
-                                                                <label class="small fw-bold">Unggah Bukti Observasi (Foto/PDF) <span class="text-danger">*</span></label>
-                                                                <input type="file" name="berkas_observasi" class="form-control form-control-sm" required>
+                                                            
+                                                            <div class="p-3 border rounded bg-white shadow-sm mb-3">
+                                                                <h6 class="text-primary fw-bold border-bottom pb-2 mb-3" style="font-size: 0.8rem;">FORM INDIKATOR EKONOMI</h6>
+                                                                
+                                                                <div class="mb-2">
+                                                                    <label class="small fw-bold">Jenis Lantai Terluas <span class="text-danger">*</span></label>
+                                                                    <select name="jenis_lantai" class="form-select form-select-sm" required>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        <option value="Tanah">Tanah / Bambu</option>
+                                                                        <option value="Semen">Semen / Papan Kualitas Rendah</option>
+                                                                        <option value="Keramik">Keramik / Granit / Marmer</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-2">
+                                                                    <label class="small fw-bold">Jenis Dinding Terluas <span class="text-danger">*</span></label>
+                                                                    <select name="jenis_dinding" class="form-select form-select-sm" required>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        <option value="Bambu">Bambu / Rumbia</option>
+                                                                        <option value="Kayu">Kayu Kualitas Rendah</option>
+                                                                        <option value="Tembok">Tembok / Beton</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-2">
+                                                                    <label class="small fw-bold">Daya Listrik <span class="text-danger">*</span></label>
+                                                                    <select name="daya_listrik" class="form-select form-select-sm" required>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        <option value="Tidak Ada">Tidak Ada Listrik</option>
+                                                                        <option value="450W">Listrik 450 Watt</option>
+                                                                        <option value="900W">Listrik >= 900 Watt</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-2">
+                                                                    <label class="small fw-bold">Sumber Air Minum <span class="text-danger">*</span></label>
+                                                                    <select name="sumber_air" class="form-select form-select-sm" required>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        <option value="Mata Air / Sumur Terbuka">Mata Air / Sumur Tak Terlindung</option>
+                                                                        <option value="Leding / Sumur Bor">Air Leding / Sumur Bor Tertutup</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="small fw-bold">Kepemilikan Aset Berharga <span class="text-danger">*</span></label>
+                                                                    <select name="kepemilikan_aset" class="form-select form-select-sm" required>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        <option value="Tidak Ada">Tidak Memiliki Aset Apapun</option>
+                                                                        <option value="Motor/Kulkas">Memiliki Kendaraan Bermotor / Elektronik Besar</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mb-2">
+                                                                <label class="small fw-bold">Unggah Bukti Observasi (Opsional)</label>
+                                                                <input type="file" name="berkas_observasi" class="form-control form-control-sm" accept=".pdf,.png,.jpg,.jpeg">
+                                                                <small class="text-muted" style="font-size: 0.65rem;">Hanya isi jika ada lampiran tambahan.</small>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="small fw-bold">Catatan Petugas</label>
-                                                                <textarea name="catatan_observasi" class="form-control form-control-sm" rows="2"></textarea>
+                                                                <textarea name="catatan_observasi" class="form-control form-control-sm" rows="2" placeholder="Tuliskan jika ada kendala di lapangan..."></textarea>
                                                             </div>
-                                                            <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-upload me-2"></i>Simpan Hasil Observasi</button>
+                                                            <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-calculator me-2"></i>Simpan Data & Hitung Desil</button>
                                                         </form>
 
                                                     @elseif($item->status_verifikasi_admin == 'Menunggu Musdes')
-                                                        <div class="alert alert-info small">Observasi selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
+                                                        <div class="alert alert-info small">Observasi dan Perhitungan PMT Selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
                                                         <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                                             @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_musdes">
                                                             <div class="mb-3">
@@ -237,7 +294,7 @@
                                                             
                                                             <div class="mb-3">
                                                                 <label class="small fw-bold">Jika Ditolak, beri alasan:</label>
-                                                                <textarea name="keterangan_ditolak" class="form-control form-control-sm" rows="2" placeholder="Isi jika akan menolak data ini..."></textarea>
+                                                                <textarea name="keterangan_ditolak" class="form-control form-control-sm" rows="2" placeholder="Isi jika forum Musdes memutuskan menolak data ini..."></textarea>
                                                             </div>
 
                                                             <div class="d-flex gap-2">

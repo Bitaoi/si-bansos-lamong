@@ -9,22 +9,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        
-        /* Navbar Transparan ke Solid */
-        .navbar { background-color: #ffffff; box-shadow: 0 2px 15px rgba(0,0,0,0.05); padding: 15px 0; }
-        .navbar-brand { font-weight: 800; color: #0d6efd !important; letter-spacing: -0.5px; }
-        .nav-link { font-weight: 600; color: #4b5563 !important; margin-left: 20px; }
-        .nav-link:hover { color: #0d6efd !important; }
+        /* 1. PALET WARNA KUSTOM */
+        :root {
+            --warna-utama: #BBD0EC; 
+            --warna-utama-gelap: #7D88DC; 
+            --warna-aksen: #A4BEE3; 
+            --warna-background: #FEFCFB; 
+        }
 
-        /* Hero Section */
+        /* 2. MENIMPA WARNA 'PRIMARY' BOOTSTRAP */
+        .text-primary { color: var(--warna-utama-gelap) !important; } /* Pakai yang gelap agar teks terbaca jelas */
+        .bg-primary { background-color: var(--warna-utama) !important; }
+        .border-primary { border-color: var(--warna-utama) !important; }
+
+        /* 3. MENYESUAIKAN WARNA TOMBOL */
+        .btn-primary {
+            background-color: var(--warna-utama-gelap) !important;
+            border-color: var(--warna-utama-gelap) !important;
+            color: white !important;
+        }
+        .btn-primary:hover {
+            background-color: var(--warna-utama) !important;
+            border-color: var(--warna-utama) !important;
+            color: #333 !important;
+        }
+
+        .btn-outline-primary {
+            color: var(--warna-utama-gelap) !important;
+            border-color: var(--warna-utama-gelap) !important;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--warna-utama-gelap) !important;
+            color: white !important;
+        }
+
+        /* 4. GAYA HALAMAN UMUM */
+        body { font-family: 'Inter', sans-serif; background-color: var(--warna-background) !important; }
+        
+        /* Navbar */
+        .navbar { background-color: #ffffff; box-shadow: 0 2px 15px rgba(0,0,0,0.05); padding: 15px 0; }
+        .navbar-brand { font-weight: 800; color: var(--warna-utama-gelap) !important; letter-spacing: -0.5px; }
+        .nav-link { font-weight: 600; color: #4b5563 !important; margin-left: 20px; }
+        .nav-link:hover { color: var(--warna-utama-gelap) !important; }
+
+        /* Hero Section (Diperbarui dengan Variabel Warna) */
         .hero-section {
-            background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+            background: linear-gradient(135deg, var(--warna-utama-gelap) 0%, var(--warna-utama) 100%);
             color: white;
-            padding: 100px 0 80px 0;
+            padding: 100px 0 100px 0;
             border-radius: 0 0 50px 50px;
             margin-bottom: 50px;
         }
+        .hero-section h1, .hero-section p { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
         /* Cards Statistik */
         .stat-card {
@@ -43,21 +79,21 @@
             font-size: 1.8rem; margin-bottom: 15px;
         }
         
-        /* Section Info Desa */
+        /* Section Info Desa (Diperbarui border kirinya) */
         .info-box {
             background: white; padding: 25px;
             border-radius: 15px;
-            border-left: 5px solid #0d6efd;
+            border-left: 5px solid var(--warna-utama-gelap);
             box-shadow: 0 4px 6px rgba(0,0,0,0.02);
             margin-bottom: 20px;
         }
 
         /* Modal Login Custom */
         .modal-content { border-radius: 20px; border: none; overflow: hidden; }
-        .modal-header { background: #0d6efd; color: white; border-bottom: none; padding: 20px 30px; }
+        .modal-header { background: var(--warna-utama-gelap); color: white; border-bottom: none; padding: 20px 30px; }
         .btn-close { filter: invert(1); }
         .form-control { padding: 12px; border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e9ecef; }
-        .form-control:focus { background-color: white; border-color: #0d6efd; box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1); }
+        .form-control:focus { background-color: white; border-color: var(--warna-utama); box-shadow: 0 0 0 4px rgba(187, 208, 236, 0.4); }
     </style>
 </head>
 <body>
@@ -76,10 +112,16 @@
                     <li class="nav-item"><a class="nav-link" href="#transparansi">Transparansi</a></li>
                     <li class="nav-item"><a class="nav-link" href="#info">Info Desa</a></li>
                     
-                    <li class="nav-item ms-3">
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a class="btn btn-outline-primary rounded-pill px-4 fw-bold" href="{{ route('status.index') }}">
+                            <i class="bi bi-search me-1"></i> Cek Status
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                         @auth
                             <div class="dropdown">
-                                <button class="btn btn-outline-primary dropdown-toggle rounded-pill px-4 fw-bold border-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-primary dropdown-toggle rounded-pill px-4 fw-bold border-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-circle me-2"></i> {{ Auth::user()->username }}
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 rounded-3">
@@ -119,14 +161,18 @@
     <section class="hero-section text-center">
         <div class="container">
             <h1 class="display-4 fw-bold mb-3">Transparansi Bantuan Sosial</h1>
-            <p class="lead opacity-75 mb-0 mx-auto" style="max-width: 700px;">
+            <p class="lead opacity-100 mb-4 mx-auto" style="max-width: 700px;">
                 Sistem informasi terpadu untuk pengelolaan data kependudukan dan penyaluran bantuan sosial 
                 Desa Lamong yang akuntabel dan transparan.
             </p>
+            
+            <a href="{{ route('status.index') }}" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold shadow mt-2 text-dark">
+                <i class="bi bi-search me-2"></i> CEK STATUS PENGAJUAN ANDA
+            </a>
         </div>
     </section>
 
-    <div class="container" style="margin-top: -100px;">
+    <div class="container" style="margin-top: -80px;">
         
         <div class="row g-4 mb-5" id="statistik">
             <div class="col-md-4">
@@ -276,12 +322,11 @@
         </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // 1. CHART GENDER (DONUT KECIL)
+        // 1. CHART GENDER 
         const ctxGender = document.getElementById('genderChart').getContext('2d');
         new Chart(ctxGender, {
             type: 'doughnut',
@@ -289,7 +334,7 @@
                 labels: ['L', 'P'],
                 datasets: [{
                     data: [{{ $lakiLaki }}, {{ $perempuan }}],
-                    backgroundColor: ['#0d6efd', '#dc3545'],
+                    backgroundColor: ['#7D88DC', '#dc3545'], // <- Diperbarui warnanya
                     borderWidth: 0
                 }]
             },
@@ -301,7 +346,7 @@
             }
         });
 
-        // 2. CHART BANSOS (BAR CHART)
+        // 2. CHART BANSOS 
         const ctxBansos = document.getElementById('bansosChart').getContext('2d');
         const labels = @json($labelBansos); 
         const dataTotal = @json($dataBansos);
@@ -313,8 +358,8 @@
                 datasets: [{
                     label: 'Jumlah Penerima (KK)',
                     data: dataTotal.length ? dataTotal : [0],
-                    backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                    borderColor: '#0d6efd',
+                    backgroundColor: '#BBD0EC', // <- Diperbarui warnanya
+                    borderColor: '#7D88DC', // <- Diperbarui warnanya
                     borderWidth: 1,
                     borderRadius: 5
                 }]

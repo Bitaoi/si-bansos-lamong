@@ -8,22 +8,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        body { background-color: #f3f4f6; font-family: sans-serif; }
-        
-        /* Sidebar & Nav */
-        .sidebar { min-height: 100vh; background: #1e293b; color: white; }
-        .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
-        .nav-link:hover, .nav-link.active { background: #0d6efd; color: white; }
-        .nav-link i { width: 24px; display: inline-block; }
-        .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; }
+        /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
+        :root {
+            --warna-paling-gelap: #2C3E50; 
+            --warna-utama: #7D88DC; 
+            --warna-soft: #BBD0EC; 
+            --warna-background: #FEFCFB; 
+        }
 
-        /* Table Styling */
-        .table-custom thead th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; font-size: 0.95rem; }
-        
-        /* Button & Card */
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        body { 
+            background-color: var(--warna-background) !important; 
+            color: var(--warna-paling-gelap);
+            font-family: sans-serif; 
+        }
+
+        /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
+        .text-primary { color: var(--warna-utama) !important; }
+        .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
+        .border-primary { border-color: var(--warna-utama) !important; }
+
+        /* 3. STYLING TOMBOL */
+        .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
+        .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
+        .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
+        .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
+
+        /* 4. SIDEBAR & KARTU */
+        .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
+        .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
+        .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
+        .nav-link i { width: 24px; display: inline-block; }
+        .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--warna-soft); font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; opacity: 0.8; }
+
+        .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .btn-action { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
+
+        /* 5. STYLING TABEL */
+        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--warna-utama); }
+        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; font-size: 0.95rem; }
     </style>
 </head>
 <body>

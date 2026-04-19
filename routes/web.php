@@ -6,15 +6,28 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WargaController; 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JenisBansosController;
-use App\Http\Controllers\PengajuanController; // <-- TAMBAHAN BARU
+use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\StatusController; // <-- TAMBAHAN: Jangan lupa import StatusController
 
-// Halaman awal (Dashboard Publik + Modal Login)
+// ====================================================
+// AREA PUBLIK (TIDAK PERLU LOGIN)
+// ====================================================
+
+// Halaman awal (Dashboard Publik / Landing Page)
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Halaman Khusus Cek Status Warga (Publik) <--- TARUH DI SINI
+Route::get('/cek-status', [StatusController::class, 'index'])->name('status.index');
 
 // Route Login & Logout
 // (Route GET /login dihapus karena form login ada di Modal Halaman Depan)
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
+// ====================================================
+// AREA TERKUNCI (WAJIB LOGIN)
+// ====================================================
 
 // Group Route yang butuh Login (Auth)
 Route::middleware(['auth'])->group(function () {
@@ -75,5 +88,4 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rt/warga', [App\Http\Controllers\WargaController::class, 'indexRT'])->name('rt.warga.index');
     
-
 });

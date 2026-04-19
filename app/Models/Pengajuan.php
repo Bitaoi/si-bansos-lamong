@@ -61,6 +61,6 @@ class Pengajuan extends Model
     {
         // Karena pengajuan bisa memiliki 1 hasil survei, kita gunakan hasOne
         // Asumsi di tabel survei_ekonomis foreign key-nya adalah 'pengajuan_id'
-        return $this->hasOne(surveiEkonomi::class, 'pengajuan_id', 'id');
+        return $this->hasOne(SurveiEkonomi::class, 'pengajuan_id', 'id');
     }
 }

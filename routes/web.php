@@ -70,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/rt', [App\Http\Controllers\UserController::class, 'storeRT'])->name('admin.rt.store');
     Route::delete('/admin/rt/{id}', [App\Http\Controllers\UserController::class, 'destroyRT'])->name('admin.rt.destroy');
 
+    // --- PENYALURAN ---
+    Route::get('/admin/penyaluran', [App\Http\Controllers\PenyaluranController::class, 'index'])->name('penyaluran.index');
+    Route::post('/admin/penyaluran/{id_pengajuan}', [App\Http\Controllers\PenyaluranController::class, 'store'])->name('penyaluran.store');
+
 
     // ====================================================
     // 2. AREA KHUSUS RT (Update Terbaru)

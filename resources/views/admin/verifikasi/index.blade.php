@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Pengajuan - Admin SI Bansos</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* =========================================================
-           PALET WARNA KUSTOM (BERLAKU UNTUK SEMUA HALAMAN)
-           ========================================================= */
+        /* PALET WARNA KUSTOM */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -18,7 +21,11 @@
             --warna-background: #FEFCFB; 
         }
 
-        body { background-color: var(--warna-background) !important; color: var(--warna-paling-gelap); font-family: sans-serif; }
+        body { 
+            background-color: var(--warna-background) !important; 
+            color: var(--warna-paling-gelap); 
+            font-family: 'Poppins', sans-serif !important; 
+        }
         
         .text-primary { color: var(--warna-utama) !important; }
         .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
@@ -94,7 +101,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
                         <i class="bi bi-truck"></i> Penyaluran
                     </a>
                 </li>
@@ -109,6 +116,7 @@
                 </li>
             </ul>
         </div>
+
         <div class="col-md-9 col-lg-10 p-4">
             <h4 class="fw-bold mb-4">Verifikasi Kelayakan Pengajuan</h4>
 
@@ -171,7 +179,7 @@
                                     <span class="badge {{ $currentBadge[0] }}">{{ $currentBadge[1] }}</span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">
+                                    <button class="btn btn-primary btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">
                                         <i class="bi bi-search me-1"></i> Review
                                     </button>
                                 </td>
@@ -268,12 +276,35 @@
                             </div>
 
                             <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-camera-fill me-2"></i>FOTO LAMPIRAN RT</h6>
-                            <div class="row g-2">
-                                <div class="col-4"><a href="{{ asset('storage/'.$item->foto_ktp_kk) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_ktp_kk) }}" class="img-evidence"></a></div>
-                                <div class="col-4"><a href="{{ asset('storage/'.$item->foto_rumah_depan) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence"></a></div>
-                                <div class="col-4">
-                                    @if($item->foto_rumah_dalam) <a href="{{ asset('storage/'.$item->foto_rumah_dalam) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence"></a>
-                                    @else <div class="bg-light h-100 d-flex align-items-center justify-content-center border text-muted small">Tanpa Foto Dalam</div> @endif
+                            <div class="row g-2 text-center">
+                                <div class="col-3">
+                                    <a href="{{ asset('storage/'.$item->foto_ktp) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$item->foto_ktp) }}" class="img-evidence">
+                                    </a>
+                                    <small class="d-block mt-2 fw-bold text-muted">KTP</small>
+                                </div>
+                                <div class="col-3">
+                                    <a href="{{ asset('storage/'.$item->foto_kk) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$item->foto_kk) }}" class="img-evidence">
+                                    </a>
+                                    <small class="d-block mt-2 fw-bold text-muted">Kartu Keluarga (KK)</small>
+                                </div>
+                                <div class="col-3">
+                                    <a href="{{ asset('storage/'.$item->foto_rumah_depan) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence">
+                                    </a>
+                                    <small class="d-block mt-2 fw-bold text-muted">Rumah Depan</small>
+                                </div>
+                                <div class="col-3">
+                                    @if($item->foto_rumah_dalam) 
+                                        <a href="{{ asset('storage/'.$item->foto_rumah_dalam) }}" target="_blank">
+                                            <img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence">
+                                        </a>
+                                        <small class="d-block mt-2 fw-bold text-muted">Rumah Dalam</small>
+                                    @else 
+                                        <div class="bg-light d-flex align-items-center justify-content-center border text-muted small" style="height: 150px; border-radius: 8px;">Tanpa Foto</div> 
+                                        <small class="d-block mt-2 fw-bold text-muted">Rumah Dalam</small>
+                                    @endif
                                 </div>
                             </div>
 
@@ -299,14 +330,14 @@
                             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-sliders me-2"></i>PANEL KENDALI TAHAPAN</h6>
                             
                             @if($item->status_verifikasi_admin == 'Proses')
-                                <div class="alert alert-secondary small">Data baru masuk. Silakan teruskan ke Dinsos untuk dilakukan survei lapangan.</div>
+                                <div class="alert alert-secondary small text-dark border-0">Data baru masuk. Silakan teruskan ke Dinsos untuk dilakukan survei lapangan.</div>
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="jadwal_observasi">
                                     <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm"><i class="bi bi-cursor-fill me-2"></i>Jadwalkan Observasi Lapangan</button>
                                 </form>
                             
                             @elseif($item->status_verifikasi_admin == 'Verifikasi Lapangan')
-                                <div class="alert alert-warning small border-0 mb-3"><i class="bi bi-info-circle me-1"></i> Silakan isi form Sensus Ekonomi (PMT) berdasarkan hasil lapangan untuk penentuan Desil otomatis.</div>
+                                <div class="alert alert-warning small border-0 mb-3 text-dark"><i class="bi bi-info-circle me-1"></i> Silakan isi form Sensus Ekonomi (PMT) berdasarkan hasil lapangan untuk penentuan Desil otomatis.</div>
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_observasi">
                                     
@@ -370,7 +401,7 @@
                                 </form>
 
                             @elseif($item->status_verifikasi_admin == 'Menunggu Musdes')
-                                <div class="alert alert-info small">Observasi dan Perhitungan PMT Selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
+                                <div class="alert alert-info small border-0 text-dark">Observasi dan Perhitungan PMT Selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_musdes">
                                     <div class="mb-3">
@@ -381,7 +412,7 @@
                                 </form>
 
                             @elseif($item->status_verifikasi_admin == 'Siap Keputusan')
-                                <div class="alert alert-success small"><i class="bi bi-unlock-fill me-1"></i> Berkas lengkap. Kunci keputusan telah dibuka.</div>
+                                <div class="alert alert-success small border-0 text-dark"><i class="bi bi-unlock-fill me-1"></i> Berkas lengkap. Kunci keputusan telah dibuka.</div>
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="final">
                                     

@@ -27,6 +27,6 @@ class Penyaluran extends Model
     // Relasi balik ke Pengajuan
     public function pengajuan()
     {
-        return $this->belongsTo(Pengajuan::class, 'id_pengajuan', 'id_pengajuan');
+        return $this->belongsTo(Pengajuan::class, 'id_pengajuan', 'id');
     }
 }

@@ -33,7 +33,8 @@ return new class extends Migration
             $table->json('checklist_kriteria')->nullable(); // Menyimpan checklist (Lansia, Sewa, dll)
 
             // bukti fisik
-            $table->string('foto_ktp_kk')->nullable();
+            $table->string('foto_ktp')->nullable();
+            $table->string('foto_kk')->nullable();
             $table->string('foto_rumah_depan')->nullable();
             $table->string('foto_rumah_dalam')->nullable();
             

@@ -55,12 +55,14 @@ class PengajuanController extends Controller
             'alasan' => 'required|string',
             'penghasilan' => 'required|numeric',
             'foto_ktp' => 'required|image|max:2048', 
+            'foto_kk' =>'required|image|max:2048',
             'foto_rumah_depan' => 'required|image|max:2048',
             'foto_rumah_dalam' => 'nullable|image|max:2048'
         ]);
 
         // Upload Foto
         $pathKtp = $request->file('foto_ktp')->store('pengajuan/ktp', 'public');
+        $pathKk = $request->file('foto_kk')->store('pengajuan/kk', 'public');
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
         $pathDalam = $request->file('foto_rumah_dalam') ? $request->file('foto_rumah_dalam')->store('pengajuan/rumah', 'public') : null;
 
@@ -76,7 +78,8 @@ class PengajuanController extends Controller
             'alasan_pengajuan' => $request->alasan,
             'estimasi_penghasilan' => $request->penghasilan,
             'checklist_kriteria' => [], // Dikosongkan karena form kriteria dipindah ke Admin
-            'foto_ktp_kk' => $pathKtp,
+            'foto_ktp' => $pathKtp,
+            'foto_kk' => $pathKk,
             'foto_rumah_depan' => $pathDepan,
             'foto_rumah_dalam' => $pathDalam,
             'status_verifikasi_admin' => 'Proses' // Menunggu tindakan Admin

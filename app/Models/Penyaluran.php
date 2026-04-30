@@ -17,6 +17,9 @@ class Penyaluran extends Model
         'tgl_terima',
         'foto_bukti',
         'keterangan',
+        'undangan_dikirim',
+        'surat_diambil',
+        'bantuan_cair'
     ];
 
     // Agar tgl_terima otomatis dianggap Tanggal

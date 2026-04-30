@@ -151,16 +151,26 @@
                                 
                                 <td>
                                     @php
-                                        $desil = $item->warga->desil ?? 4;
+                                        $desil = $item->warga->desil; // Tidak pakai bawaan 4 lagi
                                         $warnaDesil = '';
                                         $teksDesil = '';
+                                        $labelDesil = '';
                                         
-                                        if($desil == 1) { $warnaDesil = 'bg-danger'; $teksDesil = 'Sangat Miskin'; }
-                                        elseif($desil == 2) { $warnaDesil = 'bg-warning text-dark'; $teksDesil = 'Miskin'; }
-                                        elseif($desil == 3) { $warnaDesil = 'bg-info text-dark'; $teksDesil = 'Hampir Miskin'; }
-                                        else { $warnaDesil = 'bg-secondary'; $teksDesil = 'Rentan/Mampu'; }
+                                        if(is_null($desil)) {
+                                            $warnaDesil = 'bg-secondary bg-opacity-25 text-secondary border';
+                                            $labelDesil = 'Belum Ditentukan';
+                                            $teksDesil = 'Menunggu Observasi';
+                                        } elseif($desil == 1) { 
+                                            $warnaDesil = 'bg-danger'; $labelDesil = 'Desil 1'; $teksDesil = 'Sangat Miskin'; 
+                                        } elseif($desil == 2) { 
+                                            $warnaDesil = 'bg-warning text-dark'; $labelDesil = 'Desil 2'; $teksDesil = 'Miskin'; 
+                                        } elseif($desil == 3) { 
+                                            $warnaDesil = 'bg-info text-dark'; $labelDesil = 'Desil 3'; $teksDesil = 'Hampir Miskin'; 
+                                        } else { 
+                                            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan/Mampu'; 
+                                        }
                                     @endphp
-                                    <span class="badge {{ $warnaDesil }} fs-6">Desil {{ $desil }}</span><br>
+                                    <span class="badge {{ $warnaDesil }} fs-6">{{ $labelDesil }}</span><br>
                                     <small class="text-muted" style="font-size: 0.7rem;">{{ $teksDesil }}</small>
                                 </td>
 
@@ -203,13 +213,24 @@
 
 @foreach($pengajuans as $item)
     @php
-        $desil = $item->warga->desil ?? 4;
+        $desil = $item->warga->desil; // Tidak pakai bawaan 4 lagi
         $warnaDesil = '';
         $teksDesil = '';
-        if($desil == 1) { $warnaDesil = 'bg-danger'; $teksDesil = 'Sangat Miskin'; }
-        elseif($desil == 2) { $warnaDesil = 'bg-warning text-dark'; $teksDesil = 'Miskin'; }
-        elseif($desil == 3) { $warnaDesil = 'bg-info text-dark'; $teksDesil = 'Hampir Miskin'; }
-        else { $warnaDesil = 'bg-secondary'; $teksDesil = 'Rentan/Mampu'; }
+        $labelDesil = '';
+        
+        if(is_null($desil)) {
+            $warnaDesil = 'bg-secondary bg-opacity-25 text-secondary border';
+            $labelDesil = 'Belum Ditentukan';
+            $teksDesil = 'Menunggu Observasi';
+        } elseif($desil == 1) { 
+            $warnaDesil = 'bg-danger'; $labelDesil = 'Desil 1'; $teksDesil = 'Sangat Miskin'; 
+        } elseif($desil == 2) { 
+            $warnaDesil = 'bg-warning text-dark'; $labelDesil = 'Desil 2'; $teksDesil = 'Miskin'; 
+        } elseif($desil == 3) { 
+            $warnaDesil = 'bg-info text-dark'; $labelDesil = 'Desil 3'; $teksDesil = 'Hampir Miskin'; 
+        } else { 
+            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan/Mampu'; 
+        }
     @endphp
 
     <div class="modal fade" id="modalDetail{{ $item->id }}" tabindex="-1">
@@ -245,7 +266,7 @@
                         <div class="col-md-7 border-end">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-primary mb-0"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
-                                <span class="badge {{ $warnaDesil }} px-3 py-2 fs-6 shadow-sm">Kategori: {{ $teksDesil }} (Desil {{ $desil }})</span>
+                                <span class="badge {{ $warnaDesil }} px-3 py-2 fs-6 shadow-sm">Kategori: {{ $teksDesil }} ({{ $labelDesil }})</span>
                             </div>
                             
                             <div class="row mb-3">

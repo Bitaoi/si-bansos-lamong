@@ -74,6 +74,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/penyaluran', [App\Http\Controllers\PenyaluranController::class, 'index'])->name('penyaluran.index');
     Route::post('/admin/penyaluran/{id_pengajuan}', [App\Http\Controllers\PenyaluranController::class, 'store'])->name('penyaluran.store');
 
+    // --- PENYALURAN ---
+    Route::get('/admin/penyaluran', [App\Http\Controllers\PenyaluranController::class, 'index'])->name('penyaluran.index');
+    Route::post('/admin/penyaluran/{id_pengajuan}', [App\Http\Controllers\PenyaluranController::class, 'store'])->name('penyaluran.store');
+    
+    // --- SURAT / PDF ---
+    Route::get('/admin/surat/{id_pengajuan}/cetak', [App\Http\Controllers\SuratController::class, 'cetakSurat'])->name('surat.cetak');
+
 
     // ====================================================
     // 2. AREA KHUSUS RT (Update Terbaru)

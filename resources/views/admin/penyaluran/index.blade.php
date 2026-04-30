@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penyaluran Bansos - Admin SI Bansos</title>
+    
+    <!-- FONT POPPINS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
@@ -16,7 +22,12 @@
             --warna-background: #FEFCFB; 
         }
 
-        body { background-color: var(--warna-background) !important; color: var(--warna-paling-gelap); font-family: sans-serif; }
+        body { 
+            background-color: var(--warna-background) !important; 
+            color: var(--warna-paling-gelap); 
+            font-family: 'Poppins', sans-serif !important; 
+        }
+        
         .text-primary { color: var(--warna-utama) !important; }
         .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
         .border-primary { border-color: var(--warna-utama) !important; }
@@ -79,12 +90,12 @@
             <ul class="nav nav-tabs border-bottom-0 mb-3" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active px-4 py-3" id="antrean-tab" data-bs-toggle="tab" data-bs-target="#antrean" type="button" role="tab">
-                        <i class="bi"></i>Antrean Penyaluran <span class="badge bg-danger ms-2 rounded-pill">{{ $antrean->count() }}</span>
+                        <i class="bi bi-hourglass-split me-2"></i>Antrean Penyaluran <span class="badge bg-danger ms-2 rounded-pill">{{ $antrean->count() }}</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link px-4 py-3" id="riwayat-tab" data-bs-toggle="tab" data-bs-target="#riwayat" type="button" role="tab">
-                        <i class="bi"></i>Riwayat Disalurkan
+                        <i class="bi bi-check2-all me-2"></i>Riwayat Disalurkan
                     </button>
                 </li>
             </ul>
@@ -112,11 +123,18 @@
                                             <td class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</td>
                                             <td><span class="badge" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">{{ $item->jenisBansos->nama_bansos ?? '-' }}</span></td>
                                             <td class="text-center"><span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Menunggu Diambil</span></td>
+                                            
+                                            <!-- TAMBAHAN TOMBOL CETAK E-SURAT -->
                                             <td class="text-end pe-4">
+                                                <a href="{{ route('surat.cetak', $item->id) }}" target="_blank" class="btn btn-outline-danger btn-sm fw-bold me-1" title="Cetak Surat Ber-Barcode">
+                                                    <i class="bi bi-file-earmark-pdf-fill"></i> Cetak E-Surat
+                                                </a>
                                                 <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalSalur{{ $item->id }}">
-                                                    <i class="bi bi-box-seam me-1"></i> Input Penyaluran
+                                                    <i class="bi bi-box-seam me-1"></i> Update Status
                                                 </button>
                                             </td>
+                                            <!-- AKHIR TAMBAHAN -->
+
                                         </tr>
                                         @empty
                                         <tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-emoji-smile fs-1 d-block mb-3 opacity-25"></i>Semua antrean telah disalurkan!</td></tr>
@@ -170,6 +188,9 @@
     </div>
 </div>
 
+<!-- ============================================== -->
+<!-- MODAL INPUT STATUS PENYALURAN                  -->
+<!-- ============================================== -->
 @foreach($antrean as $item)
 <div class="modal fade" id="modalSalur{{ $item->id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -190,25 +211,43 @@
                         </div>
                     </div>
 
+                    <!-- TAMBAHAN: LOG PROGRESS DOKUMEN -->
+                    <div class="p-3 bg-light border rounded mb-3 shadow-sm">
+                        <label class="form-label small fw-bold text-primary border-bottom pb-1 mb-2 d-block"><i class="bi bi-ui-checks me-1"></i> LOG PROGRESS DOKUMEN</label>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" name="undangan_dikirim" value="1" id="log1{{ $item->id }}">
+                            <label class="form-check-label small text-dark" for="log1{{ $item->id }}">Undangan Fisik Telah Dikirim ke Warga</label>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" name="surat_diambil" value="1" id="log2{{ $item->id }}">
+                            <label class="form-check-label small text-dark" for="log2{{ $item->id }}">Surat Keterangan (Barcode) Telah Diambil</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="bantuan_cair" value="1" id="log3{{ $item->id }}" required>
+                            <label class="form-check-label small fw-bold text-success" for="log3{{ $item->id }}">Bantuan Telah Cair / Diterima Warga (*Wajib)</label>
+                        </div>
+                    </div>
+                    <!-- AKHIR TAMBAHAN -->
+
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Tanggal Serah Terima <span class="text-danger">*</span></label>
-                        <input type="date" name="tgl_terima" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" name="tgl_terima" class="form-control border-secondary" value="{{ date('Y-m-d') }}" required>
                     </div>
                     
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Upload Foto Bukti Penerimaan <span class="text-danger">*</span></label>
-                        <input type="file" name="foto_bukti" class="form-control" accept="image/*" required>
+                        <input type="file" name="foto_bukti" class="form-control border-secondary" accept="image/*" required>
                         <small class="text-muted" style="font-size: 0.7rem;">Wajib foto warga memegang bantuan/uang tunai (Max 2MB).</small>
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label small fw-bold">Keterangan Tambahan (Opsional)</label>
-                        <textarea name="keterangan" class="form-control" rows="2" placeholder="Misal: Diambil oleh anggota keluarga (istri) karena pemohon sakit..."></textarea>
+                        <textarea name="keterangan" class="form-control border-secondary" rows="2" placeholder="Misal: Diambil oleh anggota keluarga (istri) karena pemohon sakit..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Simpan Bukti</button>
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Simpan Bukti</button>
                 </div>
             </form>
         </div>

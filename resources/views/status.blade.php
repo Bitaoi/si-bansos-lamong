@@ -47,13 +47,6 @@
             <a class="navbar-brand fw-bold" href="{{ route('home') }}">
                 <i class="bi bi-shield-check me-2"></i>SI BANSOS LAMONG
             </a>
-            
-            <!-- BAGIAN TOMBOL MENU -->
-            <div>
-                <!-- TOMBOL MENU BARU KE HALAMAN JADWAL -->
-                <a href="{{ route('timeline.publik') }}" class="btn btn-warning btn-sm rounded-pill fw-bold px-3 me-2 text-dark shadow-sm">
-                    <i class="bi bi-calendar-event me-1"></i> Kalender Bansos
-                </a>
                 
                 <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm rounded-pill fw-bold px-3">Kembali</a>
             </div>

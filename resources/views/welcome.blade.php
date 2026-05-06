@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Publik - Desa Lamong</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -18,7 +19,7 @@
         }
 
         /* 2. MENIMPA WARNA 'PRIMARY' BOOTSTRAP */
-        .text-primary { color: var(--warna-utama-gelap) !important; } /* Pakai yang gelap agar teks terbaca jelas */
+        .text-primary { color: var(--warna-utama-gelap) !important; } 
         .bg-primary { background-color: var(--warna-utama) !important; }
         .border-primary { border-color: var(--warna-utama) !important; }
 
@@ -52,7 +53,7 @@
         .nav-link { font-weight: 600; color: #4b5563 !important; margin-left: 20px; }
         .nav-link:hover { color: var(--warna-utama-gelap) !important; }
 
-        /* Hero Section (Diperbarui dengan Variabel Warna) */
+        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, var(--warna-utama-gelap) 0%, var(--warna-utama) 100%);
             color: white;
@@ -79,7 +80,7 @@
             font-size: 1.8rem; margin-bottom: 15px;
         }
         
-        /* Section Info Desa (Diperbarui border kirinya) */
+        /* Section Info Desa */
         .info-box {
             background: white; padding: 25px;
             border-radius: 15px;
@@ -94,6 +95,19 @@
         .btn-close { filter: invert(1); }
         .form-control { padding: 12px; border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e9ecef; }
         .form-control:focus { background-color: white; border-color: var(--warna-utama); box-shadow: 0 0 0 4px rgba(187, 208, 236, 0.4); }
+
+        /* Efek Animasi Berkedip untuk Jadwal Aktif */
+        .pulse-active {
+            animation: pulse-animation 2s infinite;
+            border: 2px solid #0d6efd !important;
+        }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+        .timeline-card { transition: transform 0.3s; border-radius: 15px; }
+        .timeline-card:hover { transform: translateY(-5px); }
     </style>
 </head>
 <body>
@@ -111,12 +125,8 @@
                     <li class="nav-item"><a class="nav-link" href="#statistik">Statistik</a></li>
                     <li class="nav-item"><a class="nav-link" href="#transparansi">Transparansi</a></li>
                     <li class="nav-item"><a class="nav-link" href="#info">Info Desa</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#jadwal-bansos">Jadwal Bansos</a></li>
                     
-                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-                        <a class="btn btn-outline-primary rounded-pill px-4 fw-bold" href="{{ route('status.index') }}">
-                            <i class="bi bi-search me-1"></i> Cek Status
-                        </a>
-                    </li>
                     
                     <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                         @auth
@@ -208,7 +218,7 @@
             </div>
         </div>
 
-        <div class="row g-5">
+        <div class="row g-5 mb-5">
             <div class="col-lg-8" id="transparansi">
                 <div class="card border-0 shadow-sm p-4 h-100">
                     <h4 class="fw-bold mb-4"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Sebaran Penerima Bantuan</h4>
@@ -257,7 +267,40 @@
         </div>
     </div>
 
-    <footer class="mt-5 py-4 bg-white text-center border-top">
+    <!-- SECTION JADWAL BANSOS -->
+    <section id="jadwal-bansos" class="py-5 mt-4" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Siklus Tahapan Bansos Bulanan</h2>
+                <p class="text-muted">Proses pengusulan hingga pencairan dilakukan secara bertahap setiap bulannya sesuai kalender di bawah ini.</p>
+                <div class="badge bg-primary fs-5 mt-2 shadow-sm">
+                    <i class="bi bi-calendar-event me-2"></i> Hari ini: Tanggal {{ $hariIni }}
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                @foreach($jadwal as $item)
+                    @php 
+                        $isActive = ($hariIni >= $item->hari_mulai && $hariIni <= $item->hari_selesai); 
+                    @endphp
+                    <div class="col-md-4">
+                        <div class="card timeline-card h-100 shadow-sm {{ $isActive ? 'pulse-active' : '' }}" style="border: none; border-top: 8px solid {{ $item->warna_bg }} !important;">
+                            <div class="card-body text-center p-4">
+                                @if($isActive)
+                                    <span class="badge bg-primary mb-3"><i class="bi bi-broadcast me-1"></i> Sedang Berlangsung</span>
+                                @endif
+                                <h5 class="fw-bold" style="color: var(--warna-paling-gelap);">{{ $item->nama_tahapan }}</h5>
+                                <h2 class="display-5 fw-bold" style="color: {{ $item->warna_bg }};">Tgl {{ $item->hari_mulai }}-{{ $item->hari_selesai > 30 ? 'Akhir' : $item->hari_selesai }}</h2>
+                                <p class="text-muted mt-3 mb-0">{{ $item->deskripsi }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 bg-white text-center border-top">
         <div class="container">
             <small class="text-muted">&copy; 2026 Pemerintah Desa Lamong. Sistem Informasi Bantuan Sosial.</small>
         </div>
@@ -275,7 +318,6 @@
                 </div>
                 
                 <div class="modal-body p-4">
-                    
                     @if($errors->has('login_error'))
                         <div class="alert alert-danger py-2 small text-center mb-3 shadow-sm border-0">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $errors->first('login_error') }}
@@ -334,7 +376,7 @@
                 labels: ['L', 'P'],
                 datasets: [{
                     data: [{{ $lakiLaki }}, {{ $perempuan }}],
-                    backgroundColor: ['#7D88DC', '#dc3545'], // <- Diperbarui warnanya
+                    backgroundColor: ['#7D88DC', '#dc3545'],
                     borderWidth: 0
                 }]
             },
@@ -358,8 +400,8 @@
                 datasets: [{
                     label: 'Jumlah Penerima (KK)',
                     data: dataTotal.length ? dataTotal : [0],
-                    backgroundColor: '#BBD0EC', // <- Diperbarui warnanya
-                    borderColor: '#7D88DC', // <- Diperbarui warnanya
+                    backgroundColor: '#BBD0EC',
+                    borderColor: '#7D88DC',
                     borderWidth: 1,
                     borderRadius: 5
                 }]
@@ -372,7 +414,7 @@
                     x: { grid: { display: false } }
                 },
                 plugins: { legend: { display: false } }
-            }
+            } 
         });
     </script>
 </body>

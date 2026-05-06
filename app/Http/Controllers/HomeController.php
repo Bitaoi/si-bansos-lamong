@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\JenisBansos;
 use App\Models\Warga;
-use App\Models\Pengajuan; // Pastikan Model ini ada
+use App\Models\Pengajuan;
+use App\Models\JadwalBansos;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -40,6 +41,10 @@ class HomeController extends Controller
             }
         }
 
+        // 3. TAMBAHAN BARU: AMBIL DATA JADWAL KALENDER
+        $jadwal = JadwalBansos::orderBy('hari_mulai', 'asc')->get();
+        $hariIni = (int) date('j');
+
         // Kirim semua variabel ke view 'welcome'
         return view('welcome', compact(
             'totalWarga', 
@@ -47,7 +52,9 @@ class HomeController extends Controller
             'lakiLaki', 
             'perempuan', 
             'labelBansos', 
-            'dataBansos'
+            'dataBansos',
+            'jadwal',
+            'hariIni'
         ));
     }
 }

@@ -24,6 +24,8 @@ Route::get('/cek-status', [StatusController::class, 'index'])->name('status.inde
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Route Warga
+Route::get('/informasi-jadwal', [App\Http\Controllers\JadwalController::class, 'timelinePublik'])->name('timeline.publik');
 
 // ====================================================
 // AREA TERKUNCI (WAJIB LOGIN)
@@ -81,6 +83,9 @@ Route::middleware(['auth'])->group(function () {
     // --- SURAT / PDF ---
     Route::get('/admin/surat/{id_pengajuan}/cetak', [App\Http\Controllers\SuratController::class, 'cetakSurat'])->name('surat.cetak');
 
+    // Route Admin (Taruh di dalam grup middleware admin)
+    Route::get('/admin/jadwal', [App\Http\Controllers\JadwalController::class, 'indexAdmin'])->name('admin.jadwal.index');
+    Route::put('/admin/jadwal/{id}', [App\Http\Controllers\JadwalController::class, 'update'])->name('admin.jadwal.update');
 
     // ====================================================
     // 2. AREA KHUSUS RT (Update Terbaru)

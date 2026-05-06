@@ -47,7 +47,16 @@
             <a class="navbar-brand fw-bold" href="{{ route('home') }}">
                 <i class="bi bi-shield-check me-2"></i>SI BANSOS LAMONG
             </a>
-            <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm rounded-pill fw-bold px-3">Kembali ke Beranda</a>
+            
+            <!-- BAGIAN TOMBOL MENU -->
+            <div>
+                <!-- TOMBOL MENU BARU KE HALAMAN JADWAL -->
+                <a href="{{ route('timeline.publik') }}" class="btn btn-warning btn-sm rounded-pill fw-bold px-3 me-2 text-dark shadow-sm">
+                    <i class="bi bi-calendar-event me-1"></i> Kalender Bansos
+                </a>
+                
+                <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm rounded-pill fw-bold px-3">Kembali</a>
+            </div>
         </div>
     </nav>
 
@@ -61,11 +70,13 @@
     <div class="container mb-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card card-search mb-5 border-0">
+                
+                <!-- KOTAK PENCARIAN -->
+                <div class="card card-search mb-4 border-0">
                     <div class="card-body p-4">
                         <form action="{{ route('status.index') }}" method="GET">
                             <div class="input-group">
-                                <input type="number" name="nik" class="form-control form-control-lg border-0 bg-light" placeholder="Masukkan 16 Digit NIK..." value="{{ $nik }}" required>
+                                <input type="number" name="nik" class="form-control form-control-lg border-0 bg-light" placeholder="Masukkan 16 Digit NIK..." value="{{ $nik ?? '' }}" required>
                                 <button class="btn btn-primary px-4 fw-bold" type="submit">
                                     <i class="bi bi-search me-2"></i> CARI DATA
                                 </button>
@@ -73,6 +84,31 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- PESAN DINAMIS JADWAL AKTIF -->
+                @php
+                    // Ambil jadwal yang sedang aktif hari ini
+                    $hariIni = (int) date('j');
+                    $tahapAktif = \App\Models\JadwalBansos::where('hari_mulai', '<=', $hariIni)
+                                    ->where('hari_selesai', '>=', $hariIni)->first();
+                @endphp
+
+                @if($tahapAktif)
+                <div class="alert shadow-sm border-0 rounded-4 d-flex align-items-center mb-4" style="background-color: {{ $tahapAktif->warna_bg }}15; border-left: 5px solid {{ $tahapAktif->warna_bg }} !important;">
+                    <i class="bi bi-info-circle-fill fs-3 me-3" style="color: {{ $tahapAktif->warna_bg }};"></i>
+                    <div>
+                        <strong style="color: {{ $tahapAktif->warna_bg }};">Info Kalender Saat Ini (Tgl {{ $hariIni }}): Masa {{ $tahapAktif->nama_tahapan }}</strong>
+                        <p class="mb-0 small text-dark">{{ $tahapAktif->deskripsi }} 
+                            @if($tahapAktif->hari_mulai <= 11)
+                                <em>Pengajuan Anda sedang diinput oleh Desa.</em>
+                            @else
+                                <em>Silakan cek kembali secara berkala, data sedang divalidasi Pusat.</em>
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                @endif
+                <!-- AKHIR PESAN DINAMIS -->
 
                 @if($dicari)
                     @if($pengajuan)

@@ -7,7 +7,10 @@ use App\Models\JenisBansos;
 use App\Models\Warga;
 use App\Models\Pengajuan;
 use App\Models\JadwalBansos;
+use App\Models\Galeri;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 
 class HomeController extends Controller
 {
@@ -45,6 +48,22 @@ class HomeController extends Controller
         $jadwal = JadwalBansos::orderBy('hari_mulai', 'asc')->get();
         $hariIni = (int) date('j');
 
+        // Mengambil data tren pengajuan per tahun
+        $pengajuanPerTahun = Pengajuan::orderby('created_at', 'asc')
+        ->get()
+        ->groupBy(function($data) {
+            return Carbon::parse($data->created_at)->format('Y');
+        });
+        
+        //memisahkan label tahun dan data
+        $labelTahun =$pengajuanPerTahun->keys()->toArray();
+        $dataTahun =$pengajuanPerTahun->map(function($item){
+            return $item->count();
+        })->values()->toArray();
+
+        // GALERI
+        $galeriStatis = Galeri::latest()->get();
+
         // Kirim semua variabel ke view 'welcome'
         return view('welcome', compact(
             'totalWarga', 
@@ -53,7 +72,10 @@ class HomeController extends Controller
             'perempuan', 
             'labelBansos', 
             'dataBansos',
+            'labelTahun',
+            'dataTahun',
             'jadwal',
+            'galeriStatis',
             'hariIni'
         ));
     }

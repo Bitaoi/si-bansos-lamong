@@ -13,6 +13,7 @@ use App\Http\Controllers\PenyaluranController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifikasiController;
+use App\Http\Controllers\GaleriController;
 
 // ====================================================
 // AREA PUBLIK (TIDAK PERLU LOGIN)
@@ -71,6 +72,11 @@ Route::middleware(['auth'])->group(function () {
     // --- PENGATURAN JADWAL (ADMIN) ---
     Route::get('/admin/jadwal', [JadwalController::class, 'indexAdmin'])->name('admin.jadwal.index');
     Route::put('/admin/jadwal/{id}', [JadwalController::class, 'update'])->name('admin.jadwal.update');
+
+    // --- MANAJEMEN GALERI DESA ---
+    Route::get('/admin/galeri', [GaleriController::class, 'index'])->name('admin.galeri.index');
+    Route::post('/admin/galeri', [GaleriController::class, 'store'])->name('admin.galeri.store');
+    Route::delete('/admin/galeri/{id}', [GaleriController::class, 'destroy'])->name('admin.galeri.destroy');
 
     // ====================================================
     // 2. AREA KHUSUS RT

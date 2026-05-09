@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Pengajuan - Admin SI Bansos</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Font Poppins & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* PALET WARNA KUSTOM */
+        /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -23,30 +21,35 @@
 
         body { 
             background-color: var(--warna-background) !important; 
-            color: var(--warna-paling-gelap); 
+            color: var(--warna-paling-gelap);
             font-family: 'Poppins', sans-serif !important; 
         }
-        
+
+        /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
         .text-primary { color: var(--warna-utama) !important; }
         .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
         .border-primary { border-color: var(--warna-utama) !important; }
 
+        /* 3. STYLING TOMBOL */
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
-        
-        /* SIDEBAR KUSTOM */
+        .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
+        .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
+
+        /* 4. SIDEBAR & KARTU KONSISTEN */
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
         .nav-link i { width: 24px; display: inline-block; }
         .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--warna-soft); font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; opacity: 0.8; }
 
-        /* TABEL & KARTU */
         .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--warna-utama); }
-        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; }
         
-        /* STEPPER KUSTOM */
+        /* 5. STYLING TABEL */
+        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--warna-utama); }
+        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; font-size: 0.95rem; }
+        
+        /* 6. STEPPER & KUSTOMISASI HALAMAN VERIFIKASI */
         .stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; }
         .stepper::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 3px; background: #e2e8f0; z-index: 1; }
         .step { position: relative; z-index: 2; text-align: center; background: white; padding: 0 10px; flex: 1; }
@@ -65,6 +68,7 @@
 <div class="container-fluid">
     <div class="row">
         
+        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
@@ -72,7 +76,7 @@
             
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="{{ route('admin.dashboard') }}" class="nav-link">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
                         <i class="bi bi-grid-fill"></i> Dashboard
                     </a>
                 </li>
@@ -93,7 +97,12 @@
                         <i class="bi bi-gift-fill"></i> Jenis Bansos
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
+                    </a>
+                </li>
+                
                 <div class="sidebar-heading mt-3">Transaksi</div>
                 <li class="nav-item">
                     <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
@@ -105,19 +114,30 @@
                         <i class="bi bi-truck"></i> Penyaluran
                     </a>
                 </li>
-
+                
+                <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545;">
+                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545; border-radius: 8px;">
                             <i class="bi bi-box-arrow-right"></i> Keluar
                         </button>
                     </form>
                 </li>
             </ul>
         </div>
+        <!-- AKHIR SIDEBAR -->
 
         <div class="col-md-9 col-lg-10 p-4">
+            
+            <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold"><i class="bi bi-file-earmark-check-fill me-2"></i>Verifikasi Pengajuan</h5>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-sm btn-danger"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
+            </div>
+
             <h4 class="fw-bold mb-4">Verifikasi Kelayakan Pengajuan</h4>
 
             @if(session('success'))
@@ -140,7 +160,7 @@
                             @forelse($pengajuans as $item)
                             <tr>
                                 <td class="ps-4">
-                                    <div class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</div>
+                                    <div class="fw-bold text-dark">{{ $item->warga->nama_lengkap ?? '-' }}</div>
                                     <small class="text-muted">RT: {{ $item->pengusul->wilayah_rt_rw ?? '-' }}</small>
                                 </td>
                                 <td>
@@ -270,10 +290,10 @@
                             </div>
                             
                             <div class="row mb-3">
-                                <div class="col-6"><small class="text-muted d-block">Nama Lengkap</small><strong>{{ $item->warga->nama_lengkap }}</strong></div>
-                                <div class="col-6"><small class="text-muted d-block">NIK</small><strong>{{ $item->nik }}</strong></div>
+                                <div class="col-6"><small class="text-muted d-block">Nama Lengkap</small><strong class="text-dark">{{ $item->warga->nama_lengkap }}</strong></div>
+                                <div class="col-6"><small class="text-muted d-block">NIK</small><strong class="text-dark">{{ $item->nik }}</strong></div>
                             </div>
-                            <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light p-2 rounded border"><em>{{ $item->alasan_pengajuan }}</em></div></div>
+                            <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light text-dark p-2 rounded border"><em>{{ $item->alasan_pengajuan }}</em></div></div>
                             
                             @if($item->surveiEkonomi)
                             <div class="alert py-2 my-3 small border-0 d-flex justify-content-between align-items-center" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
@@ -290,7 +310,7 @@
                                             <li><i class="bi bi-check-square-fill me-2"></i> {{ $kriteria }}</li>
                                         @endforeach
                                     </ul>
-                                    <div class="mt-2 text-end small fw-bold">Total: {{ count($item->checklist_kriteria) }} Kondisi Terpenuhi</div>
+                                    <div class="mt-2 text-end small fw-bold text-dark">Total: {{ count($item->checklist_kriteria) }} Kondisi Terpenuhi</div>
                                 @else
                                     <div class="text-muted small">Pengajuan ini tidak menggunakan kriteria checklist.</div>
                                 @endif

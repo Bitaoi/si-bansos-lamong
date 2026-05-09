@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Warga - Admin SI Bansos</title>
+    
+    <!-- Font Poppins & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
@@ -19,7 +22,7 @@
         body { 
             background-color: var(--warna-background) !important; 
             color: var(--warna-paling-gelap);
-            font-family: sans-serif; 
+            font-family: 'Poppins', sans-serif !important; 
         }
 
         /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
@@ -33,7 +36,7 @@
         .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
         .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
 
-        /* 4. SIDEBAR & KARTU */
+        /* 4. SIDEBAR & KARTU KONSISTEN */
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
@@ -53,52 +56,65 @@
 <div class="container-fluid">
     <div class="row">
         
+        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
-            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white">
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
             </h5>
             
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="{{ route('admin.dashboard') }}" class="nav-link">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
                         <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.rt.index') }}" class="nav-link {{ Request::routeIs('admin.rt.*') ? 'active' : '' }}">
+                        <i class="bi bi-person-badge-fill"></i> Manajemen Akun RT
                     </a>
                 </li>
                 
                 <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item">
-                    <a href="{{ route('warga.index') }}" class="nav-link active">
+                    <a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}">
                         <i class="bi bi-people-fill"></i> Data Warga
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link">
+                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}">
                         <i class="bi bi-gift-fill"></i> Jenis Bansos
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
+                    </a>
+                </li>
+                
                 <div class="sidebar-heading mt-3">Transaksi</div>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-file-earmark-text-fill"></i> Verifikasi Pengajuan
+                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
+                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i> Penyaluran
                     </a>
                 </li>
-
+                
+                <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="nav-link bg-danger text-white w-100 text-start border-0 shadow-sm">
+                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545; border-radius: 8px;">
                             <i class="bi bi-box-arrow-right"></i> Keluar
                         </button>
                     </form>
                 </li>
             </ul>
         </div>
+        <!-- AKHIR SIDEBAR -->
 
         <div class="col-md-9 col-lg-10 p-4">
             

@@ -25,6 +25,7 @@
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; }
         
+        /* GAYA SIDEBAR KONSISTEN */
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
@@ -39,26 +40,78 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- SIDEBAR -->
+        
+        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
             </h5>
+            
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Manajemen Akun RT</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.rt.index') }}" class="nav-link {{ Request::routeIs('admin.rt.*') ? 'active' : '' }}">
+                        <i class="bi bi-person-badge-fill"></i> Manajemen Akun RT
+                    </a>
+                </li>
+                
                 <div class="sidebar-heading mt-3">Master Data</div>
-                <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
-                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
-                <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link active"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}">
+                        <i class="bi bi-people-fill"></i> Data Warga
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}">
+                        <i class="bi bi-gift-fill"></i> Jenis Bansos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
+                    </a>
+                </li>
+                
                 <div class="sidebar-heading mt-3">Transaksi</div>
-                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan</a></li>
-                <li class="nav-item"><a href="{{ route('penyaluran.index') }}" class="nav-link"><i class="bi bi-truck"></i> Penyaluran</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i> Penyaluran
+                    </a>
+                </li>
+                
+                <!-- TOMBOL KELUAR -->
+                <li class="nav-item mt-5">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545; border-radius: 8px;">
+                            <i class="bi bi-box-arrow-right"></i> Keluar
+                        </button>
+                    </form>
+                </li>
             </ul>
         </div>
+        <!-- AKHIR SIDEBAR -->
 
         <!-- KONTEN -->
         <div class="col-md-9 col-lg-10 p-4">
+            
+            <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold"><i class="bi bi-calendar-event me-2"></i>Jadwal Tahapan</h5>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-sm btn-danger"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">Pengaturan Kalender Bansos</h4>
@@ -125,11 +178,11 @@
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tanggal Mulai</label>
-                            <input type="number" name="hari_mulai" class="form-control" min="1" max="31" value="{{ $item->hari_mulai }}" required>
+                            <input type="number" name="hari_mulai" class="form-control border-secondary" min="1" max="31" value="{{ $item->hari_mulai }}" required>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tanggal Selesai</label>
-                            <input type="number" name="hari_selesai" class="form-control" min="1" max="31" value="{{ $item->hari_selesai }}" required>
+                            <input type="number" name="hari_selesai" class="form-control border-secondary" min="1" max="31" value="{{ $item->hari_selesai }}" required>
                         </div>
                     </div>
                 </div>

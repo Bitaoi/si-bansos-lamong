@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Akun RT - Admin SI Bansos</title>
     
-    <!-- Font Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* STRUKTUR PALET WARNA KONSISTEN */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -25,14 +23,12 @@
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; }
         
-        /* GAYA SIDEBAR KONSISTEN */
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
         .nav-link i { width: 24px; display: inline-block; }
         .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--warna-soft); font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; opacity: 0.8; }
 
-        /* GAYA KARTU & FORM */
         .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .form-control { border-radius: 8px; padding: 10px 15px; border-color: #e2e8f0; }
         .form-control:focus { border-color: var(--warna-utama); box-shadow: 0 0 0 0.25rem rgba(125, 136, 220, 0.25); }
@@ -43,24 +39,52 @@
 <div class="container-fluid">
     <div class="row">
         
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR PINTAR -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
             </h5>
             
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link active"><i class="bi bi-person-badge-fill"></i> Manajemen Akun RT</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.rt.index') }}" class="nav-link {{ Request::routeIs('admin.rt.*') ? 'active' : '' }}">
+                        <i class="bi bi-person-badge-fill"></i> Manajemen Akun RT
+                    </a>
+                </li>
                 
                 <div class="sidebar-heading mt-3">Master Data</div>
-                <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
-                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
-                <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}">
+                        <i class="bi bi-people-fill"></i> Data Warga
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}">
+                        <i class="bi bi-gift-fill"></i> Jenis Bansos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
+                    </a>
+                </li>
                 
                 <div class="sidebar-heading mt-3">Transaksi</div>
-                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan</a></li>
-                <li class="nav-item"><a href="{{ route('penyaluran.index') }}" class="nav-link"><i class="bi bi-truck"></i> Penyaluran</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i> Penyaluran
+                    </a>
+                </li>
                 
                 <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
@@ -75,10 +99,7 @@
         </div>
         <!-- AKHIR SIDEBAR -->
 
-        <!-- KONTEN UTAMA -->
         <div class="col-md-9 col-lg-10 p-4">
-            
-            <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">Tambah Akun Ketua RT</h4>
@@ -89,7 +110,6 @@
                 </a>
             </div>
 
-            <!-- FORM CARD -->
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5">
@@ -106,7 +126,6 @@
 
                         <form action="{{ route('admin.rt.store') }}" method="POST">
                             @csrf
-                            
                             <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-vcard me-2"></i>Informasi Ketua RT</h6>
                             
                             <div class="mb-3">
@@ -114,9 +133,10 @@
                                 <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Budi Santoso" value="{{ old('nama_lengkap') }}" required>
                             </div>
 
+                            <!-- NAMA INPUT SUDAH DIPERBAIKI MENJADI wilayah_rt_rw -->
                             <div class="mb-4">
                                 <label class="form-label small fw-bold">Wilayah (RT/RW) <span class="text-danger">*</span></label>
-                                <input type="text" name="wilayah" class="form-control" placeholder="Contoh: 001/005" value="{{ old('wilayah') }}" required>
+                                <input type="text" name="wilayah_rt_rw" class="form-control" placeholder="Contoh: 001/005" value="{{ old('wilayah_rt_rw') }}" required>
                                 <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">
                                     <i class="bi bi-info-circle me-1"></i> Gunakan format angka 3 digit dipisah garis miring (RT/RW). Pastikan sama persis dengan data wilayah di Data Warga.
                                 </small>
@@ -157,10 +177,7 @@
                     </div>
                 </div>
             </div>
-            
         </div>
-        <!-- AKHIR KONTEN UTAMA -->
-        
     </div>
 </div>
 

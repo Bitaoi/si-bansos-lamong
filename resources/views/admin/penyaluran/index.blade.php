@@ -140,12 +140,12 @@
             <ul class="nav nav-tabs border-bottom-0 mb-3" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active px-4 py-3" id="antrean-tab" data-bs-toggle="tab" data-bs-target="#antrean" type="button" role="tab">
-                        <i class="bi bi-hourglass-split me-2"></i>Antrean Penyaluran <span class="badge bg-danger ms-2 rounded-pill">{{ $antrean->count() }}</span>
+                        <i class=></i>Antrean Penyaluran <span class="badge bg-danger ms-2 rounded-pill">{{ $antrean->count() }}</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link px-4 py-3" id="riwayat-tab" data-bs-toggle="tab" data-bs-target="#riwayat" type="button" role="tab">
-                        <i class="bi bi-check2-all me-2"></i>Riwayat Disalurkan
+                        <i class=></i>Riwayat Disalurkan
                     </button>
                 </li>
             </ul>

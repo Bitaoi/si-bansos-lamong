@@ -58,6 +58,11 @@ class Pengajuan extends Model
         return $this->belongsTo(User::class, 'id_user_pengusul', 'id_user');
     }
 
+    public function penyaluran()
+    {
+        return $this->hasOne(Penyaluran::class, 'id_pengajuan', 'id');
+    }
+
     public function surveiEkonomi()
     {
         // Karena pengajuan bisa memiliki 1 hasil survei, kita gunakan hasOne

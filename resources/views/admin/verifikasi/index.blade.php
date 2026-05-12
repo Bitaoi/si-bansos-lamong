@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Pengajuan - Admin SI Bansos</title>
     
-    <!-- Font Poppins & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -19,37 +17,25 @@
             --warna-background: #FEFCFB; 
         }
 
-        body { 
-            background-color: var(--warna-background) !important; 
-            color: var(--warna-paling-gelap);
-            font-family: 'Poppins', sans-serif !important; 
-        }
-
-        /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
+        body { background-color: var(--warna-background) !important; color: var(--warna-paling-gelap); font-family: 'Poppins', sans-serif !important; }
         .text-primary { color: var(--warna-utama) !important; }
         .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
         .border-primary { border-color: var(--warna-utama) !important; }
-
-        /* 3. STYLING TOMBOL */
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
         .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
         .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
-
-        /* 4. SIDEBAR & KARTU KONSISTEN */
+        
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
         .nav-link i { width: 24px; display: inline-block; }
         .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--warna-soft); font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; opacity: 0.8; }
-
-        .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         
-        /* 5. STYLING TABEL */
+        .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--warna-utama); }
         .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; font-size: 0.95rem; }
         
-        /* 6. STEPPER & KUSTOMISASI HALAMAN VERIFIKASI */
         .stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; }
         .stepper::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 3px; background: #e2e8f0; z-index: 1; }
         .step { position: relative; z-index: 2; text-align: center; background: white; padding: 0 10px; flex: 1; }
@@ -68,7 +54,6 @@
 <div class="container-fluid">
     <div class="row">
         
-        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
@@ -87,35 +72,22 @@
                 </li>
                 
                 <div class="sidebar-heading mt-3">Master Data</div>
-                <li class="nav-item">
-                    <a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}">
-                        <i class="bi bi-people-fill"></i> Data Warga
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}">
-                        <i class="bi bi-gift-fill"></i> Jenis Bansos
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
-                    </a>
-                </li>
+                <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i> Data Warga</a></li>
+                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
+                <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
+                <li class="nav-item"><a href="{{ route('admin.galeri.index') }}" class="nav-link {{ Request::routeIs('admin.galeri.*') ? 'active' : '' }}"><i class="bi bi-images"></i> Galeri Desa</a></li>
                 
                 <div class="sidebar-heading mt-3">Transaksi</div>
+                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan</a></li>
                 <li class="nav-item">
-                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
-                        <i class="bi bi-truck"></i> Penyaluran
+                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
+                        <div><i class="bi bi-truck"></i> Penyaluran</div>
+                        @if(isset($jumlahAntreanPenyaluran) && $jumlahAntreanPenyaluran > 0)
+                            <span class="badge rounded-pill bg-danger border border-light shadow-sm" style="font-size: 0.7rem; padding: 0.35em 0.65em;">{{ $jumlahAntreanPenyaluran }}</span>
+                        @endif
                     </a>
                 </li>
                 
-                <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -126,8 +98,7 @@
                 </li>
             </ul>
         </div>
-        <!-- AKHIR SIDEBAR -->
-
+        
         <div class="col-md-9 col-lg-10 p-4">
             
             <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
@@ -164,17 +135,15 @@
                                     <small class="text-muted">RT: {{ $item->pengusul->wilayah_rt_rw ?? '-' }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
+                                    <span class="fw-bold fst-italic text-dark">
                                         {{ $item->jenisBansos->nama_bansos ?? '-' }}
                                     </span>
                                 </td>
                                 
                                 <td>
                                     @php
-                                        $desil = $item->warga->desil; // Tidak pakai bawaan 4 lagi
-                                        $warnaDesil = '';
-                                        $teksDesil = '';
-                                        $labelDesil = '';
+                                        $desil = $item->warga->desil; 
+                                        $warnaDesil = ''; $teksDesil = ''; $labelDesil = '';
                                         
                                         if(is_null($desil)) {
                                             $warnaDesil = 'bg-secondary bg-opacity-25 text-secondary border';
@@ -186,27 +155,29 @@
                                             $warnaDesil = 'bg-warning text-dark'; $labelDesil = 'Desil 2'; $teksDesil = 'Miskin'; 
                                         } elseif($desil == 3) { 
                                             $warnaDesil = 'bg-info text-dark'; $labelDesil = 'Desil 3'; $teksDesil = 'Hampir Miskin'; 
+                                        } elseif($desil == 4) { 
+                                            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan Miskin'; 
                                         } else { 
-                                            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan/Mampu'; 
+                                            $warnaDesil = 'bg-success'; $labelDesil = 'Desil '.$desil; $teksDesil = 'Keluarga Mampu'; 
                                         }
                                     @endphp
-                                    <span class="badge {{ $warnaDesil }} fs-6">{{ $labelDesil }}</span><br>
+                                    <span class="fw-bold fs-6">{{ $labelDesil }}</span><br>
                                     <small class="text-muted" style="font-size: 0.7rem;">{{ $teksDesil }}</small>
                                 </td>
 
                                 <td>
                                     @php
                                         $badges = [
-                                            'Proses' => ['bg-secondary', '1. Menunggu Tindakan'],
-                                            'Verifikasi Lapangan' => ['bg-warning text-dark', '2. Sedang Observasi'],
-                                            'Menunggu Musdes' => ['bg-info text-dark', '3. Menunggu Musdes'],
-                                            'Siap Keputusan' => ['bg-primary', '4. Siap Putusan Akhir'],
+                                            'Proses' => ['bg-secondary', 'Menunggu Tindakan'],
+                                            'Verifikasi Lapangan' => ['bg-warning text-dark', 'Sedang Observasi'],
+                                            'Menunggu Musdes' => ['bg-info text-dark', 'Menunggu Musdes'],
+                                            'Siap Keputusan' => ['bg-primary', 'Siap Putusan Akhir'],
                                             'Layak' => ['bg-success', 'Selesai - Layak'],
                                             'Tidak Layak' => ['bg-danger', 'Selesai - Ditolak'],
                                         ];
                                         $currentBadge = $badges[$item->status_verifikasi_admin] ?? ['bg-dark', $item->status_verifikasi_admin];
                                     @endphp
-                                    <span class="badge {{ $currentBadge[0] }}">{{ $currentBadge[1] }}</span>
+                                    <span class="fw-semibold">{{ $currentBadge[1] }}</span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <button class="btn btn-primary btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}">
@@ -233,10 +204,8 @@
 
 @foreach($pengajuans as $item)
     @php
-        $desil = $item->warga->desil; // Tidak pakai bawaan 4 lagi
-        $warnaDesil = '';
-        $teksDesil = '';
-        $labelDesil = '';
+        $desil = $item->warga->desil;
+        $warnaDesil = ''; $teksDesil = ''; $labelDesil = '';
         
         if(is_null($desil)) {
             $warnaDesil = 'bg-secondary bg-opacity-25 text-secondary border';
@@ -248,8 +217,10 @@
             $warnaDesil = 'bg-warning text-dark'; $labelDesil = 'Desil 2'; $teksDesil = 'Miskin'; 
         } elseif($desil == 3) { 
             $warnaDesil = 'bg-info text-dark'; $labelDesil = 'Desil 3'; $teksDesil = 'Hampir Miskin'; 
+        } elseif($desil == 4) { 
+            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan Miskin'; 
         } else { 
-            $warnaDesil = 'bg-primary'; $labelDesil = 'Desil 4'; $teksDesil = 'Rentan/Mampu'; 
+            $warnaDesil = 'bg-success'; $labelDesil = 'Desil '.$desil; $teksDesil = 'Keluarga Mampu'; 
         }
     @endphp
 
@@ -257,7 +228,7 @@
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content" style="border:none; border-radius:15px; overflow:hidden;">
                 <div class="modal-header text-white" style="background-color: var(--warna-paling-gelap);">
-                    <h5 class="modal-title fw-bold">Review Berkas #{{ $item->id }}</h5>
+                    <h5 class="modal-title fw-bold">Review Berkas</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
@@ -284,9 +255,9 @@
 
                     <div class="row g-4">
                         <div class="col-md-7 border-end">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold text-primary mb-0"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
-                                <span class="badge {{ $warnaDesil }} px-3 py-2 fs-6 shadow-sm">Kategori: {{ $teksDesil }} ({{ $labelDesil }})</span>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person-lines-fill me-2"></i>DATA PEMOHON</h6>
                             </div>
                             
                             <div class="row mb-3">
@@ -296,24 +267,17 @@
                             <div class="mb-3"><small class="text-muted d-block">Alasan RT</small><div class="bg-light text-dark p-2 rounded border"><em>{{ $item->alasan_pengajuan }}</em></div></div>
                             
                             @if($item->surveiEkonomi)
-                            <div class="alert py-2 my-3 small border-0 d-flex justify-content-between align-items-center" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
+                            <div class="alert py-2 my-3 small border bg-light text-dark d-flex justify-content-between align-items-center">
                                 <span><strong>Skor Kelayakan (PMT):</strong> {{ $item->surveiEkonomi->total_skor }} Poin</span>
-                                <i class="bi bi-calculator-fill fs-5"></i>
+                                <i class="bi bi-calculator-fill fs-5 text-secondary"></i>
                             </div>
                             @endif
 
-                            <h6 class="fw-bold text-danger mb-2 mt-4"><i class="bi bi-card-checklist me-2"></i>Kondisi Warga (Laporan RT)</h6>
-                            <div class="bg-light p-3 rounded mb-3 border">
-                                @if(is_array($item->checklist_kriteria) && count($item->checklist_kriteria) > 0)
-                                    <ul class="list-unstyled mb-0 kriteria-list text-danger">
-                                        @foreach($item->checklist_kriteria as $kriteria)
-                                            <li><i class="bi bi-check-square-fill me-2"></i> {{ $kriteria }}</li>
-                                        @endforeach
-                                    </ul>
-                                    <div class="mt-2 text-end small fw-bold text-dark">Total: {{ count($item->checklist_kriteria) }} Kondisi Terpenuhi</div>
-                                @else
-                                    <div class="text-muted small">Pengajuan ini tidak menggunakan kriteria checklist.</div>
-                                @endif
+                            <div class="mb-4 mt-2">
+                                <small class="text-muted d-block mb-1">Status Kategori Warga</small>
+                                <div class="fw-semibold">
+                                    {{ $teksDesil }} ({{ $labelDesil }})
+                                </div>
                             </div>
 
                             <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-camera-fill me-2"></i>FOTO LAMPIRAN RT</h6>
@@ -351,17 +315,19 @@
 
                             @if($item->berkas_observasi || $item->berita_acara_musdes)
                                 <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-folder-check me-2"></i>ARSIP DOKUMEN</h6>
+                                
                                 @if($item->berkas_observasi)
-                                    <div class="timeline-doc p-2 rounded mb-2" style="background-color: var(--warna-soft);">
+                                    <div class="timeline-doc p-2 rounded mb-2 bg-light border border-start-0">
                                         <strong><i class="bi bi-file-earmark-pdf text-danger"></i> Hasil Observasi</strong><br>
                                         <small class="text-dark">Catatan: {{ $item->catatan_observasi ?? '-' }}</small><br>
-                                        <a href="{{ asset('storage/'.$item->berkas_observasi) }}" target="_blank" class="btn btn-sm btn-primary mt-2">Lihat Berkas</a>
+                                        <a href="{{ asset('storage/'.$item->berkas_observasi) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Lihat Berkas</a>
                                     </div>
                                 @endif
+                                
                                 @if($item->berita_acara_musdes)
-                                    <div class="timeline-doc border-success bg-success bg-opacity-10 p-2 rounded">
+                                    <div class="timeline-doc p-2 rounded bg-light border border-start-0">
                                         <strong><i class="bi bi-file-earmark-pdf text-danger"></i> Berita Acara Musdes</strong><br>
-                                        <a href="{{ asset('storage/'.$item->berita_acara_musdes) }}" target="_blank" class="btn btn-sm btn-success mt-2">Lihat Berkas BA</a>
+                                        <a href="{{ asset('storage/'.$item->berita_acara_musdes) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Lihat Berkas BA</a>
                                     </div>
                                 @endif
                             @endif
@@ -378,71 +344,161 @@
                                 </form>
                             
                             @elseif($item->status_verifikasi_admin == 'Verifikasi Lapangan')
-                                <div class="alert alert-warning small border-0 mb-3 text-dark"><i class="bi bi-info-circle me-1"></i> Silakan isi form Sensus Ekonomi (PMT) berdasarkan hasil lapangan untuk penentuan Desil otomatis.</div>
+                                <div class="alert alert-warning small border-0 mb-3 text-dark"><i class="bi bi-info-circle me-1"></i> Form Sensus Ekonomi Terpadu (Kategori A, B, & C).</div>
+                                
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_observasi">
                                     
-                                    <div class="p-3 border rounded bg-white shadow-sm mb-3">
-                                        <h6 class="text-primary fw-bold border-bottom pb-2 mb-3" style="font-size: 0.8rem;">FORM INDIKATOR EKONOMI</h6>
+                                    <div class="accordion" id="accordionSensus{{ $item->id }}">
                                         
-                                        <div class="mb-2">
-                                            <label class="small fw-bold">Jenis Lantai Terluas <span class="text-danger">*</span></label>
-                                            <select name="jenis_lantai" class="form-select form-select-sm border-secondary" required>
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Tanah">Tanah / Bambu</option>
-                                                <option value="Semen">Semen / Papan Kualitas Rendah</option>
-                                                <option value="Keramik">Keramik / Granit / Marmer</option>
-                                            </select>
+                                        <div class="accordion-item mb-2 border-0 shadow-sm rounded">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriA{{ $item->id }}">
+                                                    A. Kondisi Tempat Tinggal
+                                                </button>
+                                            </h2>
+                                            <div id="kategoriA{{ $item->id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSensus{{ $item->id }}">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Luas Lantai <span class="text-danger">*</span></label>
+                                                        <select name="luas_lantai" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="< 8 m² per orang">< 8 m² per orang</option>
+                                                            <option value="> 8 m² per orang">> 8 m² per orang</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Jenis Lantai <span class="text-danger">*</span></label>
+                                                        <select name="jenis_lantai" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Tanah / Bambu">Tanah / Bambu</option>
+                                                            <option value="Semen / Plester">Semen / Plester</option>
+                                                            <option value="Keramik / Marmer">Keramik / Marmer</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Jenis Dinding <span class="text-danger">*</span></label>
+                                                        <select name="jenis_dinding" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Bilik Bambu / Kayu Murah">Bilik Bambu / Kayu Murah</option>
+                                                            <option value="Tembok Tanpa Plester">Tembok Tanpa Plester</option>
+                                                            <option value="Tembok Bagus / Semen">Tembok Bagus / Semen</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Sumber Air <span class="text-danger">*</span></label>
+                                                        <select name="sumber_air" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Sungai / Mata Air">Sungai / Mata Air</option>
+                                                            <option value="Sumur / Pompa">Sumur / Pompa</option>
+                                                            <option value="PDAM">PDAM</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Daya Listrik <span class="text-danger">*</span></label>
+                                                        <select name="daya_listrik" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="450 Watt (Subsidi)">450 Watt (Subsidi)</option>
+                                                            <option value="900 Watt (Subsidi)">900 Watt (Subsidi)</option>
+                                                            <option value="900 Watt (Non-Subsidi) / 1300+">900 Watt (Non-Subsidi) / 1300+</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label class="small fw-bold">Jenis Dinding Terluas <span class="text-danger">*</span></label>
-                                            <select name="jenis_dinding" class="form-select form-select-sm border-secondary" required>
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Bambu">Bambu / Rumbia</option>
-                                                <option value="Kayu">Kayu Kualitas Rendah</option>
-                                                <option value="Tembok">Tembok / Beton</option>
-                                            </select>
+
+                                        <div class="accordion-item mb-2 border-0 shadow-sm rounded">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriB{{ $item->id }}">
+                                                    B. Kepemilikan Aset
+                                                </button>
+                                            </h2>
+                                            <div id="kategoriB{{ $item->id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSensus{{ $item->id }}">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Kendaraan <span class="text-danger">*</span></label>
+                                                        <select name="kendaraan" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Tidak punya">Tidak punya</option>
+                                                            <option value="Sepeda / 1 Motor Butut">Sepeda / 1 Motor Butut</option>
+                                                            <option value="1 Motor Baru (Kredit/Lunas)">1 Motor Baru (Kredit/Lunas)</option>
+                                                            <option value="Mobil">Mobil</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Barang Elektronik <span class="text-danger">*</span></label>
+                                                        <select name="elektronik" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Tidak ada Kulkas/TV">Tidak ada Kulkas/TV</option>
+                                                            <option value="Ada Kulkas / TV Tabung">Ada Kulkas / TV Tabung</option>
+                                                            <option value="Ada AC / TV Layar Datar Besar">Ada AC / TV Layar Datar Besar</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Ternak/Lahan <span class="text-danger">*</span></label>
+                                                        <select name="ternak_lahan" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Tidak punya">Tidak punya</option>
+                                                            <option value="Punya ternak kambing/sapi">Punya ternak kambing/sapi</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label class="small fw-bold">Daya Listrik <span class="text-danger">*</span></label>
-                                            <select name="daya_listrik" class="form-select form-select-sm border-secondary" required>
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Tidak Ada">Tidak Ada Listrik</option>
-                                                <option value="450W">Listrik 450 Watt</option>
-                                                <option value="900W">Listrik >= 900 Watt</option>
-                                            </select>
+
+                                        <div class="accordion-item mb-3 border-0 shadow-sm rounded">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriC{{ $item->id }}">
+                                                    C. Sosial Ekonomi KK
+                                                </button>
+                                            </h2>
+                                            <div id="kategoriC{{ $item->id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSensus{{ $item->id }}">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Pendidikan Kepala Keluarga <span class="text-danger">*</span></label>
+                                                        <select name="pendidikan_kk" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="SD / Tidak Sekolah">SD / Tidak Sekolah</option>
+                                                            <option value="SMP/SMA">SMP/SMA</option>
+                                                            <option value="Kuliah (D3/S1)">Kuliah (D3/S1)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Pekerjaan <span class="text-danger">*</span></label>
+                                                        <select name="pekerjaan" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Buruh Tani / Serabutan">Buruh Tani / Serabutan</option>
+                                                            <option value="Karyawan Swasta / Pedagang Kecil">Karyawan Swasta / Pedagang Kecil</option>
+                                                            <option value="PNS / TNI / POLRI">PNS / TNI / POLRI</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="small fw-bold">Jumlah Tanggungan <span class="text-danger">*</span></label>
+                                                        <select name="jml_tanggungan" class="form-select form-select-sm" required>
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="Banyak (> 3 anak/lansia)">Banyak (> 3 anak/lansia)</option>
+                                                            <option value="Sedikit (1-2 orang)">Sedikit (1-2 orang)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label class="small fw-bold">Sumber Air Minum <span class="text-danger">*</span></label>
-                                            <select name="sumber_air" class="form-select form-select-sm border-secondary" required>
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Mata Air / Sumur Terbuka">Mata Air / Sumur Tak Terlindung</option>
-                                                <option value="Leding / Sumur Bor">Air Leding / Sumur Bor Tertutup</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="small fw-bold">Kepemilikan Aset Berharga <span class="text-danger">*</span></label>
-                                            <select name="kepemilikan_aset" class="form-select form-select-sm border-secondary" required>
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Tidak Ada">Tidak Memiliki Aset Apapun</option>
-                                                <option value="Motor/Kulkas">Memiliki Kendaraan Bermotor / Elektronik Besar</option>
-                                            </select>
-                                        </div>
+
                                     </div>
 
                                     <div class="mb-2">
-                                        <label class="small fw-bold">Unggah Bukti Observasi (Opsional)</label>
+                                        <label class="small fw-bold">Unggah Bukti Observasi Lapangan (Opsional)</label>
                                         <input type="file" name="berkas_observasi" class="form-control form-control-sm border-secondary" accept=".pdf,.png,.jpg,.jpeg">
                                     </div>
                                     <div class="mb-3">
                                         <label class="small fw-bold">Catatan Petugas</label>
                                         <textarea name="catatan_observasi" class="form-control form-control-sm border-secondary" rows="2" placeholder="Tuliskan jika ada kendala di lapangan..."></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm"><i class="bi bi-calculator me-2"></i>Simpan Data & Hitung Desil</button>
+                                    <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm"><i class="bi bi-calculator me-2"></i>Simpan Data & Hitung Skor Otomatis</button>
                                 </form>
 
                             @elseif($item->status_verifikasi_admin == 'Menunggu Musdes')
-                                <div class="alert alert-info small border-0 text-dark">Observasi dan Perhitungan PMT Selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
+                                <div class="alert alert-info small border-0 text-dark">Observasi dan Perhitungan Desil Selesai. Unggah Berita Acara Musdes untuk membuka kunci Keputusan Akhir.</div>
                                 <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_musdes">
                                     <div class="mb-3">
@@ -458,7 +514,7 @@
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="final">
                                     
                                     <div class="mb-3">
-                                        <label class="small fw-bold">Jika Ditolak, beri alasan:</label>
+                                        <label class="small fw-bold">Jika Ditolak, beri alasan (Opsional):</label>
                                         <textarea name="keterangan_ditolak" class="form-control form-control-sm border-secondary" rows="2" placeholder="Isi jika forum Musdes memutuskan menolak data ini..."></textarea>
                                     </div>
 

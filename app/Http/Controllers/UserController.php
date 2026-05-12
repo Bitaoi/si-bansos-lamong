@@ -53,7 +53,27 @@ class UserController extends Controller
         return redirect()->route('admin.rt.index')->with('success', 'Akun Ketua RT berhasil ditambahkan!');
     }
 
-    // 4. Hapus Akun RT
+    // 4. Edit Akun RT (BY RT)
+    public function updateProfile(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+
+        $request->validate([
+            'username' => 'required|unique:users,username,'.$user->id,
+            'password' => 'nullable|min:5|confirmed'
+        ]);
+
+        $user->username = $request->username;
+        if($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+        return back()->with('success', 'Profil dan kata sandi anda berhasil diperbarui!');
+    }
+
+
+    // 5. Hapus Akun RT
     public function destroyRT($id)
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }

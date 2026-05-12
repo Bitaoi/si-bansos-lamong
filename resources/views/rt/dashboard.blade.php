@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard RT - SI Bansos</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
+        /* 1. STRUKTUR PALET WARNA (Sama persis dengan Admin) */
         :root {
-            --warna-paling-gelap: #2C3E50; /* Biru gelap untuk teks & Sidebar */
-            --warna-utama: #7D88DC; /* Warna tombol/elemen utama */
-            --warna-soft: #BBD0EC; /* Warna aksen/background muda */
-            --warna-background: #FEFCFB; /* Warna latar halaman */
+            --warna-paling-gelap: #2C3E50; 
+            --warna-utama: #7D88DC; 
+            --warna-soft: #BBD0EC; 
+            --warna-background: #FEFCFB; 
         }
 
         body { 
             background-color: var(--warna-background) !important; 
             color: var(--warna-paling-gelap);
-            font-family: sans-serif; 
+            font-family: 'Poppins', sans-serif !important; 
         }
         
         /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
@@ -60,7 +62,8 @@
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(125, 136, 220, 0.15); }
         .icon-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
         
-        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid var(--warna-utama); }
+        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid var(--warna-utama); text-transform: uppercase; }
+        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; }
     </style>
 </head>
 <body>
@@ -91,7 +94,7 @@
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545;">
+                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545; border-radius: 8px;">
                             <i class="bi bi-box-arrow-right"></i> Keluar
                         </button>
                     </form>
@@ -108,6 +111,16 @@
                     <button class="btn btn-sm btn-danger"><i class="bi bi-box-arrow-right"></i></button>
                 </form>
             </div>
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div><strong>Gagal!</strong> Periksa kembali isian form Anda. (Pastikan username belum dipakai orang lain & konfirmasi password sesuai).</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
@@ -129,17 +142,20 @@
                 </div>
             @endif
 
-            <div class="card border-0 shadow-sm bg-primary text-white mb-4 rounded-4 overflow-hidden">
+            <div class="card border-0 shadow-sm bg-white mb-4 rounded-4 overflow-hidden" style="border-left: 5px solid var(--warna-utama) !important;">
                 <div class="card-body p-4 position-relative">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h2 class="fw-bold mb-1">Halo, Ketua {{ Auth::user()->wilayah_rt_rw ?? Auth::user()->username }}! 👋</h2>
-                            <p class="mb-0 opacity-75 fs-5">
+                            <h2 class="fw-bold text-dark mb-1">Halo, Ketua {{ Auth::user()->wilayah_rt_rw ?? Auth::user()->username }}! </h2>
+                            <p class="mb-3 text-muted fs-5">
                                 Selamat datang di Panel Pengelola Bantuan Sosial Desa Lamong.
                             </p>
+                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditProfil">
+                                <i class="bi bi-gear-fill me-2"></i> Pengaturan Akun
+                            </button>
                         </div>
                         <div class="col-md-4 text-end d-none d-md-block">
-                            <i class="bi bi-person-badge" style="font-size: 4rem; opacity: 0.2;"></i>
+                            <i class="bi bi-person-badge text-primary" style="font-size: 4rem; opacity: 0.2;"></i>
                         </div>
                     </div>
                 </div>
@@ -201,7 +217,7 @@
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid var(--warna-soft) !important;">
-                <div class="card-header bg-white py-3 border-bottom">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>Status Pengajuan Terkini</h6>
                 </div>
                 <div class="card-body p-0">
@@ -221,7 +237,7 @@
                                     <td class="ps-4 small text-muted">
                                         {{ $item->tgl_pengajuan->format('d M Y') }}
                                     </td>
-                                    <td class="fw-bold">{{ $item->warga->nama_lengkap ?? 'Data Warga Terhapus' }}</td>
+                                    <td class="fw-bold text-dark">{{ $item->warga->nama_lengkap ?? 'Data Warga Terhapus' }}</td>
                                     <td>
                                         <span class="badge" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
                                             {{ $item->jenisBansos->nama_bansos ?? '-' }}
@@ -239,7 +255,10 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada pengajuan.</td>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                        Belum ada pengajuan.
+                                    </td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -291,6 +310,46 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditProfil" tabindex="-1" aria-labelledby="modalEditProfilLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 text-dark">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="fw-bold" id="modalEditProfilLabel"><i class="bi bi-person-gear me-2 text-primary"></i>Pengaturan Akun</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('rt.profil.update') }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Username Login</label>
+                        <input type="text" name="username" class="form-control form-control-lg bg-light" value="{{ Auth::user()->username }}" required>
+                    </div>
+                    
+                    <hr class="my-4 opacity-25">
+                    
+                    <div class="alert alert-warning border-0 p-3 small mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i> Isi bagian di bawah ini <b>hanya</b> jika Anda ingin mengganti kata sandi. Kosongkan jika tidak ada perubahan sandi.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Password Baru</label>
+                        <input type="password" name="password" class="form-control" placeholder="Masukkan sandi baru (min. 5 karakter)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Konfirmasi Password Baru</label>
+                        <input type="password" name="password_confirmation" class="form-control" placeholder="Ketik ulang sandi baru">
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

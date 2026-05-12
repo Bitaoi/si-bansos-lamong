@@ -164,7 +164,7 @@
                             <div class="col-md-3">
                                 <label class="form-label fw-bold">Foto Rumah (Dalam)</label>
                                 <input type="file" name="foto_rumah_dalam" class="form-control border-secondary" accept="image/*">
-                                <div class="form-text small">Wajib diisi. Format JPG/PNG.</div>
+                                <div class="form-text small">Tidak wajib diisi. Format JPG/PNG.</div>
                             </div>
                         </div>
                     </div>

@@ -3,14 +3,87 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class SurveiEkonomi extends Model {
+class SurveiEkonomi extends Model 
+{
     protected $fillable = [
-        'pengajuan_id', 'jenis_lantai', 'jenis_dinding', 
-        'sumber_air', 'daya_listrik', 'kepemilikan_aset', 
+        'pengajuan_id', 
+        'luas_lantai', 'jenis_lantai', 'jenis_dinding', 'sumber_air', 'daya_listrik', 
+        'kendaraan', 'elektronik', 'ternak_lahan', 
+        'pendidikan_kk', 'pekerjaan', 'jml_tanggungan', 
         'total_skor', 'desil_hasil'
     ];
 
     public function pengajuan() {
         return $this->belongsTo(Pengajuan::class);
+    }
+
+    /**
+     * Algoritma Perhitungan Desil (Metode Ambang Batas / Skor Real-time)
+     */
+    public static function kalkulasiDesil($data)
+    {
+        $skor = 0;
+
+        // A. KONDISI TEMPAT TINGGAL
+        $skor += ($data['luas_lantai'] == '< 8 m² per orang') ? 0 : 10;
+        
+        if ($data['jenis_lantai'] == 'Tanah / Bambu') $skor += 0;
+        elseif ($data['jenis_lantai'] == 'Semen / Plester') $skor += 5;
+        elseif ($data['jenis_lantai'] == 'Keramik / Marmer') $skor += 15;
+
+        if ($data['jenis_dinding'] == 'Bilik Bambu / Kayu Murah') $skor += 0;
+        elseif ($data['jenis_dinding'] == 'Tembok Tanpa Plester') $skor += 5;
+        elseif ($data['jenis_dinding'] == 'Tembok Bagus / Semen') $skor += 10;
+
+        if ($data['sumber_air'] == 'Sungai / Mata Air') $skor += 0;
+        elseif ($data['sumber_air'] == 'Sumur / Pompa') $skor += 5;
+        elseif ($data['sumber_air'] == 'PDAM') $skor += 10;
+
+        if ($data['daya_listrik'] == '450 Watt (Subsidi)') $skor += 0;
+        elseif ($data['daya_listrik'] == '900 Watt (Subsidi)') $skor += 5;
+        elseif ($data['daya_listrik'] == '900 Watt (Non-Subsidi) / 1300+') $skor += 20;
+
+        // B. KEPEMILIKAN ASET
+        if ($data['kendaraan'] == 'Tidak punya') $skor += 0;
+        elseif ($data['kendaraan'] == 'Sepeda / 1 Motor Butut') $skor += 5;
+        elseif ($data['kendaraan'] == '1 Motor Baru (Kredit/Lunas)') $skor += 15;
+        elseif ($data['kendaraan'] == 'Mobil') $skor += 50; // Langsung tinggi
+
+        if ($data['elektronik'] == 'Tidak ada Kulkas/TV') $skor += 0;
+        elseif ($data['elektronik'] == 'Ada Kulkas / TV Tabung') $skor += 5;
+        elseif ($data['elektronik'] == 'Ada AC / TV Layar Datar Besar') $skor += 15;
+
+        if ($data['ternak_lahan'] == 'Tidak punya') $skor += 0;
+        elseif ($data['ternak_lahan'] == 'Punya ternak kambing/sapi') $skor += 10;
+
+        // C. SOSIAL EKONOMI KK
+        if ($data['pendidikan_kk'] == 'SD / Tidak Sekolah') $skor += 0;
+        elseif ($data['pendidikan_kk'] == 'SMP/SMA') $skor += 5;
+        elseif ($data['pendidikan_kk'] == 'Kuliah (D3/S1)') $skor += 15;
+
+        if ($data['pekerjaan'] == 'Buruh Tani / Serabutan') $skor += 0;
+        elseif ($data['pekerjaan'] == 'Karyawan Swasta / Pedagang Kecil') $skor += 10;
+        elseif ($data['pekerjaan'] == 'PNS / TNI / POLRI') $skor += 50;
+
+        if ($data['jml_tanggungan'] == 'Banyak (> 3 anak/lansia)') $skor -= 5;
+        elseif ($data['jml_tanggungan'] == 'Sedikit (1-2 orang)') $skor += 0;
+
+        // PENENTUAN DESIL (Cara B: Ambang Batas Nilai)
+        if ($skor <= 25) {
+            $desil = 1; // Sangat Miskin
+        } elseif ($skor <= 40) {
+            $desil = 2; // Miskin
+        } elseif ($skor <= 55) {
+            $desil = 3; // Hampir Miskin
+        } elseif ($skor <= 70) {
+            $desil = 4; // Rentan Miskin
+        } else {
+            $desil = 5; // Desil 5 ke atas (Mampu / Tidak Layak)
+        }
+
+        return [
+            'total_skor' => $skor,
+            'desil' => $desil
+        ];
     }
 }

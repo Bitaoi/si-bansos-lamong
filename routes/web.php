@@ -88,6 +88,9 @@ Route::middleware(['auth'])->group(function () {
     // Form Pengajuan Bantuan
     Route::get('/rt/pengajuan/create', [PengajuanController::class, 'create'])->name('pengajuan.create');
     Route::post('/rt/pengajuan/store', [PengajuanController::class, 'store'])->name('pengajuan.store');
+
+    // Update Profil Akun
+    Route::put('rt/profil/update', [UserController::class, 'editProfile'])->name('rt.profil.update');
     
     // API Internal untuk Cari Warga (AJAX)
     Route::get('/rt/api/warga', [PengajuanController::class, 'searchWarga'])->name('api.warga.search');

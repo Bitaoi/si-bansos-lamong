@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* 1. STRUKTUR PALET WARNA (Sama persis dengan Admin) */
+        /* 1. STRUKTUR PALET WARNA */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -229,6 +229,7 @@
                                     <th>Nama Warga</th>
                                     <th>Bansos</th>
                                     <th>Status Verifikasi</th>
+                                    <th class="text-end pe-4">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -252,10 +253,23 @@
                                             <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Ditolak</span>
                                         @endif
                                     </td>
+                                    <td class="text-end pe-4">
+                                        @if($item->status_verifikasi_admin == 'Proses')
+                                            <form action="{{ route('pengajuan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pengajuan atas nama {{ $item->warga->nama_lengkap ?? 'warga ini' }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Batalkan Pengajuan">
+                                                    <i class="bi bi-x-circle-fill me-1"></i> Batal
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-muted small"><i class="bi bi-lock-fill text-secondary"></i> Terkunci</span>
+                                        @endif
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
+                                    <td colspan="5" class="text-center py-4 text-muted">
                                         <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                         Belum ada pengajuan.
                                     </td>
@@ -267,18 +281,20 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4" style="border: 1px solid var(--warna-soft) !important;">
+            @php
+                $tanggalSekarang = (int) now()->format('d');
+                // Mengecek apakah hari ini <= 8 (Masa Buka Pengajuan)
+                $isBuka = $tanggalSekarang <= 8; 
+            @endphp
+
+            <div class="card border-0 shadow-sm rounded-4 mb-5" style="border: 1px solid var(--warna-soft) !important;">
                 <div class="card-header bg-white py-3 border-bottom">
                     <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-lightning-charge-fill me-2"></i>Aksi Cepat</h6>
                 </div>
+                
                 <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            @php
-                                $tanggalSekarang = (int) now()->format('d');
-                                $isBuka = $tanggalSekarang <= 8;
-                            @endphp
-
                             @if($isBuka)
                                 <a href="{{ route('pengajuan.create') }}" class="btn btn-outline-primary w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
                                     <i class="bi bi-plus-circle-fill fs-4 me-3"></i> 
@@ -288,13 +304,13 @@
                                     </div>
                                 </a>
                             @else
-                                <button class="btn btn-outline-secondary w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center" disabled style="cursor: not-allowed; background-color: var(--warna-background);">
-                                    <i class="bi bi-lock-fill fs-4 me-3 text-danger"></i> 
+                                <div class="w-100 py-3 px-4 h-100 d-flex align-items-center bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-3" style="cursor: not-allowed;">
+                                    <i class="bi bi-door-closed-fill fs-3 text-danger me-3"></i> 
                                     <div>
-                                        <div class="text-secondary">Pengajuan Ditutup</div>
-                                        <small class="fw-normal text-danger">Akan dibuka kembali Tgl 1 bulan depan.</small>
+                                        <div class="fw-bold text-danger">Pengajuan Ditutup</div>
+                                        <small class="fw-normal text-danger" style="opacity: 0.8;">Akan dibuka kembali Tgl 1 bulan depan.</small>
                                     </div>
-                                </button>
+                                </div>
                             @endif
                         </div>
                         <div class="col-md-6">

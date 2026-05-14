@@ -186,26 +186,28 @@ class WargaController extends Controller
     // =================================================================
     // 9. DAFTAR WARGA KHUSUS RT (Filter Otomatis Wilayah)
     // =================================================================
-    public function indexRT()
+    public function indexRt(Request $request)
     {
         $user = Auth::user();
-        if ($user->role !== 'RT') { abort(403); }
-
-        // 1. Pecah format wilayah (Contoh: "001/005" menjadi RT "001" dan RW "005")
+        // Asumsi wilayah RT/RW disimpan dengan format "01/02"
         $wilayah = explode('/', $user->wilayah_rt_rw);
-        $rt = $wilayah[0] ?? '';
-        $rw = $wilayah[1] ?? '';
+        $rt = $wilayah[0] ?? '00';
+        $rw = $wilayah[1] ?? '00';
 
-        // 2. Query Filter: Hanya ambil warga yang RT dan RW-nya cocok
-        // (Bisa juga ditambahkan toleransi jika format Excel warga berupa integer seperti "1" alih-alih "001")
-        $wargas = Warga::where(function($query) use ($rt) {
-                            $query->where('rt', $rt)->orWhere('rt', (int)$rt);
-                       })
-                       ->where(function($query) use ($rw) {
-                            $query->where('rw', $rw)->orWhere('rw', (int)$rw);
-                       })
-                       ->latest()
-                       ->paginate(10);
+        // Query dasar (Hanya ambil warga di RT tersebut)
+        $query = Warga::where('rt', $rt)->where('rw', $rw);
+
+        // --- TAMBAHAN LOGIKA PENCARIAN ---
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nik', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_lengkap', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Jangan lupa withQueryString() agar pagination tetap ingat kata kuncinya!
+        $wargas = $query->paginate(10)->withQueryString(); 
 
         return view('rt.warga.index', compact('wargas', 'rt', 'rw'));
     }

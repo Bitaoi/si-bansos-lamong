@@ -48,7 +48,6 @@
             box-shadow: 0 20px 40px rgba(125, 136, 220, 0.15);
         }
 
-        /* GAYA GLASSMORPHISM BERWARNA (UNTUK JADWAL) */
         .glass-card-colored {
             background: rgba(255, 255, 255, 0.4); 
             backdrop-filter: blur(15px); 
@@ -153,16 +152,18 @@
 
     <nav class="navbar navbar-expand-lg navbar-glass sticky-top">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ asset('img/logo-desa.png') }}" alt="Logo Desa" width="120" height="80" class="me-2">
-                DESA LAMONG
+            <a class="navbar-brand d-flex align-items-center m-0 p-0" href="#">
+                <img src="{{ asset('img/logo-desa.png') }}" alt="Logo Desa" 
+                     onerror="this.onerror=null; this.outerHTML='<div class=\'bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm\' style=\'width: 45px; height: 45px; margin-right: 15px;\'><i class=\'bi bi-buildings-fill fs-5\'></i></div>';" 
+                     style="width: 45px; height: 45px; object-fit: contain; margin-right: 15px;">
+                <span class="fs-4 fw-bold text-primary" style="letter-spacing: 0.5px;">DESA LAMONG</span>
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <i class="bi bi-list fs-1 text-primary"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="#statistik">Galeri</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#galeri">Galeri</a></li>
                     <li class="nav-item"><a class="nav-link" href="#transparansi">Statistik</a></li>
                     <li class="nav-item"><a class="nav-link" href="#jadwal-bansos">Jadwal</a></li>
                     <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
@@ -259,7 +260,6 @@
             <div class="col-12">
                 <div class="d-flex align-items-center justify-content-between mb-4 px-2">
                     <h3 class="fw-bold text-dark mb-0"><i class="bi bi-images text-primary me-2"></i> Potret Desa Lamong</h3>
-                    <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">Dokumentasi Resmi</span>
                 </div>
                 <div class="gallery-container glass-card border-0 p-2">
                     <div id="carouselGaleriLengkap" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
@@ -287,16 +287,24 @@
             <div class="col-12 mb-2 px-3">
                 <h3 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i> Data & Transparansi</h3>
             </div>
-            <div class="col-lg-6">
-                <div class="glass-card p-4 h-100">
-                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Tren Pengajuan Bantuan (Tahunan)</h5>
-                    <div style="position: relative; height: 300px;"><canvas id="trenChart"></canvas></div>
-                </div>
-            </div>
+            
             <div class="col-lg-6">
                 <div class="glass-card p-4 h-100">
                     <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Sebaran Penerima Bansos</h5>
                     <div style="position: relative; height: 300px;"><canvas id="bansosChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-bar-chart-steps text-primary me-2"></i>Diterima vs Ditolak</h5>
+                    <div style="position: relative; height: 300px;"><canvas id="compareChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Tren Pengajuan Bantuan (Tahunan)</h5>
+                    <div style="position: relative; height: 350px;"><canvas id="trenChart"></canvas></div>
                 </div>
             </div>
             
@@ -320,6 +328,7 @@
     <section id="jadwal-bansos" class="py-5 mt-4 position-relative" style="background-color: var(--warna-background);">
         <div class="container py-4 position-relative" style="z-index: 1;">
             <div class="text-center mb-5 fade-in-up">
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 mb-2 fw-bold">Timeframe</span>
                 <h2 class="fw-bold text-dark">Siklus Tahapan Bansos Bulanan</h2>
                 <div class="badge bg-white text-dark fs-6 px-4 py-2 mt-2 shadow-sm rounded-pill border">
                     <i class="bi bi-calendar-event text-primary me-2"></i> Hari ini: Tanggal {{ $hariIni ?? date('d') }}
@@ -337,7 +346,8 @@
                             
                             <div class="color-tint" style="background-color: {{ $warnaAsli }};"></div>
 
-                            <div class="card-body text-center p-4">
+                            <div class="card-body text-center p-4 position-relative">
+
                                 @if($isActive)
                                     <span class="badge mb-3 shadow-sm rounded-pill px-3 py-2" style="background-color: {{ $warnaAsli }}; color: white;">
                                         <i class="bi bi-broadcast pulse me-1"></i> Aktif Sekarang
@@ -346,7 +356,7 @@
                                     <div class="mb-5"></div>
                                 @endif
 
-                                <h5 class="fw-bold text-dark mb-3">{{ $item->nama_tahapan }}</h5>
+                                <h5 class="fw-bold text-dark mb-3 mt-2">{{ $item->nama_tahapan }}</h5>
                                 
                                 <h2 class="display-5 fw-bold my-3" style="color: {{ $warnaAsli }}; letter-spacing: -1px;">
                                     Tgl {{ $item->hari_mulai }}-{{ $item->hari_selesai > 30 ? 'Akhir' : $item->hari_selesai }}
@@ -362,7 +372,7 @@
     </section>
 
     <footer class="py-4 bg-white text-center border-top">
-        <div class="container"><small class="text-muted fw-bold">&copy; 2026 Pemerintah Desa Lamong. <span class="fw-normal">Sistem Informasi Bantuan Sosial.</span></small></div>
+        <div class="container"><small class="text-muted fw-bold">&copy; {{ date('Y') }} Pemerintah Desa Lamong. <span class="fw-normal">Sistem Informasi Bantuan Sosial.</span></small></div>
     </footer>
 
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
@@ -394,12 +404,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Ambil data (Aman dari null)
-            const dtLabelTahun  = {!! json_encode($labelTahun ?? ['2023', '2024', '2025', '2026']) !!};
-            const dtDataTahun   = {!! json_encode($dataTahun ?? [45, 120, 150, 210]) !!};
+            // DATA GRAFIK
+            const dtLabelTahun  = {!! json_encode($labelTahun ?? [date('Y')]) !!};
+            const dtDataTahun   = {!! json_encode($dataTahun ?? [0]) !!};
             const dtLabelBansos = {!! json_encode($labelBansos ?? []) !!};
             const dtDataBansos  = {!! json_encode($dataBansos ?? []) !!};
+            
+            const dtLabelPerbandingan = {!! json_encode($labelPerbandingan ?? []) !!};
+            const dtDataDiterima      = {!! json_encode($dataDiterima ?? []) !!};
+            const dtDataDitolak       = {!! json_encode($dataDitolak ?? []) !!};
 
+            // 1. TREN TAHUNAN (Bawah)
             const ctxT = document.getElementById('trenChart');
             if(ctxT) {
                 new Chart(ctxT.getContext('2d'), {
@@ -418,6 +433,7 @@
                 });
             }
 
+            // 2. SEBARAN BANSOS (Atas Kiri)
             const ctxB = document.getElementById('bansosChart');
             if(ctxB) {
                 const bgColors = ['rgba(125, 136, 220, 0.85)', 'rgba(40, 167, 69, 0.85)', 'rgba(255, 193, 7, 0.85)', 'rgba(220, 53, 69, 0.85)', 'rgba(23, 162, 184, 0.85)', 'rgba(253, 126, 20, 0.85)'];
@@ -437,6 +453,41 @@
                         }]
                     },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+
+            // 3. DITERIMA VS DITOLAK (Atas Kanan)
+            const ctxC = document.getElementById('compareChart');
+            if(ctxC) {
+                new Chart(ctxC.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: dtLabelPerbandingan.length ? dtLabelPerbandingan : ['Data Kosong'],
+                        datasets: [
+                            {
+                                label: 'Disetujui',
+                                data: dtDataDiterima.length ? dtDataDiterima : [0],
+                                backgroundColor: 'rgba(40, 167, 69, 0.85)',
+                                borderColor: '#28a745',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Ditolak',
+                                data: dtDataDitolak.length ? dtDataDitolak : [0],
+                                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                                borderColor: '#dc3545',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: true, position: 'bottom' } },
+                        scales: { y: { beginAtZero: true } }
+                    }
                 });
             }
         });

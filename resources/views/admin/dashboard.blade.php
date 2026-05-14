@@ -12,16 +12,16 @@
     <style>
         /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
         :root {
-            --warna-paling-gelap: #2C3E50; /* Biru sangat gelap untuk teks & Sidebar agar jelas */
-            --warna-utama: #7D88DC; /* Warna tengah dari paletmu untuk tombol utama */
-            --warna-soft: #BBD0EC; /* Warna pastel dari paletmu untuk aksen/border */
-            --warna-background: #FEFCFB; /* Warna putih pucat dari paletmu */
+            --warna-paling-gelap: #2C3E50; 
+            --warna-utama: #7D88DC; 
+            --warna-soft: #BBD0EC; 
+            --warna-background: #FEFCFB; 
         }
 
         body { 
             background-color: var(--warna-background) !important; 
             color: var(--warna-paling-gelap);
-            font-family: 'Poppins', sans-serif !important; /* Diubah ke Poppins */
+            font-family: 'Poppins', sans-serif !important; 
         }
 
         /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
@@ -148,7 +148,7 @@
                                     <i class="bi bi-people-fill"></i>
                                 </div>
                                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Penduduk</h6>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $totalWarga }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $totalWarga ?? 0 }}</h3>
                             </div>
                         </div>
                     </div>
@@ -162,7 +162,7 @@
                                     <i class="bi bi-send-fill"></i>
                                 </div>
                                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Total Usulan</h6>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $totalPengajuan }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $totalPengajuan ?? 0 }}</h3>
                             </div>
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                                     <i class="bi bi-hourglass-split"></i>
                                 </div>
                                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Verifikasi</h6>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $menungguVerifikasi }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $menungguVerifikasi ?? 0 }}</h3>
                             </div>
                         </div>
                     </div>
@@ -190,24 +190,26 @@
                                     <i class="bi bi-check-circle-fill"></i>
                                 </div>
                                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Siap Salur</h6>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $penerimaLayak }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $penerimaLayak ?? 0 }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
 
                  <div class="col-12 col-md-6 col-lg-4 col-xl-4">
-                    <div class="card stat-card shadow-sm h-100" style="background-color: var(--warna-utama); color: white;">
-                        <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="small mb-1 text-uppercase fw-bold opacity-75">Sisa Kuota Global</h6>
-                                <h2 class="fw-bold mb-0 text-white">{{ $sisaKuota }}</h2>
-                            </div>
-                            <div class="icon-circle bg-white" style="color: var(--warna-utama);">
-                                <i class="bi bi-pie-chart-fill"></i>
+                    <a href="{{ route('admin.kuota.index') }}" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm h-100" style="background-color: var(--warna-utama); color: white; cursor: pointer;">
+                            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="small mb-1 text-uppercase fw-bold opacity-75">Sisa Kuota Global <i class="bi bi-box-arrow-up-right ms-1"></i></h6>
+                                    <h2 class="fw-bold mb-0 text-white">{{ $sisaKuota ?? 0 }}</h2>
+                                </div>
+                                <div class="icon-circle bg-white shadow" style="color: var(--warna-utama);">
+                                    <i class="bi bi-pie-chart-fill"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -229,7 +231,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($pengajuanTerbaru as $item)
+                                @forelse($pengajuanTerbaru ?? [] as $item)
                                 <tr>
                                     <td class="ps-4 text-muted small">{{ \Carbon\Carbon::parse($item->tgl_pengajuan)->format('d M Y') }}</td>
                                     <td class="fw-bold">{{ $item->warga->nama_lengkap ?? '-' }}</td>
@@ -266,7 +268,7 @@
             </div>
 
         </div>
-        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

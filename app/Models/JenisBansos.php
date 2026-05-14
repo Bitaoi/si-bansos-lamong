@@ -17,12 +17,15 @@ class JenisBansos extends Model
         'sumber_dana',
         'deskripsi_bantuan',
         'bentuk_penyerahan',
+        'bentuk_bantuan',
         'nominal', 
         'frekuensi', 
         'tahun_anggaran',
         'kuota',
         'deskripsi_kuota', 
-        'kriteria_desil'   
+        'kriteria_penerima',
+        'kriteria_desil',
+        'kriteria_lainnya'   
     ];
 
     // Beri tahu Laravel untuk mengubah JSON dari DB menjadi Array otomatis
@@ -35,4 +38,12 @@ class JenisBansos extends Model
     {
         return $this->hasMany(Pengajuan::class, 'id_bansos');
     }
+    // Fungsi untuk menghitung sisa kuota secara otomatis
+    public function getSisaKuotaAttribute()
+    {
+        // Hitung pengajuan yang sudah disetujui (Layak)
+        $terpakai = $this->pengajuan()->where('status_verifikasi_admin', 'Layak')->count();
+        return $this->kuota - $terpakai;
+    }
+    
 }

@@ -117,17 +117,31 @@
                         <h5 class="form-section-title"><span class="step-number">2</span> Parameter Pengajuan</h5>
                         
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">Jenis Bantuan <span class="text-danger">*</span></label>
                                 <select name="id_bansos" class="form-select border-secondary" required>
                                     <option value="">-- Pilih Program --</option>
                                     @foreach($bansos as $b)
-                                        <option value="{{ $b->id }}">{{ $b->nama_bansos }}</option>
+                                        @php
+                                             $sisa = $b->sisa_kuota; // Memanggil fungsi yang kita buat di Model
+                                             $isFull = $sisa <= 0;
+                                        @endphp
+                                        <option value="{{ $b->id }}" {{ $isFull ? 'disabled' : '' }}>
+                                            {{ $b->nama_bansos }} 
+                                            (Sisa Kuota: {{ $isFull ? 'PENUH' : $sisa . ' Orang' }})
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Estimasi Penghasilan (Per Bulan) <span class="text-danger">*</span></label>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Tanggal Pengajuan <span class="text-danger">*</span></label>
+                                <input type="date" name="tgl_pengajuan" class="form-control border-secondary" required value="{{ date('Y-m-d') }}">
+                                <div class="form-text small">Atur mundur tanggal untuk mengisi data lama.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Estimasi Penghasilan <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-secondary">Rp</span>
                                     <input type="number" name="penghasilan" class="form-control border-secondary" placeholder="0" required>

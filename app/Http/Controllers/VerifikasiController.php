@@ -14,6 +14,7 @@ class VerifikasiController extends Controller
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
         $pengajuans = Pengajuan::with(['warga', 'jenisBansos', 'pengusul', 'surveiEkonomi'])
+                        ->orderByRaw("FIELD(status_verifikasi_admin, 'Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan', 'Layak', 'Tidak Layak')")
                         ->orderBy('created_at', 'desc')
                         ->paginate(10);
 

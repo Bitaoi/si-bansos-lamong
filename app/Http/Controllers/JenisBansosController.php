@@ -29,7 +29,6 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        // Validasi disesuaikan dengan name="" di form create.blade.php yang baru
         $request->validate([
             'nama_bansos'       => 'required|string|max:100',
             'kode_bansos'       => 'required|string|max:50',
@@ -38,13 +37,16 @@ class JenisBansosController extends Controller
             'nominal'           => 'required|string',
             'frekuensi'         => 'required|string',
             'tahun_anggaran'    => 'required|numeric',
-            // Field deskripsi_bantuan, kuota, kriteria_lainnya boleh kosong (nullable)
         ]);
 
         $data = $request->all();
         
-        // Handle checkbox Desil (Karena checkbox tidak mengirim data jika tidak dicentang)
+        // Handle checkbox Desil
         $data['kriteria_desil'] = $request->kriteria_desil ?? [];
+        
+        // MENGAKALI ERROR 1364 (Kolom-kolom lama yang masih Wajib Isi di database)
+        $data['kriteria_penerima'] = '-'; 
+        $data['bentuk_bantuan'] = '-'; 
 
         // Simpan
         JenisBansos::create($data);
@@ -57,7 +59,6 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
         
-        // Variabel diubah menjadi $jenisBansos agar sinkron dengan edit.blade.php
         $jenisBansos = JenisBansos::findOrFail($id);
         return view('admin.jenis_bansos.edit', compact('jenisBansos'));
     }
@@ -75,6 +76,10 @@ class JenisBansosController extends Controller
             'nominal'           => 'required|string',
             'frekuensi'         => 'required|string',
             'tahun_anggaran'    => 'required|numeric',
+            'deskripsi_bantuan' => 'nullable|string',
+            'kriteria_lainnya'  => 'nullable|string',
+            'deskripsi_kuota'   => 'nullable|string',
+            'kuota'             => 'nullable|numeric',
         ]);
 
         $jenisBansos = JenisBansos::findOrFail($id);
@@ -83,6 +88,10 @@ class JenisBansosController extends Controller
         
         // Handle checkbox Desil update
         $data['kriteria_desil'] = $request->kriteria_desil ?? [];
+        
+        // MENGAKALI ERROR 1364 UNTUK UPDATE
+        $data['kriteria_penerima'] = '-';
+        $data['bentuk_bantuan'] = '-';
 
         $jenisBansos->update($data);
 

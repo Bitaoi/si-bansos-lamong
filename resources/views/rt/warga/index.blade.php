@@ -72,7 +72,7 @@
         
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class="bi bi-building me-2"></i>MENU RT
+                <i class="bi bi-buildings-fill me-2"></i>MENU RT
             </h5>
             <ul class="nav flex-column">
                 <li class="nav-item">
@@ -111,7 +111,7 @@
                 </form>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h4 class="fw-bold mb-1 text-dark">Daftar Warga RT {{ $rt }} / RW {{ $rw }}</h4>
                     <p class="text-muted mb-0">Total {{ $wargas->total() }} penduduk terdaftar di wilayah Anda.</p>
@@ -119,6 +119,25 @@
                 <a href="{{ route('rt.dashboard') }}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
                     <i class="bi bi-arrow-left me-2"></i>Kembali
                 </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white" style="border: 1px solid var(--warna-soft) !important;">
+                <div class="card-body p-3">
+                    <form action="{{ route('rt.warga.index') }}" method="GET" class="row g-2 align-items-center">
+                        <div class="col-md-9 col-lg-10">
+                            <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" name="search" class="form-control border-0 bg-light py-2" placeholder="Cari berdasarkan NIK atau Nama Lengkap..." value="{{ request('search') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-lg-2 d-grid d-md-flex gap-2">
+                            <button type="submit" class="btn btn-primary fw-bold shadow-sm w-100 rounded-3">CARI</button>
+                            @if(request('search'))
+                                <a href="{{ route('rt.warga.index') }}" class="btn btn-outline-danger fw-bold shadow-sm rounded-3" title="Reset Pencarian"><i class="bi bi-x-lg"></i></a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="card border-0 shadow-sm rounded-4" style="border: 1px solid var(--warna-soft) !important;">
@@ -153,8 +172,12 @@
                                 @empty
                                 <tr>
                                     <td colspan="5" class="text-center py-5 text-muted">
-                                        <i class="bi bi-people fs-1 d-block mb-3" style="opacity: 0.2; color: var(--warna-paling-gelap);"></i>
-                                        Belum ada data warga di wilayah RT Anda.<br>Pastikan admin desa telah mengimpor data kependudukan.
+                                        <i class="bi bi-search fs-1 d-block mb-3" style="opacity: 0.2; color: var(--warna-paling-gelap);"></i>
+                                        @if(request('search'))
+                                            Data warga dengan kata kunci "<strong>{{ request('search') }}</strong>" tidak ditemukan.
+                                        @else
+                                            Belum ada data warga di wilayah RT Anda.<br>Pastikan admin desa telah mengimpor data kependudukan.
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforelse
@@ -165,7 +188,7 @@
                 
                 @if($wargas->hasPages())
                     <div class="card-footer bg-white py-3 border-top-0 rounded-bottom-4">
-                        {{ $wargas->links() }}
+                        {{ $wargas->links('pagination::bootstrap-5') }}
                     </div>
                 @endif
             </div>

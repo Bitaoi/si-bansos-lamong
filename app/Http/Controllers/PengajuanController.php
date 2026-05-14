@@ -6,13 +6,24 @@ use Illuminate\Http\Request;
 use App\Models\Pengajuan;
 use App\Models\Warga;
 use App\Models\JenisBansos;
+use App\Models\JadwalBansos; // Wajib import JadwalBansos
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage; // Wajib import Storage untuk fitur Hapus
 
 class PengajuanController extends Controller
 {
-    // 1. TAMPILKAN FORM
+    // 1. TAMPILKAN FORM (Dengan Proteksi Jadwal)
     public function create()
     {
+        // Ambil jadwal tahapan usulan (Tanggal 1-11)
+        $jadwalUsulan = JadwalBansos::where('nama_tahapan', 'LIKE', '%Usulan%')->first();
+        $hariIni = (int) date('d');
+
+        // Jika jadwal ditemukan, dan hari ini DI LUAR tanggal mulai/selesai, TENDANG KELUAR!
+        if ($jadwalUsulan && ($hariIni < $jadwalUsulan->hari_mulai || $hariIni > $jadwalUsulan->hari_selesai)) {
+            return redirect()->route('rt.dashboard')->with('error', 'Akses ditolak! Saat ini masa pengajuan bansos sedang ditutup. Silakan ajukan kembali pada tanggal ' . $jadwalUsulan->hari_mulai . ' s/d ' . $jadwalUsulan->hari_selesai . ' bulan depan.');
+        }
+
         // Ambil bansos yang Aktif saja
         $bansos = JenisBansos::where('status', 'Aktif')->get();
         return view('rt.pengajuan.create', compact('bansos'));
@@ -45,13 +56,30 @@ class PengajuanController extends Controller
         return response()->json(['status' => 'not_found']);
     }
 
-    // 3. SIMPAN PENGAJUAN (TANPA HITUNG DESIL)
+    // 3. SIMPAN PENGAJUAN (Dengan Proteksi Jadwal Ganda)
     public function store(Request $request)
     {
-        // Validasi bersih, tanpa array checklist
+        // Proteksi di jalur POST (Antisipasi user yang diamkan browser lalu submit pas jam 12 malam ganti tanggal)
+        $jadwalUsulan = JadwalBansos::where('nama_tahapan', 'LIKE', '%Usulan%')->first();
+        $hariIni = (int) date('d');
+
+        if ($jadwalUsulan && ($hariIni < $jadwalUsulan->hari_mulai || $hariIni > $jadwalUsulan->hari_selesai)) {
+            return redirect()->route('rt.dashboard')->with('error', 'Gagal menyimpan! Batas waktu pengajuan bansos bulan ini baru saja berakhir.');
+        }
+
+        // ambil data bansos yang dipilih
+        $bansos = JenisBansos::findOrFail($request->id_bansos);
+
+        // cek kuota 
+        if ($bansos->sisa_kuota <= 0) {
+            return redirect()->back()->with('error', "Gagal mengajukan! Kuota untuk program {$bansos->nama_bansos} sudah penuh.")->withInput();
+        }
+
+        // Validasi data
         $request->validate([
             'nik' => 'required|exists:wargas,nik',
             'id_bansos' => 'required',
+            'tgl_pengajuan' => 'required|date',
             'alasan' => 'required|string',
             'penghasilan' => 'required|numeric',
             'foto_ktp' => 'required|image|max:2048', 
@@ -74,17 +102,40 @@ class PengajuanController extends Controller
             'nik' => $request->nik,
             'id_bansos' => $request->id_bansos,
             'id_user_pengusul' => $idPengusul,
-            'tgl_pengajuan' => now(),
+            'tgl_pengajuan' => $request->tgl_pengajuan, // Inputan date picker agar grafik tahunan bekerja
             'alasan_pengajuan' => $request->alasan,
             'estimasi_penghasilan' => $request->penghasilan,
-            'checklist_kriteria' => [], // Dikosongkan karena form kriteria dipindah ke Admin
+            'checklist_kriteria' => [], 
             'foto_ktp' => $pathKtp,
             'foto_kk' => $pathKk,
             'foto_rumah_depan' => $pathDepan,
             'foto_rumah_dalam' => $pathDalam,
-            'status_verifikasi_admin' => 'Proses' // Menunggu tindakan Admin
+            'status_verifikasi_admin' => 'Proses'
         ]);
 
         return redirect()->route('rt.dashboard')->with('success', "Usulan berhasil dikirim! Menunggu verifikasi lapangan dan perhitungan Desil oleh Admin Desa.");
+    }
+
+    // 4. BATALKAN PENGAJUAN (HANYA BISA JIKA MASIH 'PROSES')
+    public function destroy($id)
+    {
+        $pengajuan = Pengajuan::findOrFail($id);
+
+        $idPengusul = Auth::user()->id_user ?? Auth::id();
+
+        // Pastikan yang menghapus adalah RT yang mengusulkan, dan statusnya belum diproses Admin
+        if ($pengajuan->id_user_pengusul == $idPengusul && $pengajuan->status_verifikasi_admin == 'Proses') {
+            
+            // Bersihkan file foto dari storage server (Biar harddisk nggak bengkak)
+            if ($pengajuan->foto_ktp) Storage::disk('public')->delete($pengajuan->foto_ktp);
+            if ($pengajuan->foto_kk) Storage::disk('public')->delete($pengajuan->foto_kk);
+            if ($pengajuan->foto_rumah_depan) Storage::disk('public')->delete($pengajuan->foto_rumah_depan);
+            if ($pengajuan->foto_rumah_dalam) Storage::disk('public')->delete($pengajuan->foto_rumah_dalam);
+
+            $pengajuan->delete();
+            return redirect()->route('rt.dashboard')->with('success', 'Pengajuan warga berhasil dibatalkan dan ditarik kembali.');
+        }
+
+        return redirect()->route('rt.dashboard')->with('error', 'Akses ditolak! Pengajuan sudah divalidasi oleh Admin, atau data ini bukan milik Anda.');
     }
 }

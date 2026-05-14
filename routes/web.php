@@ -52,6 +52,9 @@ Route::middleware(['auth'])->group(function () {
     // --- MANAJEMEN JENIS BANSOS ---
     Route::resource('/admin/jenis-bansos', JenisBansosController::class);
 
+    // halaman rincian kuota bansos
+    Route::get('/admin/monitoring-kuota', [DashboardController::class, 'kuotaDetail'])->name('admin.kuota.index');
+
     //--- VERIFIKASI PENGAJUAN ---
     Route::get('/admin/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
     Route::put('/admin/verifikasi/{id}', [VerifikasiController::class, 'update'])->name('verifikasi.update');
@@ -69,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
     // --- SURAT / PDF ---
     Route::get('/admin/surat/{id_pengajuan}/cetak', [SuratController::class, 'cetakSurat'])->name('surat.cetak');
 
+    // --- PENGATURAN JADWAL (ADMIN) ---
     // --- PENGATURAN JADWAL (ADMIN) ---
     Route::get('/admin/jadwal', [JadwalController::class, 'indexAdmin'])->name('admin.jadwal.index');
     Route::put('/admin/jadwal/{id}', [JadwalController::class, 'update'])->name('admin.jadwal.update');
@@ -98,4 +102,5 @@ Route::middleware(['auth'])->group(function () {
     // Data Warga (View only for RT)
     Route::get('/rt/warga', [WargaController::class, 'indexRT'])->name('rt.warga.index');
     
+    Route::delete('/rt/pengajuan/{id}/batal', [App\Http\Controllers\PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
 });

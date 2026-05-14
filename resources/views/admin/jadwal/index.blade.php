@@ -41,7 +41,6 @@
 <div class="container-fluid">
     <div class="row">
         
-        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
@@ -71,7 +70,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link active">
                         <i class="bi bi-calendar-event"></i> Jadwal Tahapan
                     </a>
                 </li>
@@ -88,7 +87,6 @@
                     </a>
                 </li>
                 
-                <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -99,9 +97,7 @@
                 </li>
             </ul>
         </div>
-        <!-- AKHIR SIDEBAR -->
 
-        <!-- KONTEN -->
         <div class="col-md-9 col-lg-10 p-4">
             
             <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
@@ -115,7 +111,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">Pengaturan Kalender Bansos</h4>
-                    <p class="text-muted mb-0">Atur rentang tanggal untuk setiap tahapan (siklus bulanan).</p>
+                    <p class="text-muted mb-0">Atur rentang tanggal dan deskripsi untuk setiap tahapan (siklus bulanan).</p>
                 </div>
             </div>
 
@@ -148,7 +144,7 @@
                                     <td class="text-center fw-bold fs-5 text-primary">{{ $item->hari_selesai }}</td>
                                     <td class="text-end pe-4">
                                         <button class="btn btn-warning btn-sm fw-bold text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">
-                                            <i class="bi bi-pencil-square me-1"></i> Edit Tanggal
+                                            <i class="bi bi-pencil-square me-1"></i> Edit Data
                                         </button>
                                     </td>
                                 </tr>
@@ -162,7 +158,6 @@
     </div>
 </div>
 
-<!-- MODAL EDIT JADWAL -->
 @foreach($jadwal as $item)
 <div class="modal fade" id="editModal{{ $item->id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -172,10 +167,11 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.jadwal.update', $item->id) }}" method="POST">
-                @csrf @method('PUT')
+                @csrf 
+                @method('PUT')
                 <div class="modal-body p-4">
                     <div class="alert alert-light border small text-muted mb-4">Pastikan rentang tanggal (1-31) tidak saling bertabrakan dengan tahapan lainnya.</div>
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tanggal Mulai</label>
                             <input type="number" name="hari_mulai" class="form-control border-secondary" min="1" max="31" value="{{ $item->hari_mulai }}" required>
@@ -183,6 +179,10 @@
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tanggal Selesai</label>
                             <input type="number" name="hari_selesai" class="form-control border-secondary" min="1" max="31" value="{{ $item->hari_selesai }}" required>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="form-label fw-bold small">Deskripsi Tahapan</label>
+                            <textarea name="deskripsi" class="form-control border-secondary" rows="4" required>{{ $item->deskripsi }}</textarea>
                         </div>
                     </div>
                 </div>

@@ -3,80 +3,96 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\JenisBansos;
 use App\Models\Warga;
 use App\Models\Pengajuan;
-use App\Models\JadwalBansos;
+use App\Models\JenisBansos;
 use App\Models\Galeri;
-use Carbon\Carbon;
+use App\Models\JadwalBansos;
 use Illuminate\Support\Facades\DB;
-
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // 1. STATISTIK KEPENDUDUKAN
-        // Menghitung total data dari tabel 'wargas'
+        // 1. Data Statistik Atas
         $totalWarga = Warga::count();
-        $totalKK = Warga::distinct('no_kk')->count(); 
-        $lakiLaki = Warga::where('jenis_kelamin', 'L')->count();
-        $perempuan = Warga::where('jenis_kelamin', 'P')->count();
+        $totalKK = Warga::distinct('no_kk')->count();
+        $lakiLaki = Warga::where('jenis_kelamin', 'LIKE', 'L%')->count();
+        $perempuan = Warga::where('jenis_kelamin', 'LIKE', 'P%')->count();
 
-        // 2. STATISTIK PENERIMA BANTUAN (Agregat)
-        // Mengambil jumlah pengajuan yang statusnya 'Layak' (Disetujui)
-        // Dikelompokkan berdasarkan jenis bansos
-        $statistik = Pengajuan::select('id_bansos', DB::raw('count(*) as total'))
-            ->where('status_verifikasi_admin', 'Layak')
-            ->groupBy('id_bansos')
-            ->with('jenisBansos') // Memanggil relasi ke tabel jenis_bansos
+        // 2. Data Jadwal dan Galeri
+        $jadwal = JadwalBansos::all();
+        $hariIni = date('d');
+        $galeriStatis = Galeri::latest()->take(3)->get();
+
+        // 3. GRAFIK TREN PENGAJUAN (DINAMIS)
+        // Mengelompokkan jumlah pengajuan berdasarkan tahun dari tgl_pengajuan
+        $trenPengajuan = Pengajuan::select(
+                DB::raw('YEAR(tgl_pengajuan) as tahun'),
+                DB::raw('count(id) as total')
+            )
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'ASC')
             ->get();
 
-        // Siapkan data untuk Grafik Chart.js
-        $labelBansos = [];
-        $dataBansos = [];
+        $labelTahun = [];
+        $dataTahun = [];
 
-        foreach ($statistik as $data) {
-            // Cek apakah relasi jenisBansos ada (untuk menghindari error jika data bansos terhapus)
-            if ($data->jenisBansos) {
-                $labelBansos[] = $data->jenisBansos->nama_bansos;
-                $dataBansos[] = $data->total;
+        // Jika data kosong, berikan default tahun ini agar grafik tidak error
+        if ($trenPengajuan->isEmpty()) {
+            $labelTahun[] = date('Y');
+            $dataTahun[] = 0;
+        } else {
+            foreach ($trenPengajuan as $tren) {
+                $labelTahun[] = $tren->tahun;
+                $dataTahun[] = $tren->total;
             }
         }
 
-        // 3. TAMBAHAN BARU: AMBIL DATA JADWAL KALENDER
-        $jadwal = JadwalBansos::orderBy('hari_mulai', 'asc')->get();
-        $hariIni = (int) date('j');
+        // 4. GRAFIK SEBARAN BANSOS DISETUJUI (DINAMIS)
+        // Menghitung pengajuan yang statusnya 'Layak' dikelompokkan per jenis bansos
+        $sebaranBansos = Pengajuan::where('status_verifikasi_admin', 'Layak')
+            ->join('jenis_bansos', 'pengajuans.id_bansos', '=', 'jenis_bansos.id')
+            ->select('jenis_bansos.kode_bansos', DB::raw('count(pengajuans.id) as total'))
+            ->groupBy('jenis_bansos.kode_bansos')
+            ->get();
 
-        // Mengambil data tren pengajuan per tahun
-        $pengajuanPerTahun = Pengajuan::orderby('created_at', 'asc')
-        ->get()
-        ->groupBy(function($data) {
-            return Carbon::parse($data->created_at)->format('Y');
-        });
-        
-        //memisahkan label tahun dan data
-        $labelTahun =$pengajuanPerTahun->keys()->toArray();
-        $dataTahun =$pengajuanPerTahun->map(function($item){
-            return $item->count();
-        })->values()->toArray();
+        $labelBansos = [];
+        $dataBansos = [];
 
-        // GALERI
-        $galeriStatis = Galeri::latest()->get();
+        foreach ($sebaranBansos as $sebaran) {
+            // Gunakan kode_bansos agar label di grafik tidak terlalu panjang
+            $labelBansos[] = $sebaran->kode_bansos ?? 'Lainnya';
+            $dataBansos[] = $sebaran->total;
+        }
 
-        // Kirim semua variabel ke view 'welcome'
+        // --- 5. DATA GRAFIK PERBANDINGAN DITERIMA VS DITOLAK ---
+        $semuaBansos = \App\Models\JenisBansos::all();
+        $labelPerbandingan = [];
+        $dataDiterima = [];
+        $dataDitolak = [];
+
+        foreach ($semuaBansos as $b) {
+            $labelPerbandingan[] = $b->kode_bansos;
+            $dataDiterima[] = \App\Models\Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Layak')->count();
+            $dataDitolak[] = \App\Models\Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Tidak Layak')->count();
+        }
+
         return view('welcome', compact(
             'totalWarga', 
             'totalKK', 
             'lakiLaki', 
             'perempuan', 
-            'labelBansos', 
-            'dataBansos',
-            'labelTahun',
-            'dataTahun',
-            'jadwal',
+            'jadwal', 
+            'hariIni', 
             'galeriStatis',
-            'hariIni'
+            'labelTahun',     
+            'dataTahun',      
+            'labelBansos',    
+            'dataBansos',
+            'labelPerbandingan',
+            'dataDiterima',
+            'dataDitolak'      
         ));
     }
 }

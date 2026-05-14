@@ -35,7 +35,6 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- SIDEBAR -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
@@ -53,7 +52,6 @@
             </ul>
         </div>
 
-        <!-- KONTEN UTAMA -->
         <div class="col-md-9 col-lg-10 p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -66,7 +64,6 @@
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5">
-                <!-- Perhatikan method PUT untuk proses edit/update -->
                 <form action="{{ route('jenis-bansos.update', $jenisBansos->id) }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -123,35 +120,32 @@
                     
                     @php
                         // Memastikan data desil berbentuk array untuk pengecekan checkbox
-                        $desilTerpilih = is_array($jenisBansos->kriteria_desil) ? $jenisBansos->kriteria_desil : [];
+                        $desilTerpilih = is_string($jenisBansos->kriteria_desil) 
+                            ? json_decode($jenisBansos->kriteria_desil, true) 
+                            : ($jenisBansos->kriteria_desil ?? []);
+                            
+                        if (!is_array($desilTerpilih)) { $desilTerpilih = []; }
                     @endphp
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Target Kelayakan (Berdasarkan Hasil PMT/Desil) <span class="text-danger">*</span></label>
-                        <div class="p-3 border rounded bg-light" style="border-color: #e2e8f0 !important;">
-                            <div class="form-check form-check-inline me-4">
-                                <input class="form-check-input border-secondary" type="checkbox" name="kriteria_desil[]" value="1" id="desil1" {{ in_array('1', $desilTerpilih) ? 'checked' : '' }}>
-                                <label class="form-check-label text-dark" for="desil1">Desil 1 (Sangat Miskin)</label>
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-bold small text-muted">Kriteria Sasaran (Berdasarkan Desil)</label>
+                        <div class="row g-3 bg-light p-3 rounded-3 border" style="border-color: #e2e8f0 !important;">
+                            @for($i = 1; $i <= 10; $i++)
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="form-check">
+                                    <input class="form-check-input border-secondary shadow-sm" type="checkbox" name="kriteria_desil[]" value="{{ $i }}" id="desil{{ $i }}"
+                                    {{ in_array((string)$i, $desilTerpilih) ? 'checked' : '' }}>
+                                    <label class="form-check-label text-dark" for="desil{{ $i }}">
+                                        Desil {{ $i }}
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline me-4">
-                                <input class="form-check-input border-secondary" type="checkbox" name="kriteria_desil[]" value="2" id="desil2" {{ in_array('2', $desilTerpilih) ? 'checked' : '' }}>
-                                <label class="form-check-label text-dark" for="desil2">Desil 2 (Miskin)</label>
-                            </div>
-                            <div class="form-check form-check-inline me-4">
-                                <input class="form-check-input border-secondary" type="checkbox" name="kriteria_desil[]" value="3" id="desil3" {{ in_array('3', $desilTerpilih) ? 'checked' : '' }}>
-                                <label class="form-check-label text-dark" for="desil3">Desil 3 (Hampir Miskin)</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input border-secondary" type="checkbox" name="kriteria_desil[]" value="4" id="desil4" {{ in_array('4', $desilTerpilih) ? 'checked' : '' }}>
-                                <label class="form-check-label text-dark" for="desil4">Desil 4 (Rentan/Mampu)</label>
-                            </div>
-                            <small class="d-block mt-3 text-muted" style="font-size: 0.75rem;">
-                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Centang Desil mana saja yang berhak menerima bantuan ini.
-                            </small>
+                            @endfor
                         </div>
+                        <div class="form-text mt-2"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Centang desil mana saja yang berhak menerima bantuan ini.</div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-4 mt-3">
                         <label class="form-label small fw-bold">Deskripsi Kriteria Tambahan (Selain Desil)</label>
                         <textarea name="kriteria_lainnya" class="form-control" rows="2">{{ $jenisBansos->kriteria_lainnya }}</textarea>
                     </div>

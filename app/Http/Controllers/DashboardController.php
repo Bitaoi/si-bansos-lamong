@@ -30,7 +30,8 @@ class DashboardController extends Controller
         // 3. HITUNG SISA KUOTA (Global)
         // Pastikan kolom 'kuota_penerima' ada di tabel jenis_bansos
         $totalKuota = JenisBansos::sum('kuota_penerima'); 
-        $sisaKuota  = $totalKuota - $penerimaLayak;
+        $terpakai = Pengajuan::where('status_verifikasi_admin', 'Layak')->count();
+        $sisaKuota  = $totalKuota - $terpakai;
 
         // 4. TABEL RINGKASAN: 5 Pengajuan Terbaru
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
@@ -46,6 +47,16 @@ class DashboardController extends Controller
             'sisaKuota',
             'pengajuanTerbaru'
         ));
+    }
+
+    public function kuotaDetail()
+    {
+    if (Auth::user()->role !== 'Admin') { abort(403); }
+
+    // Ambil semua jenis bansos beserta relasi pengajuannya
+    $bansos = \App\Models\JenisBansos::with('pengajuan')->get();
+
+    return view('admin.kuota.index', compact('bansos'));
     }
 
     // =================================================================
@@ -84,9 +95,9 @@ class DashboardController extends Controller
 
         // 4. TABEL STATUS: 5 Pengajuan Terakhir milik RT ini (TAMBAHAN BARU)
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
-                            ->where('id_user_pengusul', $user->id_user) // Filter punya saya
-                            ->latest('tgl_pengajuan')
-                            ->take(5)
+                            ->where('id_user_pengusul', $user->id_user)
+                            ->orderBy('tgl_pengajuan', 'desc')
+                            ->orderBy('id', 'desc')
                             ->get();
 
         return view('rt.dashboard', compact(

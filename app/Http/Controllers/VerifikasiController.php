@@ -28,15 +28,22 @@ class VerifikasiController extends Controller
         $pengajuan = Pengajuan::findOrFail($id);
         $tahap = $request->tahap; 
 
-        // TAHAP 1: Jadwalkan Observasi
+        // TAHAP 1: Jadwalkan Observasi (Menyimpan Tanggal)
         if ($tahap == 'jadwal_observasi') {
-            $pengajuan->update(['status_verifikasi_admin' => 'Verifikasi Lapangan']);
-            return back()->with('success', 'Status diubah: Menunggu Verifikasi Lapangan (Ground Check).');
+            $request->validate([
+                'tgl_observasi' => 'required|date'
+            ]);
+
+            $pengajuan->update([
+                'status_verifikasi_admin' => 'Verifikasi Lapangan',
+                'tgl_observasi' => $request->tgl_observasi
+            ]);
+
+            return back()->with('success', 'Jadwal Observasi ditetapkan. Status berubah: Menunggu Verifikasi Lapangan.');
         }
         
         // TAHAP 2: Input Sensus Lapangan & Otomatisasi Skoring PMT
         elseif ($tahap == 'hasil_observasi') {
-            // 1. Validasi Input sesuai algoritma Kategori A, B, C
             $request->validate([
                 'luas_lantai' => 'required|string',
                 'jenis_lantai' => 'required|string',
@@ -53,10 +60,8 @@ class VerifikasiController extends Controller
                 'catatan_observasi' => 'nullable|string'
             ]);
             
-            // 2. Panggil Algoritma Cerdas dari Model (Langsung keluar Skor dan Desil)
             $hasilKalkulasi = SurveiEkonomi::kalkulasiDesil($request->all());
 
-            // 3. Simpan ke database (UpdateOrCreate agar tidak double)
             SurveiEkonomi::updateOrCreate(
                 ['pengajuan_id' => $id],
                 [
@@ -76,20 +81,17 @@ class VerifikasiController extends Controller
                 ]
             );
 
-            // 4. Proses File Observasi
             $path = null;
             if ($request->hasFile('berkas_observasi')) {
                 $path = $request->file('berkas_observasi')->store('verifikasi/observasi', 'public');
             }
             
-            // 5. Update Status Pengajuan ke Menunggu Musdes
             $pengajuan->update([
                 'berkas_observasi' => $path ?? $pengajuan->berkas_observasi,
                 'catatan_observasi' => $request->catatan_observasi,
                 'status_verifikasi_admin' => 'Menunggu Musdes'
             ]);
 
-            // Set desil warga
             $pengajuan->warga->update(['desil' => $hasilKalkulasi['desil']]);
 
             return back()->with('success', "Sensus tersimpan! Warga mendapat Skor " . $hasilKalkulasi['total_skor'] . " (Desil " . $hasilKalkulasi['desil'] . "). Status berlanjut ke Menunggu Musdes.");
@@ -110,7 +112,7 @@ class VerifikasiController extends Controller
             return back()->with('success', 'Berita Acara Musdes diunggah. Tombol Keputusan Akhir telah dibuka!');
         }
         
-        // TAHAP 4: Keputusan Final (Sesuai Keputusan Musdes)
+        // TAHAP 4: Keputusan Final
         elseif ($tahap == 'final') {
             $request->validate(['status' => 'required|in:Layak,Tidak Layak']);
             

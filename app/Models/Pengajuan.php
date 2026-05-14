@@ -19,8 +19,6 @@ class Pengajuan extends Model
         'alasan_pengajuan',
         'estimasi_penghasilan',
         'checklist_kriteria',
-        'foto_ktp',
-        'foto_kk',
         'foto_rumah_depan',
         'foto_rumah_dalam',
         'status_verifikasi_admin',
@@ -28,11 +26,13 @@ class Pengajuan extends Model
         'berkas_observasi',
         'catatan_observasi',
         'berita_acara_musdes',
+        'tgl_observasi',
     ];
 
     protected $casts = [
         'checklist_kriteria' => 'array',
-        'tgl_pengajuan' => 'date'
+        'tgl_pengajuan' => 'date',
+        'tgl_observasi' => 'date',
     ];
 
     // ================= RELASI =================

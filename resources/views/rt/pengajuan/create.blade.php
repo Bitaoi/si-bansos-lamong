@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* PALET WARNA KUSTOM */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -28,9 +27,6 @@
         }
 
         .text-primary { color: var(--warna-utama) !important; }
-        .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
-        .border-primary { border-color: var(--warna-utama) !important; }
-
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
 
@@ -45,7 +41,6 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1 text-primary">Form Pengajuan Bantuan</h4>
@@ -54,59 +49,23 @@
                 <a href="{{ route('rt.dashboard') }}" class="btn btn-outline-secondary fw-bold"><i class="bi bi-arrow-left"></i> Kembali</a>
             </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 rounded-4 border-0">
-                    <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Pengajuan Gagal Dikirim!</h6>
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
             <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="card mb-4">
                     <div class="card-body p-4">
                         <h5 class="form-section-title"><span class="step-number">1</span> Identitas Warga</h5>
-                        
-                        <div class="alert alert-info d-flex align-items-center border-0" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
-                            <i class="bi bi-info-circle-fill me-2 fs-4 text-primary"></i>
-                            <div>Masukan NIK atau Nama Warga, lalu tekan <strong>Cari</strong>. Data akan terisi otomatis.</div>
-                        </div>
-
                         <div class="input-group mb-4">
                             <input type="text" id="searchKeyword" class="form-control form-control-lg border-primary" placeholder="Ketik NIK atau Nama Lengkap Warga...">
-                            <button class="btn btn-primary px-4 fw-bold" type="button" onclick="cariWarga()">
-                                <i class="bi bi-search me-2"></i> CARI DATA
-                            </button>
+                            <button class="btn btn-primary px-4 fw-bold" type="button" onclick="cariWarga()"><i class="bi bi-search me-2"></i> CARI DATA</button>
                         </div>
-
                         <div id="resultArea" style="display: none;">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">NIK</label>
-                                    <input type="text" name="nik" id="nik" class="form-control readonly-input fw-bold text-primary" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nama Lengkap</label>
-                                    <input type="text" id="nama" class="form-control readonly-input fw-bold text-dark" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">No. Kartu Keluarga</label>
-                                    <input type="text" id="no_kk" class="form-control readonly-input" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Jumlah Anggota Keluarga</label>
-                                    <input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold" readonly>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-bold">Alamat Domisili</label>
-                                    <textarea id="alamat" class="form-control readonly-input" rows="2" readonly></textarea>
-                                </div>
+                                <div class="col-md-6"><label class="form-label fw-bold">NIK</label><input type="text" name="nik" id="nik" class="form-control readonly-input fw-bold text-primary" readonly></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Nama Lengkap</label><input type="text" id="nama" class="form-control readonly-input fw-bold text-dark" readonly></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">No. Kartu Keluarga</label><input type="text" id="no_kk" class="form-control readonly-input" readonly></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Jumlah Anggota Keluarga</label><input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold" readonly></div>
+                                <div class="col-12"><label class="form-label fw-bold">Alamat Domisili</label><textarea id="alamat" class="form-control readonly-input" rows="2" readonly></textarea></div>
                             </div>
                         </div>
                     </div>
@@ -115,41 +74,27 @@
                 <div class="card mb-4">
                     <div class="card-body p-4">
                         <h5 class="form-section-title"><span class="step-number">2</span> Parameter Pengajuan</h5>
-                        
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Jenis Bantuan <span class="text-danger">*</span></label>
                                 <select name="id_bansos" class="form-select border-secondary" required>
                                     <option value="">-- Pilih Program --</option>
                                     @foreach($bansos as $b)
-                                        @php
-                                             $sisa = $b->sisa_kuota; // Memanggil fungsi yang kita buat di Model
-                                             $isFull = $sisa <= 0;
-                                        @endphp
-                                        <option value="{{ $b->id }}" {{ $isFull ? 'disabled' : '' }}>
-                                            {{ $b->nama_bansos }} 
-                                            (Sisa Kuota: {{ $isFull ? 'PENUH' : $sisa . ' Orang' }})
-                                        </option>
+                                        <option value="{{ $b->id }}">{{ $b->nama_bansos }} (Sisa: {{ $b->sisa_kuota }} Orang)</option>
                                     @endforeach
                                 </select>
                             </div>
-                            
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Tanggal Pengajuan <span class="text-danger">*</span></label>
                                 <input type="date" name="tgl_pengajuan" class="form-control border-secondary" required value="{{ date('Y-m-d') }}">
-                                <div class="form-text small">Atur mundur tanggal untuk mengisi data lama.</div>
                             </div>
-
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Estimasi Penghasilan <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-secondary">Rp</span>
-                                    <input type="number" name="penghasilan" class="form-control border-secondary" placeholder="0" required>
-                                </div>
+                                <div class="input-group"><span class="input-group-text bg-light border-secondary">Rp</span><input type="number" name="penghasilan" class="form-control border-secondary" placeholder="0" required></div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold">Alasan Pengajuan (Rekomendasi RT) <span class="text-danger">*</span></label>
-                                <textarea name="alasan" class="form-control border-secondary" rows="3" placeholder="Contoh: Kepala keluarga baru saja di-PHK, kondisi rumah memprihatinkan..." required></textarea>
+                                <textarea name="alasan" class="form-control border-secondary" rows="3" required></textarea>
                             </div>
                         </div>
                     </div>
@@ -157,28 +102,17 @@
 
                 <div class="card mb-4">
                     <div class="card-body p-4">
-                        <h5 class="form-section-title"><span class="step-number">3</span> Lampiran Bukti Fisik</h5>
-                        
+                        <h5 class="form-section-title"><span class="step-number">3</span> Lampiran Bukti Kondisi Rumah</h5>
                         <div class="row g-4">
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Foto KTP <span class="text-danger">*</span></label>
-                                <input type="file" name="foto_ktp" class="form-control border-secondary" accept="image/*" required>
-                                <div class="form-text small">Wajib diisi. Format JPG/PNG.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Foto KK <span class="text-danger">*</span></label>
-                                <input type="file" name="foto_kk" class="form-control border-secondary" accept="image/*" required>
-                                <div class="form-text small">Wajib diisi. Format JPG/PNG.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Foto Rumah (Depan) <span class="text-danger">*</span></label>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Foto Rumah (Tampak Depan) <span class="text-danger">*</span></label>
                                 <input type="file" name="foto_rumah_depan" class="form-control border-secondary" accept="image/*" required>
-                                <div class="form-text small">Wajib diisi. Format JPG/PNG.</div>
+                                <div class="form-text small text-muted">Menampakkan kondisi keseluruhan bagian depan rumah.</div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Foto Rumah (Dalam)</label>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Foto Rumah (Interior / Dalam)</label>
                                 <input type="file" name="foto_rumah_dalam" class="form-control border-secondary" accept="image/*">
-                                <div class="form-text small">Tidak wajib diisi. Format JPG/PNG.</div>
+                                <div class="form-text small text-muted">Menampakkan kondisi lantai atau dinding bagian dalam rumah.</div>
                             </div>
                         </div>
                     </div>
@@ -186,25 +120,17 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
                     <button type="reset" class="btn btn-light border px-4 fw-bold text-muted">Reset Form</button>
-                    <button type="submit" class="btn btn-primary px-5 btn-lg fw-bold shadow-sm">
-                        <i class="bi bi-send-fill me-2"></i> KIRIM USULAN KE ADMIN
-                    </button>
+                    <button type="submit" class="btn btn-primary px-5 btn-lg fw-bold shadow-sm"><i class="bi bi-send-fill me-2"></i> KIRIM USULAN</button>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function cariWarga() {
         let keyword = document.getElementById('searchKeyword').value;
-        if(!keyword) {
-            alert('Silakan isi NIK atau Nama terlebih dahulu!');
-            return;
-        }
-
+        if(!keyword) { alert('Silakan isi NIK atau Nama terlebih dahulu!'); return; }
         fetch(`{{ route('api.warga.search') }}?keyword=${keyword}`)
             .then(response => response.json())
             .then(data => {
@@ -216,17 +142,11 @@
                     document.getElementById('jumlah_keluarga').value = data.data.jumlah_keluarga + ' Orang';
                     document.getElementById('alamat').value = data.data.alamat;
                 } else {
-                    alert('Data warga tidak ditemukan! Pastikan nama atau NIK benar.');
+                    alert('Data warga tidak ditemukan!');
                     document.getElementById('resultArea').style.display = 'none';
-                    document.getElementById('nik').value = '';
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat mencari data.');
             });
     }
 </script>
-
 </body>
 </html>

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // 1. Data Statistik Atas
         $totalWarga = Warga::count();
@@ -25,8 +25,13 @@ class HomeController extends Controller
         $hariIni = date('d');
         $galeriStatis = Galeri::latest()->take(3)->get();
 
-        // 3. GRAFIK TREN PENGAJUAN (DINAMIS)
-        // Mengelompokkan jumlah pengajuan berdasarkan tahun dari tgl_pengajuan
+        // =======================================================
+        // LOGIKA FILTER TAHUN (INPUT KETIK)
+        // =======================================================
+        // Menangkap filter tahun yang diketik user dari URL
+        $tahunFilter = $request->get('tahun');
+
+        // 3. GRAFIK TREN PENGAJUAN (DINAMIS - TAHUNAN)
         $trenPengajuan = Pengajuan::select(
                 DB::raw('YEAR(tgl_pengajuan) as tahun'),
                 DB::raw('count(id) as total')
@@ -38,7 +43,6 @@ class HomeController extends Controller
         $labelTahun = [];
         $dataTahun = [];
 
-        // Jika data kosong, berikan default tahun ini agar grafik tidak error
         if ($trenPengajuan->isEmpty()) {
             $labelTahun[] = date('Y');
             $dataTahun[] = 0;
@@ -49,33 +53,48 @@ class HomeController extends Controller
             }
         }
 
-        // 4. GRAFIK SEBARAN BANSOS DISETUJUI (DINAMIS)
-        // Menghitung pengajuan yang statusnya 'Layak' dikelompokkan per jenis bansos
-        $sebaranBansos = Pengajuan::where('status_verifikasi_admin', 'Layak')
+        // 4. GRAFIK SEBARAN BANSOS DISETUJUI (TERFILTER BERDASARKAN TGL PENGAJUAN)
+        $querySebaran = Pengajuan::where('status_verifikasi_admin', 'Layak')
             ->join('jenis_bansos', 'pengajuans.id_bansos', '=', 'jenis_bansos.id')
             ->select('jenis_bansos.kode_bansos', DB::raw('count(pengajuans.id) as total'))
-            ->groupBy('jenis_bansos.kode_bansos')
-            ->get();
+            ->groupBy('jenis_bansos.kode_bansos');
+
+        // Jika user mengetik tahun, filter berdasarkan tahun dari tgl_pengajuan
+        if (!empty($tahunFilter)) {
+            $querySebaran->whereYear('pengajuans.tgl_pengajuan', $tahunFilter);
+        }
+
+        $sebaranBansos = $querySebaran->get();
 
         $labelBansos = [];
         $dataBansos = [];
 
         foreach ($sebaranBansos as $sebaran) {
-            // Gunakan kode_bansos agar label di grafik tidak terlalu panjang
             $labelBansos[] = $sebaran->kode_bansos ?? 'Lainnya';
             $dataBansos[] = $sebaran->total;
         }
 
-        // --- 5. DATA GRAFIK PERBANDINGAN DITERIMA VS DITOLAK ---
-        $semuaBansos = \App\Models\JenisBansos::all();
+        // 5. DATA GRAFIK PERBANDINGAN DITERIMA VS DITOLAK (TERFILTER)
+        $semuaBansos = JenisBansos::all();
         $labelPerbandingan = [];
         $dataDiterima = [];
         $dataDitolak = [];
 
         foreach ($semuaBansos as $b) {
             $labelPerbandingan[] = $b->kode_bansos;
-            $dataDiterima[] = \App\Models\Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Layak')->count();
-            $dataDitolak[] = \App\Models\Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Tidak Layak')->count();
+            
+            // Siapkan query untuk menghitung status pengajuan per bansos
+            $qDiterima = Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Layak');
+            $qDitolak = Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Tidak Layak');
+
+            // Terapkan filter tahun jika ada
+            if (!empty($tahunFilter)) {
+                $qDiterima->whereYear('tgl_pengajuan', $tahunFilter);
+                $qDitolak->whereYear('tgl_pengajuan', $tahunFilter);
+            }
+
+            $dataDiterima[] = $qDiterima->count();
+            $dataDitolak[] = $qDitolak->count();
         }
 
         return view('welcome', compact(
@@ -92,7 +111,8 @@ class HomeController extends Controller
             'dataBansos',
             'labelPerbandingan',
             'dataDiterima',
-            'dataDitolak'      
+            'dataDitolak',
+            'tahunFilter'     // <--- Passing inputan tahun ke view
         ));
     }
 }

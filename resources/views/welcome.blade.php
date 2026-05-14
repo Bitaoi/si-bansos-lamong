@@ -284,8 +284,20 @@
         </div>
 
         <div class="row g-4 mb-5 fade-in-up" id="transparansi" style="animation-delay: 1s;">
-            <div class="col-12 mb-2 px-3">
+            
+            <div class="col-12 mb-2 px-3 d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i> Data & Transparansi</h3>
+                
+                <form action="{{ url('/') }}#transparansi" method="GET" class="d-flex align-items-center mt-3 mt-md-0 bg-white p-1 rounded-pill shadow-sm border" style="max-width: 300px;">
+                    <i class="bi bi-funnel-fill text-muted ms-3"></i>
+                    <input type="number" name="tahun" class="form-control form-control-sm border-0 bg-transparent text-primary ms-1 shadow-none" placeholder="Ketik Tahun" value="{{ $tahunFilter ?? '' }}">
+                    
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold"><i class="bi bi-search"></i></button>
+                    
+                    @if(!empty($tahunFilter))
+                        <a href="{{ url('/') }}#transparansi" class="btn btn-light btn-sm rounded-pill ms-1 text-danger" title="Hapus Filter"><i class="bi bi-x-circle-fill"></i></a>
+                    @endif
+                </form>
             </div>
             
             <div class="col-lg-6">
@@ -296,7 +308,7 @@
             </div>
             <div class="col-lg-6">
                 <div class="glass-card p-4 h-100">
-                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-bar-chart-steps text-primary me-2"></i>Diterima vs Ditolak</h5>
+                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-bar-chart-steps text-primary me-2"></i>Grafik Perbandingan Diterima dan Ditolak</h5>
                     <div style="position: relative; height: 300px;"><canvas id="compareChart"></canvas></div>
                 </div>
             </div>
@@ -429,7 +441,17 @@
                             borderWidth: 3, pointBackgroundColor: '#fff', fill: true, tension: 0.4 
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, precision: 0 } // <-- MEMAKSA SKALA BILANGAN BULAT
+                            }
+                        }
+                    }
                 });
             }
 
@@ -452,7 +474,17 @@
                             borderRadius: 8
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, precision: 0 } // <-- MEMAKSA SKALA BILANGAN BULAT
+                            }
+                        }
+                    }
                 });
             }
 
@@ -486,7 +518,12 @@
                         responsive: true, 
                         maintainAspectRatio: false, 
                         plugins: { legend: { display: true, position: 'bottom' } },
-                        scales: { y: { beginAtZero: true } }
+                        scales: { 
+                            y: { 
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, precision: 0 } // <-- MEMAKSA SKALA BILANGAN BULAT
+                            } 
+                        }
                     }
                 });
             }

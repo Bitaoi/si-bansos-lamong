@@ -154,7 +154,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center m-0 p-0" href="#">
                 <img src="{{ asset('img/logo-desa.png') }}" alt="Logo Desa" 
-                     onerror="this.onerror=null; this.outerHTML='<div class=\'bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm\' style=\'width: 45px; height: 45px; margin-right: 15px;\'><i class=\'bi bi-buildings-fill fs-5\'></i></div>';" 
+                     onerror="this.onerror=null; this.outerHTML='<div class=\'bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm\' style=\'width: 45px; height: 45px; margin-right: 15px;\'><i class=\'bi bi-house-door-fill fs-5\'></i></div>';" 
                      style="width: 45px; height: 45px; object-fit: contain; margin-right: 15px;">
                 <span class="fs-4 fw-bold text-primary" style="letter-spacing: 0.5px;">DESA LAMONG</span>
             </a>

@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* 1. STRUKTUR PALET WARNA */
         :root {
             --warna-paling-gelap: #2C3E50; 
             --warna-utama: #7D88DC; 
@@ -24,35 +23,16 @@
             font-family: 'Poppins', sans-serif !important; 
         }
         
-        /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
         .text-primary { color: var(--warna-utama) !important; }
         .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
         .border-primary { border-color: var(--warna-utama) !important; }
 
-        /* 3. STYLING TOMBOL */
-        .btn-primary {
-            background-color: var(--warna-utama) !important;
-            border-color: var(--warna-utama) !important;
-            color: #ffffff !important; 
-            box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2);
-        }
-        .btn-primary:hover {
-            background-color: var(--warna-paling-gelap) !important;
-            border-color: var(--warna-paling-gelap) !important;
-            color: #ffffff !important;
-        }
+        .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
+        .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
 
-        .btn-outline-primary {
-            color: var(--warna-utama) !important;
-            border-color: var(--warna-utama) !important;
-            background-color: transparent !important;
-        }
-        .btn-outline-primary:hover {
-            background-color: var(--warna-utama) !important;
-            color: #ffffff !important;
-        }
+        .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
+        .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
 
-        /* 4. SIDEBAR & KARTU */
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
@@ -76,21 +56,9 @@
                 <i class="bi bi-building me-2"></i>MENU RT
             </h5>
             <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a href="{{ route('rt.dashboard') }}" class="nav-link active">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('pengajuan.create') }}" class="nav-link">
-                        <i class="bi bi-file-earmark-plus-fill"></i> Pengajuan Baru
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('rt.warga.index') }}" class="nav-link">
-                        <i class="bi bi-people-fill"></i> Data Warga RT
-                    </a>
-                </li>
+                <li class="nav-item"><a href="{{ route('rt.dashboard') }}" class="nav-link active"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="{{ route('pengajuan.create') }}" class="nav-link"><i class="bi bi-file-earmark-plus-fill"></i> Pengajuan Baru</a></li>
+                <li class="nav-item"><a href="{{ route('rt.warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga RT</a></li>
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -114,30 +82,19 @@
 
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                        <div><strong>Gagal!</strong> Periksa kembali isian form Anda. (Pastikan username belum dipakai orang lain & konfirmasi password sesuai).</div>
-                    </div>
+                    <div class="d-flex align-items-center"><i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i><div><strong>Gagal!</strong> Periksa kembali isian form Anda.</div></div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                        <div><strong>Akses Ditolak!</strong> {{ session('error') }}</div>
-                    </div>
+                    <div class="d-flex align-items-center"><i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i><div><strong>Akses Ditolak!</strong> {{ session('error') }}</div></div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-                        <div><strong>Berhasil!</strong> {{ session('success') }}</div>
-                    </div>
+                    <div class="d-flex align-items-center"><i class="bi bi-check-circle-fill fs-4 me-3"></i><div><strong>Berhasil!</strong> {{ session('success') }}</div></div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
@@ -147,9 +104,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h2 class="fw-bold text-dark mb-1">Halo, Ketua {{ Auth::user()->wilayah_rt_rw ?? Auth::user()->username }}! </h2>
-                            <p class="mb-3 text-muted fs-5">
-                                Selamat datang di Panel Pengelola Bantuan Sosial Desa Lamong.
-                            </p>
+                            <p class="mb-3 text-muted fs-5">Selamat datang di Panel Pengelola Bantuan Sosial Desa Lamong.</p>
                             <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditProfil">
                                 <i class="bi bi-gear-fill me-2"></i> Pengaturan Akun
                             </button>
@@ -161,6 +116,48 @@
                 </div>
             </div>
 
+            <!-- MULAI POTONGAN KODE FILTER BARU -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 bg-white p-3 rounded-4 border shadow-sm" style="position: relative; z-index: 50;">
+                <div class="mb-3 mb-lg-0">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-range me-2 text-primary"></i>Filter Periode Dashboard</h6>
+                </div>
+                
+                <form action="{{ route('rt.dashboard') }}" method="GET" class="d-flex gap-2 align-items-center flex-wrap">
+                    <select name="bulan" class="form-select form-select-sm fw-bold border-secondary text-primary" style="width: auto; cursor: pointer;">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ sprintf('%02d', $m) }}" {{ $bulanFilter == sprintf('%02d', $m) ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    
+                    <select name="tahun" class="form-select form-select-sm fw-bold border-secondary text-primary" style="width: auto; cursor: pointer;">
+                        <option value="{{ date('Y') }}" {{ $tahunFilter == date('Y') ? 'selected' : '' }}>{{ date('Y') }}</option>
+                        @if(isset($daftarTahun))
+                            @foreach($daftarTahun as $thn)
+                                @if($thn != date('Y'))
+                                    <option value="{{ $thn }}" {{ $tahunFilter == $thn ? 'selected' : '' }}>{{ $thn }}</option>
+                                @endif
+                            @endforeach
+                        @endif
+                    </select>
+
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold shadow-sm px-3">
+                        <i class="bi bi-search me-1"></i> Terapkan
+                    </button>
+
+                    <div class="d-none d-md-block border-end mx-1" style="height: 30px;"></div>
+
+                    <button type="submit" formaction="{{ route('rt.rekap.export') }}" class="btn btn-success btn-sm fw-bold shadow-sm text-nowrap">
+                        <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+                    </button>
+                    <button type="submit" formaction="{{ route('rt.rekap.export.pdf') }}" class="btn btn-danger btn-sm fw-bold shadow-sm text-nowrap">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                    </button>
+                </form>
+            </div>
+            <!-- AKHIR POTONGAN KODE FILTER BARU -->
+
             <div class="row g-4 mb-4">
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card stat-card shadow-sm h-100">
@@ -169,7 +166,7 @@
                                 <div class="icon-circle me-3" style="background-color: #e2e8f0; color: #64748b;"><i class="bi bi-people-fill"></i></div>
                                 <div>
                                     <h6 class="text-muted small mb-1 text-uppercase fw-bold">Warga Saya</h6>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $wargaSaya }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $wargaSaya ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -181,8 +178,8 @@
                             <div class="d-flex align-items-center">
                                 <div class="icon-circle me-3" style="background-color: var(--warna-soft); color: var(--warna-utama);"><i class="bi bi-send-fill"></i></div>
                                 <div>
-                                    <h6 class="text-muted small mb-1 text-uppercase fw-bold">Total Usulan</h6>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $totalUsulanSaya }}</h3>
+                                    <h6 class="text-muted small mb-1 text-uppercase fw-bold">Usulan Bulan Ini</h6>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $totalUsulanRT ?? $totalUsulanSaya ?? 0 }}</h3> 
                                 </div>
                             </div>
                         </div>
@@ -194,8 +191,8 @@
                             <div class="d-flex align-items-center">
                                 <div class="icon-circle bg-warning bg-opacity-10 text-warning me-3"><i class="bi bi-hourglass-split"></i></div>
                                 <div>
-                                    <h6 class="text-muted small mb-1 text-uppercase fw-bold">Verifikasi</h6>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $menungguVerifikasi }}</h3>
+                                    <h6 class="text-muted small mb-1 text-uppercase fw-bold">Diproses</h6>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $usulanDiproses ?? $menungguVerifikasi ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -208,7 +205,7 @@
                                 <div class="icon-circle bg-success bg-opacity-10 text-success me-3"><i class="bi bi-check-circle-fill"></i></div>
                                 <div>
                                     <h6 class="text-muted small mb-1 text-uppercase fw-bold">Disetujui</h6>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $siapDisalurkan }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $usulanDisetujui ?? $siapDisalurkan ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -216,9 +213,50 @@
                 </div>
             </div>
 
+            @if(isset($rekapBansosRT))
+            <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid var(--warna-soft) !important;">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-table me-2"></i>Rekapitulasi Bantuan Wilayah</h6>
+                    <span class="badge bg-light text-secondary border">Periode: {{ \Carbon\Carbon::create()->month((int)$bulanFilter)->translatedFormat('F') }} {{ $tahunFilter }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Program Bansos</th>
+                                    <th class="text-center">Total Usulan</th>
+                                    <th class="text-center">Disetujui</th>
+                                    <th class="text-center">Ditolak</th>
+                                    <th class="text-center">Proses</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($rekapBansosRT as $rekap)
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="fw-bold text-dark">{{ $rekap->nama_bansos }}</span><br>
+                                        <small class="badge bg-light text-secondary border">{{ $rekap->kode_bansos }}</small>
+                                    </td>
+                                    <td class="text-center fw-bold text-dark">{{ $rekap->total }}</td>
+                                    <td class="text-center fw-bold text-success">{{ $rekap->layak }}</td>
+                                    <td class="text-center fw-bold text-danger">{{ $rekap->tidak_layak }}</td>
+                                    <td class="text-center fw-bold text-warning">{{ $rekap->proses }}</td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada data rekap di bulan ini.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid var(--warna-soft) !important;">
                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>Status Pengajuan Terkini</h6>
+                    <span class="badge bg-light text-primary border"><i class="bi bi-funnel-fill"></i> Filter Aktif: {{ \Carbon\Carbon::create()->month((int)$bulanFilter ?? date('m'))->translatedFormat('F') }} {{ $tahunFilter ?? date('Y') }}</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -233,17 +271,11 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($pengajuanTerbaru as $item)
+                                @forelse($pengajuanTerbaru ?? [] as $item)
                                 <tr>
-                                    <td class="ps-4 small text-muted">
-                                        {{ $item->tgl_pengajuan->format('d M Y') }}
-                                    </td>
+                                    <td class="ps-4 small text-muted">{{ $item->tgl_pengajuan->format('d M Y') }}</td>
                                     <td class="fw-bold text-dark">{{ $item->warga->nama_lengkap ?? 'Data Warga Terhapus' }}</td>
-                                    <td>
-                                        <span class="badge" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">
-                                            {{ $item->jenisBansos->nama_bansos ?? '-' }}
-                                        </span>
-                                    </td>
+                                    <td><span class="badge" style="background-color: var(--warna-soft); color: var(--warna-paling-gelap);">{{ $item->jenisBansos->nama_bansos ?? '-' }}</span></td>
                                     <td>
                                         @if(in_array($item->status_verifikasi_admin, ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan']))
                                             <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> {{ $item->status_verifikasi_admin }}</span>
@@ -256,11 +288,8 @@
                                     <td class="text-end pe-4">
                                         @if($item->status_verifikasi_admin == 'Proses')
                                             <form action="{{ route('pengajuan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pengajuan atas nama {{ $item->warga->nama_lengkap ?? 'warga ini' }}?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Batalkan Pengajuan">
-                                                    <i class="bi bi-x-circle-fill me-1"></i> Batal
-                                                </button>
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Batalkan Pengajuan"><i class="bi bi-x-circle-fill me-1"></i> Batal</button>
                                             </form>
                                         @else
                                             <span class="text-muted small"><i class="bi bi-lock-fill text-secondary"></i> Terkunci</span>
@@ -268,12 +297,7 @@
                                     </td>
                                 </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                        Belum ada pengajuan.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-2"></i> Belum ada pengajuan di bulan ini.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -283,7 +307,6 @@
 
             @php
                 $tanggalSekarang = (int) now()->format('d');
-                // Mengecek apakah hari ini <= 8 (Masa Buka Pengajuan)
                 $isBuka = $tanggalSekarang <= 8; 
             @endphp
 
@@ -298,28 +321,19 @@
                             @if($isBuka)
                                 <a href="{{ route('pengajuan.create') }}" class="btn btn-outline-primary w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
                                     <i class="bi bi-plus-circle-fill fs-4 me-3"></i> 
-                                    <div>
-                                        <div>Buat Pengajuan Bansos</div>
-                                        <small class="fw-normal text-muted">Batas waktu: Tgl 1 - 8 Bulan Ini</small>
-                                    </div>
+                                    <div><div>Buat Pengajuan Bansos</div><small class="fw-normal text-muted">Batas waktu: Tgl 1 - 8 Bulan Ini</small></div>
                                 </a>
                             @else
                                 <div class="w-100 py-3 px-4 h-100 d-flex align-items-center bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-3" style="cursor: not-allowed;">
                                     <i class="bi bi-door-closed-fill fs-3 text-danger me-3"></i> 
-                                    <div>
-                                        <div class="fw-bold text-danger">Pengajuan Ditutup</div>
-                                        <small class="fw-normal text-danger" style="opacity: 0.8;">Akan dibuka kembali Tgl 1 bulan depan.</small>
-                                    </div>
+                                    <div><div class="fw-bold text-danger">Pengajuan Ditutup</div><small class="fw-normal text-danger" style="opacity: 0.8;">Akan dibuka kembali Tgl 1 bulan depan.</small></div>
                                 </div>
                             @endif
                         </div>
                         <div class="col-md-6">
                             <a href="{{ route('rt.warga.index') }}" class="btn btn-outline-dark w-100 py-3 fw-bold text-start ps-4 h-100 d-flex align-items-center">
                                 <i class="bi bi-search fs-4 me-3"></i> 
-                                <div>
-                                    <div>Cek Data Warga</div>
-                                    <small class="fw-normal text-muted">Lihat daftar warga di RT/RW Anda</small>
-                                </div>
+                                <div><div>Cek Data Warga</div><small class="fw-normal text-muted">Lihat daftar warga di RT/RW Anda</small></div>
                             </a>
                         </div>
                     </div>

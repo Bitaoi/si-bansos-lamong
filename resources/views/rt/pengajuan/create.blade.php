@@ -20,12 +20,7 @@
             --warna-background: #FEFCFB; 
         }
 
-        body { 
-            background-color: var(--warna-background) !important; 
-            color: var(--warna-paling-gelap); 
-            font-family: 'Poppins', sans-serif !important; 
-        }
-
+        body { background-color: var(--warna-background) !important; color: var(--warna-paling-gelap); font-family: 'Poppins', sans-serif !important; }
         .text-primary { color: var(--warna-utama) !important; }
         .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
         .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
@@ -56,12 +51,18 @@
                     <div class="card-body p-4">
                         <h5 class="form-section-title"><span class="step-number">1</span> Identitas Warga</h5>
                         <div class="input-group mb-4">
-                            <input type="text" id="searchKeyword" class="form-control form-control-lg border-primary" placeholder="Ketik NIK atau Nama Lengkap Warga...">
+                            <input type="text" id="searchKeyword" class="form-control form-control-lg border-primary" placeholder="Ketik NIK atau Nama Lengkap Warga..." value="{{ old('nik') }}">
                             <button class="btn btn-primary px-4 fw-bold" type="button" onclick="cariWarga()"><i class="bi bi-search me-2"></i> CARI DATA</button>
                         </div>
-                        <div id="resultArea" style="display: none;">
+                        <div id="resultArea" style="display: {{ old('nik') ? 'block' : 'none' }};">
+                            
+                            <div id="alertSudahDaftar" class="alert alert-danger mb-4 fw-bold shadow-sm border-danger" style="display: none;">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i> 
+                                PENOLAKAN SISTEM: Warga ini sudah terdaftar bantuan sosial di periode bulan ini. Tidak bisa diajukan kembali!
+                            </div>
+
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label fw-bold">NIK</label><input type="text" name="nik" id="nik" class="form-control readonly-input fw-bold text-primary" readonly></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">NIK</label><input type="text" name="nik" id="nik" class="form-control readonly-input fw-bold text-primary" value="{{ old('nik') }}" readonly></div>
                                 <div class="col-md-6"><label class="form-label fw-bold">Nama Lengkap</label><input type="text" id="nama" class="form-control readonly-input fw-bold text-dark" readonly></div>
                                 <div class="col-md-6"><label class="form-label fw-bold">No. Kartu Keluarga</label><input type="text" id="no_kk" class="form-control readonly-input" readonly></div>
                                 <div class="col-md-6"><label class="form-label fw-bold">Jumlah Anggota Keluarga</label><input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold" readonly></div>
@@ -80,21 +81,21 @@
                                 <select name="id_bansos" class="form-select border-secondary" required>
                                     <option value="">-- Pilih Program --</option>
                                     @foreach($bansos as $b)
-                                        <option value="{{ $b->id }}">{{ $b->nama_bansos }} (Sisa: {{ $b->sisa_kuota }} Orang)</option>
+                                        <option value="{{ $b->id }}" {{ old('id_bansos') == $b->id ? 'selected' : '' }}>{{ $b->nama_bansos }} (Sisa: {{ $b->sisa_kuota }} Orang)</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Tanggal Pengajuan <span class="text-danger">*</span></label>
-                                <input type="date" name="tgl_pengajuan" class="form-control border-secondary" required value="{{ date('Y-m-d') }}">
+                                <input type="date" name="tgl_pengajuan" class="form-control border-secondary" required value="{{ old('tgl_pengajuan', date('Y-m-d')) }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Estimasi Penghasilan <span class="text-danger">*</span></label>
-                                <div class="input-group"><span class="input-group-text bg-light border-secondary">Rp</span><input type="number" name="penghasilan" class="form-control border-secondary" placeholder="0" required></div>
+                                <div class="input-group"><span class="input-group-text bg-light border-secondary">Rp</span><input type="number" name="penghasilan" class="form-control border-secondary" placeholder="0" value="{{ old('penghasilan') }}" required></div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold">Alasan Pengajuan (Rekomendasi RT) <span class="text-danger">*</span></label>
-                                <textarea name="alasan" class="form-control border-secondary" rows="3" required></textarea>
+                                <textarea name="alasan" class="form-control border-secondary" rows="3" required>{{ old('alasan') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -120,20 +121,33 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
                     <button type="reset" class="btn btn-light border px-4 fw-bold text-muted">Reset Form</button>
-                    <button type="submit" class="btn btn-primary px-5 btn-lg fw-bold shadow-sm"><i class="bi bi-send-fill me-2"></i> KIRIM USULAN</button>
+                    <button type="submit" id="btnSubmitPengajuan" class="btn btn-primary px-5 btn-lg fw-bold shadow-sm"><i class="bi bi-send-fill me-2"></i> KIRIM USULAN</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     function cariWarga() {
         let keyword = document.getElementById('searchKeyword').value;
         if(!keyword) { alert('Silakan isi NIK atau Nama terlebih dahulu!'); return; }
+        
+        // Memunculkan efek loading pada tombol saat mencari data
+        let btnCari = document.querySelector('button[onclick="cariWarga()"]');
+        let originalText = btnCari.innerHTML;
+        btnCari.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mencari...';
+        btnCari.disabled = true;
+
         fetch(`{{ route('api.warga.search') }}?keyword=${keyword}`)
             .then(response => response.json())
             .then(data => {
+                btnCari.innerHTML = originalText;
+                btnCari.disabled = false;
+
                 if(data.status === 'success') {
                     document.getElementById('resultArea').style.display = 'block';
                     document.getElementById('nik').value = data.data.nik;
@@ -141,12 +155,56 @@
                     document.getElementById('no_kk').value = data.data.no_kk;
                     document.getElementById('jumlah_keluarga').value = data.data.jumlah_keluarga + ' Orang';
                     document.getElementById('alamat').value = data.data.alamat;
+
+                    // LOGIKA CEK DAFTAR GANDA
+                    let alertPeringatan = document.getElementById('alertSudahDaftar');
+                    let btnSubmit = document.getElementById('btnSubmitPengajuan');
+
+                    if(data.data.sudah_daftar) {
+                        // Jika sudah daftar: Munculkan Alert Merah & Matikan Tombol Submit
+                        alertPeringatan.style.display = 'block';
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = '<i class="bi bi-x-circle me-2"></i> TIDAK BISA DIAJUKAN';
+                        btnSubmit.classList.replace('btn-primary', 'btn-danger');
+                        
+                        // Scroll otomatis ke alert agar RT langsung membaca penolakan
+                        alertPeringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        // Jika belum daftar: Sembunyikan Alert & Hidupkan Tombol Submit
+                        alertPeringatan.style.display = 'none';
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = '<i class="bi bi-send-fill me-2"></i> KIRIM USULAN';
+                        btnSubmit.classList.replace('btn-danger', 'btn-primary');
+                    }
+
                 } else {
-                    alert('Data warga tidak ditemukan!');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tidak Ditemukan',
+                        text: 'Data warga tidak ditemukan! Pastikan NIK atau Nama sudah benar.',
+                    });
                     document.getElementById('resultArea').style.display = 'none';
                 }
+            })
+            .catch(error => {
+                btnCari.innerHTML = originalText;
+                btnCari.disabled = false;
+                Swal.fire('Error', 'Terjadi kesalahan pada server.', 'error');
             });
     }
+
+    // Tampilkan notifikasi jika masih tembus lewat validasi server
+    document.addEventListener("DOMContentLoaded", function() {
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'PENDAFTARAN DITOLAK!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Tutup'
+            });
+        @endif
+    });
 </script>
 </body>
 </html>

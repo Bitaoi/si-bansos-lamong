@@ -73,7 +73,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/surat/{id_pengajuan}/cetak', [SuratController::class, 'cetakSurat'])->name('surat.cetak');
 
     // --- PENGATURAN JADWAL (ADMIN) ---
-    // --- PENGATURAN JADWAL (ADMIN) ---
     Route::get('/admin/jadwal', [JadwalController::class, 'indexAdmin'])->name('admin.jadwal.index');
     Route::put('/admin/jadwal/{id}', [JadwalController::class, 'update'])->name('admin.jadwal.update');
 
@@ -81,6 +80,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/galeri', [GaleriController::class, 'index'])->name('admin.galeri.index');
     Route::post('/admin/galeri', [GaleriController::class, 'store'])->name('admin.galeri.store');
     Route::delete('/admin/galeri/{id}', [GaleriController::class, 'destroy'])->name('admin.galeri.destroy');
+
+    // --- EKSPOR REKAPITULASI (ADMIN) ---
+    Route::get('/admin/dashboard/export', [DashboardController::class, 'exportRekapAdmin'])->name('admin.rekap.export');
+    Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportRekapAdminPdf'])->name('admin.rekap.export.pdf');
 
     // ====================================================
     // 2. AREA KHUSUS RT
@@ -102,5 +105,10 @@ Route::middleware(['auth'])->group(function () {
     // Data Warga (View only for RT)
     Route::get('/rt/warga', [WargaController::class, 'indexRT'])->name('rt.warga.index');
     
-    Route::delete('/rt/pengajuan/{id}/batal', [App\Http\Controllers\PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
+    // Batal Pengajuan
+    Route::delete('/rt/pengajuan/{id}/batal', [PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
+
+    // --- EKSPOR REKAPITULASI (RT) ---
+    Route::get('/rt/dashboard/export', [DashboardController::class, 'exportRekapRT'])->name('rt.rekap.export');
+    Route::get('/rt/dashboard/export-pdf', [DashboardController::class, 'exportRekapRTPdf'])->name('rt.rekap.export.pdf');
 });

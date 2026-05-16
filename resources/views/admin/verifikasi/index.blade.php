@@ -61,10 +61,9 @@
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
                 <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
             </h5>
-            
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Manajemen Akun RT</a></li>
+                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Akun RT</a></li>
                 <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
                 <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
@@ -206,16 +205,12 @@
                             <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-camera-fill me-2"></i>FOTO KONDISI RUMAH</h6>
                             <div class="row g-3 text-center">
                                 <div class="col-6">
-                                    <a href="{{ asset('storage/'.$item->foto_rumah_depan) }}" target="_blank">
-                                        <img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence">
-                                    </a>
+                                    <a href="{{ asset('storage/'.$item->foto_rumah_depan) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence"></a>
                                     <small class="d-block mt-2 fw-bold text-muted">Tampak Depan</small>
                                 </div>
                                 <div class="col-6">
                                     @if($item->foto_rumah_dalam) 
-                                        <a href="{{ asset('storage/'.$item->foto_rumah_dalam) }}" target="_blank">
-                                            <img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence">
-                                        </a>
+                                        <a href="{{ asset('storage/'.$item->foto_rumah_dalam) }}" target="_blank"><img src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence"></a>
                                         <small class="d-block mt-2 fw-bold text-muted">Interior / Dalam</small>
                                     @else 
                                         <div class="bg-light d-flex align-items-center justify-content-center border text-muted small" style="height: 150px; border-radius: 8px;">Tanpa Foto Interior</div> 
@@ -247,47 +242,48 @@
                             
                             @if($item->status_verifikasi_admin == 'Proses')
                                 <div class="alert alert-secondary small text-dark border-0">Data pengajuan baru masuk. Silakan jadwalkan kapan tim desa akan melakukan observasi ke lapangan.</div>
-                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
+                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" class="needs-validation" novalidate>
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="jadwal_observasi">
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Tentukan Tanggal Observasi <span class="text-danger">*</span></label>
                                         <input type="date" name="tgl_observasi" class="form-control border-secondary" required>
+                                        <div class="invalid-feedback">Tanggal observasi wajib diisi!</div>
                                     </div>
                                     <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm"><i class="bi bi-cursor-fill me-2"></i>Jadwalkan Observasi Lapangan</button>
                                 </form>
                             
                             @elseif($item->status_verifikasi_admin == 'Verifikasi Lapangan')
                                 <div class="alert alert-warning small border-0 mb-3 text-dark"><i class="bi bi-info-circle me-1"></i> Isi 11 Kriteria BPS untuk kalkulasi skor kelayakan.</div>
-                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="needs-validation form-review" data-id="{{ $item->id }}" novalidate>
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_observasi">
                                     
                                     @php $se = $item->surveiEkonomi; @endphp
                                     
                                     <div class="accordion mb-3" id="accordionSensus{{ $item->id }}">
                                         <div class="accordion-item border-0 shadow-sm rounded mb-2">
-                                            <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriA{{ $item->id }}">Point A. Kondisi Hunian</button></h2>
-                                            <div id="kategoriA{{ $item->id }}" class="accordion-collapse collapse bg-white p-3" data-bs-parent="#accordionSensus{{ $item->id }}">
-                                                <div class="mb-2"><label class="small fw-bold">1. Luas Lantai</label><select name="luas_lantai" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="< 8 m² per orang" {{ ($se->luas_lantai ?? '') == '< 8 m² per orang' ? 'selected' : '' }}>< 8 m² per orang</option><option value="> 8 m² per orang" {{ ($se->luas_lantai ?? '') == '> 8 m² per orang' ? 'selected' : '' }}>> 8 m² per orang</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">2. Jenis Lantai</label><select name="jenis_lantai" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Tanah / Bambu" {{ ($se->jenis_lantai ?? '') == 'Tanah / Bambu' ? 'selected' : '' }}>Tanah / Bambu</option><option value="Semen / Plester" {{ ($se->jenis_lantai ?? '') == 'Semen / Plester' ? 'selected' : '' }}>Semen / Plester</option><option value="Keramik / Marmer" {{ ($se->jenis_lantai ?? '') == 'Keramik / Marmer' ? 'selected' : '' }}>Keramik / Marmer</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">3. Jenis Dinding</label><select name="jenis_dinding" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Bilik Bambu / Kayu Murah" {{ ($se->jenis_dinding ?? '') == 'Bilik Bambu / Kayu Murah' ? 'selected' : '' }}>Bilik Bambu / Kayu Murah</option><option value="Tembok Tanpa Plester" {{ ($se->jenis_dinding ?? '') == 'Tembok Tanpa Plester' ? 'selected' : '' }}>Tembok Tanpa Plester</option><option value="Tembok Bagus / Semen" {{ ($se->jenis_dinding ?? '') == 'Tembok Bagus / Semen' ? 'selected' : '' }}>Tembok Bagus / Semen</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">4. Sumber Air</label><select name="sumber_air" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Sungai / Mata Air" {{ ($se->sumber_air ?? '') == 'Sungai / Mata Air' ? 'selected' : '' }}>Sungai / Mata Air</option><option value="Sumur / Pompa" {{ ($se->sumber_air ?? '') == 'Sumur / Pompa' ? 'selected' : '' }}>Sumur / Pompa</option><option value="PDAM" {{ ($se->sumber_air ?? '') == 'PDAM' ? 'selected' : '' }}>PDAM</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">5. Daya Listrik</label><select name="daya_listrik" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Tidak Pakai/Numpang" {{ ($se->daya_listrik ?? '') == 'Tidak Pakai/Numpang' ? 'selected' : '' }}>Tidak Pakai/Numpang</option><option value="450 Watt (Subsidi)" {{ ($se->daya_listrik ?? '') == '450 Watt (Subsidi)' ? 'selected' : '' }}>450 Watt (Subsidi)</option><option value="900 Watt (Subsidi)" {{ ($se->daya_listrik ?? '') == '900 Watt (Subsidi)' ? 'selected' : '' }}>900 Watt (Subsidi)</option><option value="900 Watt (Non-Subsidi) / 1300+" {{ ($se->daya_listrik ?? '') == '900 Watt (Non-Subsidi) / 1300+' ? 'selected' : '' }}>900 Watt (Non-Subsidi) / 1300+</option></select></div>
+                                            <h2 class="accordion-header"><button class="accordion-button fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriA{{ $item->id }}">Point A. Kondisi Hunian</button></h2>
+                                            <div id="kategoriA{{ $item->id }}" class="accordion-collapse collapse show bg-white p-3" data-bs-parent="#accordionSensus{{ $item->id }}">
+                                                <div class="mb-2"><label class="small fw-bold">1. Luas Lantai <span class="text-danger">*</span></label><select name="luas_lantai" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="< 8 m² per orang" {{ ($se->luas_lantai ?? '') == '< 8 m² per orang' ? 'selected' : '' }}>< 8 m² per orang</option><option value="> 8 m² per orang" {{ ($se->luas_lantai ?? '') == '> 8 m² per orang' ? 'selected' : '' }}>> 8 m² per orang</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">2. Jenis Lantai <span class="text-danger">*</span></label><select name="jenis_lantai" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Tanah / Bambu" {{ ($se->jenis_lantai ?? '') == 'Tanah / Bambu' ? 'selected' : '' }}>Tanah / Bambu</option><option value="Semen / Plester" {{ ($se->jenis_lantai ?? '') == 'Semen / Plester' ? 'selected' : '' }}>Semen / Plester</option><option value="Keramik / Marmer" {{ ($se->jenis_lantai ?? '') == 'Keramik / Marmer' ? 'selected' : '' }}>Keramik / Marmer</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">3. Jenis Dinding <span class="text-danger">*</span></label><select name="jenis_dinding" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Bilik Bambu / Kayu Murah" {{ ($se->jenis_dinding ?? '') == 'Bilik Bambu / Kayu Murah' ? 'selected' : '' }}>Bilik Bambu / Kayu Murah</option><option value="Tembok Tanpa Plester" {{ ($se->jenis_dinding ?? '') == 'Tembok Tanpa Plester' ? 'selected' : '' }}>Tembok Tanpa Plester</option><option value="Tembok Bagus / Semen" {{ ($se->jenis_dinding ?? '') == 'Tembok Bagus / Semen' ? 'selected' : '' }}>Tembok Bagus / Semen</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">4. Sumber Air <span class="text-danger">*</span></label><select name="sumber_air" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Sungai / Mata Air" {{ ($se->sumber_air ?? '') == 'Sungai / Mata Air' ? 'selected' : '' }}>Sungai / Mata Air</option><option value="Sumur / Pompa" {{ ($se->sumber_air ?? '') == 'Sumur / Pompa' ? 'selected' : '' }}>Sumur / Pompa</option><option value="PDAM" {{ ($se->sumber_air ?? '') == 'PDAM' ? 'selected' : '' }}>PDAM</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">5. Daya Listrik <span class="text-danger">*</span></label><select name="daya_listrik" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Tidak Pakai/Numpang" {{ ($se->daya_listrik ?? '') == 'Tidak Pakai/Numpang' ? 'selected' : '' }}>Tidak Pakai/Numpang</option><option value="450 Watt (Subsidi)" {{ ($se->daya_listrik ?? '') == '450 Watt (Subsidi)' ? 'selected' : '' }}>450 Watt (Subsidi)</option><option value="900 Watt (Subsidi)" {{ ($se->daya_listrik ?? '') == '900 Watt (Subsidi)' ? 'selected' : '' }}>900 Watt (Subsidi)</option><option value="900 Watt (Non-Subsidi) / 1300+" {{ ($se->daya_listrik ?? '') == '900 Watt (Non-Subsidi) / 1300+' ? 'selected' : '' }}>900 Watt (Non-Subsidi) / 1300+</option></select></div>
                                             </div>
                                         </div>
                                         <div class="accordion-item border-0 shadow-sm rounded mb-2">
                                             <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriB{{ $item->id }}">Point B. Kepemilikan Aset</button></h2>
                                             <div id="kategoriB{{ $item->id }}" class="accordion-collapse collapse bg-white p-3" data-bs-parent="#accordionSensus{{ $item->id }}">
-                                                <div class="mb-2"><label class="small fw-bold">6. Kendaraan</label><select name="kendaraan" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Tidak punya" {{ ($se->kendaraan ?? '') == 'Tidak punya' ? 'selected' : '' }}>Tidak punya</option><option value="Sepeda / 1 Motor Butut" {{ ($se->kendaraan ?? '') == 'Sepeda / 1 Motor Butut' ? 'selected' : '' }}>Sepeda / 1 Motor Butut</option><option value="1 Motor Baru (Kredit/Lunas)" {{ ($se->kendaraan ?? '') == '1 Motor Baru (Kredit/Lunas)' ? 'selected' : '' }}>1 Motor Baru (Kredit/Lunas)</option><option value="Mobil" {{ ($se->kendaraan ?? '') == 'Mobil' ? 'selected' : '' }}>Mobil</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">7. Elektronik</label><select name="elektronik" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Tidak ada Kulkas/TV" {{ ($se->elektronik ?? '') == 'Tidak ada Kulkas/TV' ? 'selected' : '' }}>Tidak ada Kulkas/TV</option><option value="Ada Kulkas / TV Tabung" {{ ($se->elektronik ?? '') == 'Ada Kulkas / TV Tabung' ? 'selected' : '' }}>Ada Kulkas / TV Tabung</option><option value="Ada AC / TV Layar Datar Besar" {{ ($se->elektronik ?? '') == 'Ada AC / TV Layar Datar Besar' ? 'selected' : '' }}>Ada AC / TV Layar Datar Besar</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">8. Ternak/Lahan</label><select name="ternak_lahan" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Tidak punya" {{ ($se->ternak_lahan ?? '') == 'Tidak punya' ? 'selected' : '' }}>Tidak punya</option><option value="Punya ternak kambing/sapi" {{ ($se->ternak_lahan ?? '') == 'Punya ternak kambing/sapi' ? 'selected' : '' }}>Punya ternak kambing/sapi</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">6. Kendaraan <span class="text-danger">*</span></label><select name="kendaraan" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Tidak punya" {{ ($se->kendaraan ?? '') == 'Tidak punya' ? 'selected' : '' }}>Tidak punya</option><option value="Sepeda / 1 Motor Butut" {{ ($se->kendaraan ?? '') == 'Sepeda / 1 Motor Butut' ? 'selected' : '' }}>Sepeda / 1 Motor Butut</option><option value="1 Motor Baru (Kredit/Lunas)" {{ ($se->kendaraan ?? '') == '1 Motor Baru (Kredit/Lunas)' ? 'selected' : '' }}>1 Motor Baru (Kredit/Lunas)</option><option value="Mobil" {{ ($se->kendaraan ?? '') == 'Mobil' ? 'selected' : '' }}>Mobil</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">7. Elektronik <span class="text-danger">*</span></label><select name="elektronik" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Tidak ada Kulkas/TV" {{ ($se->elektronik ?? '') == 'Tidak ada Kulkas/TV' ? 'selected' : '' }}>Tidak ada Kulkas/TV</option><option value="Ada Kulkas / TV Tabung" {{ ($se->elektronik ?? '') == 'Ada Kulkas / TV Tabung' ? 'selected' : '' }}>Ada Kulkas / TV Tabung</option><option value="Ada AC / TV Layar Datar Besar" {{ ($se->elektronik ?? '') == 'Ada AC / TV Layar Datar Besar' ? 'selected' : '' }}>Ada AC / TV Layar Datar Besar</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">8. Ternak/Lahan <span class="text-danger">*</span></label><select name="ternak_lahan" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Tidak punya" {{ ($se->ternak_lahan ?? '') == 'Tidak punya' ? 'selected' : '' }}>Tidak punya</option><option value="Punya ternak kambing/sapi" {{ ($se->ternak_lahan ?? '') == 'Punya ternak kambing/sapi' ? 'selected' : '' }}>Punya ternak kambing/sapi</option></select></div>
                                             </div>
                                         </div>
                                         <div class="accordion-item border-0 shadow-sm rounded">
                                             <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#kategoriC{{ $item->id }}">Point C. Sosial Ekonomi</button></h2>
                                             <div id="kategoriC{{ $item->id }}" class="accordion-collapse collapse bg-white p-3" data-bs-parent="#accordionSensus{{ $item->id }}">
-                                                <div class="mb-2"><label class="small fw-bold">9. Pendidikan KK</label><select name="pendidikan_kk" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="SD / Tidak Sekolah" {{ ($se->pendidikan_kk ?? '') == 'SD / Tidak Sekolah' ? 'selected' : '' }}>SD / Tidak Sekolah</option><option value="SMP/SMA" {{ ($se->pendidikan_kk ?? '') == 'SMP/SMA' ? 'selected' : '' }}>SMP/SMA</option><option value="Kuliah (D3/S1)" {{ ($se->pendidikan_kk ?? '') == 'Kuliah (D3/S1)' ? 'selected' : '' }}>Kuliah (D3/S1)</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">10. Pekerjaan KK</label><select name="pekerjaan" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Buruh Tani / Serabutan" {{ ($se->pekerjaan ?? '') == 'Buruh Tani / Serabutan' ? 'selected' : '' }}>Buruh Tani / Serabutan</option><option value="Karyawan Swasta / Pedagang Kecil" {{ ($se->pekerjaan ?? '') == 'Karyawan Swasta / Pedagang Kecil' ? 'selected' : '' }}>Karyawan Swasta / Pedagang Kecil</option><option value="PNS / TNI / POLRI" {{ ($se->pekerjaan ?? '') == 'PNS / TNI / POLRI' ? 'selected' : '' }}>PNS / TNI / POLRI</option></select></div>
-                                                <div class="mb-2"><label class="small fw-bold">11. Jml Tanggungan</label><select name="jml_tanggungan" class="form-select form-select-sm" required><option value="">-- Pilih --</option><option value="Banyak (> 3 anak/lansia)" {{ ($se->jml_tanggungan ?? '') == 'Banyak (> 3 anak/lansia)' ? 'selected' : '' }}>Banyak (> 3 anak/lansia)</option><option value="Sedikit (1-2 orang)" {{ ($se->jml_tanggungan ?? '') == 'Sedikit (1-2 orang)' ? 'selected' : '' }}>Sedikit (1-2 orang)</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">9. Pendidikan KK <span class="text-danger">*</span></label><select name="pendidikan_kk" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="SD / Tidak Sekolah" {{ ($se->pendidikan_kk ?? '') == 'SD / Tidak Sekolah' ? 'selected' : '' }}>SD / Tidak Sekolah</option><option value="SMP/SMA" {{ ($se->pendidikan_kk ?? '') == 'SMP/SMA' ? 'selected' : '' }}>SMP/SMA</option><option value="Kuliah (D3/S1)" {{ ($se->pendidikan_kk ?? '') == 'Kuliah (D3/S1)' ? 'selected' : '' }}>Kuliah (D3/S1)</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">10. Pekerjaan KK <span class="text-danger">*</span></label><select name="pekerjaan" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Buruh Tani / Serabutan" {{ ($se->pekerjaan ?? '') == 'Buruh Tani / Serabutan' ? 'selected' : '' }}>Buruh Tani / Serabutan</option><option value="Karyawan Swasta / Pedagang Kecil" {{ ($se->pekerjaan ?? '') == 'Karyawan Swasta / Pedagang Kecil' ? 'selected' : '' }}>Karyawan Swasta / Pedagang Kecil</option><option value="PNS / TNI / POLRI" {{ ($se->pekerjaan ?? '') == 'PNS / TNI / POLRI' ? 'selected' : '' }}>PNS / TNI / POLRI</option></select></div>
+                                                <div class="mb-2"><label class="small fw-bold">11. Jml Tanggungan <span class="text-danger">*</span></label><select name="jml_tanggungan" class="form-select form-select-sm border-secondary" required><option value="">-- Pilih --</option><option value="Banyak (> 3 anak/lansia)" {{ ($se->jml_tanggungan ?? '') == 'Banyak (> 3 anak/lansia)' ? 'selected' : '' }}>Banyak (> 3 anak/lansia)</option><option value="Sedikit (1-2 orang)" {{ ($se->jml_tanggungan ?? '') == 'Sedikit (1-2 orang)' ? 'selected' : '' }}>Sedikit (1-2 orang)</option></select></div>
                                             </div>
                                         </div>
                                     </div>
@@ -298,15 +294,19 @@
 
                             @elseif($item->status_verifikasi_admin == 'Menunggu Musdes')
                                 <div class="alert alert-info small border-0 text-dark">Observasi Selesai. Unggah Berita Acara Musdes untuk membuka kunci Final.</div>
-                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="hasil_musdes">
-                                    <div class="mb-3"><label class="small fw-bold">Berita Acara Musdes <span class="text-danger">*</span></label><input type="file" name="berita_acara_musdes" class="form-control form-control-sm border-secondary" required></div>
+                                    <div class="mb-3">
+                                        <label class="small fw-bold">Berita Acara Musdes <span class="text-danger">*</span></label>
+                                        <input type="file" name="berita_acara_musdes" class="form-control form-control-sm border-secondary" required>
+                                        <div class="invalid-feedback">File Berita Acara Wajib Diunggah!</div>
+                                    </div>
                                     <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm"><i class="bi bi-unlock-fill me-2"></i>Unggah & Buka Kunci Final</button>
                                 </form>
 
                             @elseif($item->status_verifikasi_admin == 'Siap Keputusan')
                                 <div class="alert alert-success small border-0 text-dark">Kunci keputusan terbuka.</div>
-                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST">
+                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" class="needs-validation" novalidate>
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="final">
                                     <div class="mb-3">
                                         <label class="small fw-bold">Jika Ditolak, beri alasan (Opsional):</label>
@@ -336,57 +336,23 @@
     @if($item->surveiEkonomi)
         @php
             $se = $item->surveiEkonomi;
-            
-            // Logika Penarikan Skor Persis dengan SurveiEkonomi::kalkulasiDesil()
-            // A. Hunian & Fasilitas
             $s_luas = ($se->luas_lantai == '> 8 m² per orang') ? 10 : 0;
-            
-            $s_lantai = 0;
-            if ($se->jenis_lantai == 'Semen / Plester') $s_lantai = 5;
-            elseif ($se->jenis_lantai == 'Keramik / Marmer') $s_lantai = 15;
-            
-            $s_dinding = 0;
-            if ($se->jenis_dinding == 'Tembok Tanpa Plester') $s_dinding = 5;
-            elseif ($se->jenis_dinding == 'Tembok Bagus / Semen') $s_dinding = 10;
-            
-            $s_air = 0;
-            if ($se->sumber_air == 'Sumur / Pompa') $s_air = 5;
-            elseif ($se->sumber_air == 'PDAM') $s_air = 10;
-            
-            $s_listrik = 0;
-            if ($se->daya_listrik == '900 Watt (Subsidi)') $s_listrik = 5;
-            elseif ($se->daya_listrik == '900 Watt (Non-Subsidi) / 1300+') $s_listrik = 20;
-
+            $s_lantai = 0; if ($se->jenis_lantai == 'Semen / Plester') $s_lantai = 5; elseif ($se->jenis_lantai == 'Keramik / Marmer') $s_lantai = 15;
+            $s_dinding = 0; if ($se->jenis_dinding == 'Tembok Tanpa Plester') $s_dinding = 5; elseif ($se->jenis_dinding == 'Tembok Bagus / Semen') $s_dinding = 10;
+            $s_air = 0; if ($se->sumber_air == 'Sumur / Pompa') $s_air = 5; elseif ($se->sumber_air == 'PDAM') $s_air = 10;
+            $s_listrik = 0; if ($se->daya_listrik == '900 Watt (Subsidi)') $s_listrik = 5; elseif ($se->daya_listrik == '900 Watt (Non-Subsidi) / 1300+') $s_listrik = 20;
             $subtotalA = $s_luas + $s_lantai + $s_dinding + $s_air + $s_listrik;
 
-            // B. Aset
-            $s_kendaraan = 0;
-            if ($se->kendaraan == 'Sepeda / 1 Motor Butut') $s_kendaraan = 5;
-            elseif ($se->kendaraan == '1 Motor Baru (Kredit/Lunas)') $s_kendaraan = 15;
-            elseif ($se->kendaraan == 'Mobil') $s_kendaraan = 50;
-
-            $s_elektronik = 0;
-            if ($se->elektronik == 'Ada Kulkas / TV Tabung') $s_elektronik = 5;
-            elseif ($se->elektronik == 'Ada AC / TV Layar Datar Besar') $s_elektronik = 15;
-
+            $s_kendaraan = 0; if ($se->kendaraan == 'Sepeda / 1 Motor Butut') $s_kendaraan = 5; elseif ($se->kendaraan == '1 Motor Baru (Kredit/Lunas)') $s_kendaraan = 15; elseif ($se->kendaraan == 'Mobil') $s_kendaraan = 50;
+            $s_elektronik = 0; if ($se->elektronik == 'Ada Kulkas / TV Tabung') $s_elektronik = 5; elseif ($se->elektronik == 'Ada AC / TV Layar Datar Besar') $s_elektronik = 15;
             $s_ternak = ($se->ternak_lahan == 'Punya ternak kambing/sapi') ? 10 : 0;
-
             $subtotalB = $s_kendaraan + $s_elektronik + $s_ternak;
 
-            // C. Sosial Ekonomi
-            $s_pendidikan = 0;
-            if ($se->pendidikan_kk == 'SMP/SMA') $s_pendidikan = 5;
-            elseif ($se->pendidikan_kk == 'Kuliah (D3/S1)') $s_pendidikan = 15;
-
-            $s_kerja = 0;
-            if ($se->pekerjaan == 'Karyawan Swasta / Pedagang Kecil') $s_kerja = 10;
-            elseif ($se->pekerjaan == 'PNS / TNI / POLRI') $s_kerja = 50;
-
+            $s_pendidikan = 0; if ($se->pendidikan_kk == 'SMP/SMA') $s_pendidikan = 5; elseif ($se->pendidikan_kk == 'Kuliah (D3/S1)') $s_pendidikan = 15;
+            $s_kerja = 0; if ($se->pekerjaan == 'Karyawan Swasta / Pedagang Kecil') $s_kerja = 10; elseif ($se->pekerjaan == 'PNS / TNI / POLRI') $s_kerja = 50;
             $s_tanggungan = ($se->jml_tanggungan == 'Banyak (> 3 anak/lansia)') ? -5 : 0;
-
             $subtotalC = $s_pendidikan + $s_kerja + $s_tanggungan;
             
-            // Fallback total check
             $totalHitung = $subtotalA + $subtotalB + $subtotalC;
         @endphp
 
@@ -437,10 +403,6 @@
                                 </tr>
                             </tfoot>
                         </table>
-                        
-                        @if($totalHitung != $item->surveiEkonomi->total_skor)
-                        <div class="alert alert-warning m-3 small border-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i> Peringatan: Skor hitung rincian ({{ $totalHitung }}) berbeda dengan database ({{ $item->surveiEkonomi->total_skor }}). Hubungi developer jika ini terjadi.</div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -449,5 +411,47 @@
 @endforeach
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const formsValidate = document.querySelectorAll('.needs-validation');
+        
+        Array.from(formsValidate).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Cari field pertama yang kosong/belum dipilih
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) {
+                        
+                        // Cek apakah field tersebut tersembunyi di dalam Accordion
+                        const collapseParent = firstInvalid.closest('.accordion-collapse');
+                        if (collapseParent && !collapseParent.classList.contains('show')) {
+                            // Paksa buka accordion yang menyimpan field kosong tersebut
+                            const bsCollapse = new bootstrap.Collapse(collapseParent, { toggle: false });
+                            bsCollapse.show();
+                        }
+                        
+                        // Munculkan notifikasi ke Admin menggunakan SweetAlert2
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Gagal Menyimpan!',
+                            text: 'Masih ada parameter atau data yang belum Anda isi. Silakan periksa kembali bagian yang bergaris merah.',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: '<i class="bi bi-pencil-square me-2"></i>Lengkapi Data'
+                        });
+                    }
+                }
+                
+                // Tambahkan class CSS bawaan Bootstrap untuk memunculkan garis merah
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
 </body>
 </html>

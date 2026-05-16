@@ -32,12 +32,27 @@ class PengajuanController extends Controller
 
         if ($warga) {
             $jumlahAnggota = Warga::where('no_kk', $warga->no_kk)->count();
+
+            // ==============================================================
+            // LOGIKA BARU: Cek apakah warga ini sudah didaftarkan bulan ini
+            // ==============================================================
+            $bulanIni = date('m');
+            $tahunIni = date('Y');
+            
+            $sudahDaftar = Pengajuan::where('nik', $warga->nik)
+                                    ->whereMonth('tgl_pengajuan', $bulanIni)
+                                    ->whereYear('tgl_pengajuan', $tahunIni)
+                                    ->exists();
+
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'nik' => $warga->nik, 'nama' => $warga->nama_lengkap, 'no_kk' => $warga->no_kk,
+                    'nik' => $warga->nik, 
+                    'nama' => $warga->nama_lengkap, 
+                    'no_kk' => $warga->no_kk,
                     'alamat' => $warga->alamat_lengkap . " RT " . $warga->rt . " RW " . $warga->rw,
-                    'jumlah_keluarga' => $jumlahAnggota
+                    'jumlah_keluarga' => $jumlahAnggota,
+                    'sudah_daftar' => $sudahDaftar // <-- Mengirimkan status ke form RT
                 ]
             ]);
         }
@@ -46,6 +61,7 @@ class PengajuanController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validasi Jadwal (Timeframe)
         $jadwalUsulan = JadwalBansos::where('nama_tahapan', 'LIKE', '%Usulan%')->first();
         $hariIni = (int) date('d');
 
@@ -55,11 +71,12 @@ class PengajuanController extends Controller
 
         $bansos = JenisBansos::findOrFail($request->id_bansos);
 
+        // 2. Validasi Sisa Kuota
         if ($bansos->sisa_kuota <= 0) {
             return redirect()->back()->with('error', "Gagal mengajukan! Kuota untuk program {$bansos->nama_bansos} sudah penuh.")->withInput();
         }
 
-        // VALIDASI DIPERBARUI: Hapus KTP dan KK
+        // 3. Validasi Form Input
         $request->validate([
             'nik' => 'required|exists:wargas,nik',
             'id_bansos' => 'required',
@@ -70,6 +87,25 @@ class PengajuanController extends Controller
             'foto_rumah_dalam' => 'nullable|image|max:2048'
         ]);
 
+        // =========================================================================
+        // FITUR BARU: CEK PENGAJUAN GANDA DI PERIODE (BULAN & TAHUN) YANG SAMA
+        // =========================================================================
+        $bulanPengajuan = date('m', strtotime($request->tgl_pengajuan));
+        $tahunPengajuan = date('Y', strtotime($request->tgl_pengajuan));
+
+        $cekDouble = Pengajuan::where('nik', $request->nik)
+                        ->whereMonth('tgl_pengajuan', $bulanPengajuan)
+                        ->whereYear('tgl_pengajuan', $tahunPengajuan)
+                        ->first();
+
+        if ($cekDouble) {
+            return redirect()->back()
+                ->with('error', 'PENDAFTARAN DITOLAK! Warga dengan NIK tersebut sudah terdaftar / diajukan pada periode bulan ini. Tidak boleh didaftarkan lagi sampai ke periode berikutnya.')
+                ->withInput();
+        }
+        // =========================================================================
+
+        // 4. Jika lolos semua validasi, Simpan Data
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
         $pathDalam = $request->file('foto_rumah_dalam') ? $request->file('foto_rumah_dalam')->store('pengajuan/rumah', 'public') : null;
 

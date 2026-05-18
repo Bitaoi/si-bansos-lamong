@@ -176,4 +176,39 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Pop-up jika ada Error Validasi (Form kosong/salah)
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Data Belum Lengkap!',
+                html: `
+                    <div class="text-danger mb-2">Mohon periksa kembali isian form Anda:</div>
+                    <ul style="text-align: left; font-size: 0.9rem; margin-bottom: 0;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                `,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Saya Mengerti',
+                customClass: { popup: 'rounded-4 shadow-lg' }
+            });
+        @endif
+
+        // Pop-up jika Berhasil (Opsional, untuk notif sukses)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#7D88DC',
+                customClass: { popup: 'rounded-4 shadow-lg' }
+            });
+        @endif
+    });
+</script>
 </html>

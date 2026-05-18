@@ -83,10 +83,6 @@
         <div class="col-md-9 col-lg-10 p-4">
             <h4 class="fw-bold mb-4">Verifikasi Kelayakan Pengajuan</h4>
 
-            @if(session('success'))
-                <div class="alert alert-success border-0 shadow-sm rounded-4"><i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}</div>
-            @endif
-
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-0">
                     <table class="table table-custom table-hover align-middle mb-0">
@@ -130,7 +126,7 @@
                                         ];
                                         $currentBadge = $badges[$item->status_verifikasi_admin] ?? ['bg-dark', $item->status_verifikasi_admin];
                                     @endphp
-                                    <span class="fw-semibold">{{ $currentBadge[1] }}</span>
+                                    <span class="badge {{ $currentBadge[0] }} fw-semibold">{{ $currentBadge[1] }}</span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <button class="btn btn-primary btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $item->id }}"><i class="bi bi-search me-1"></i> Review</button>
@@ -306,15 +302,15 @@
 
                             @elseif($item->status_verifikasi_admin == 'Siap Keputusan')
                                 <div class="alert alert-success small border-0 text-dark">Kunci keputusan terbuka.</div>
-                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" class="needs-validation" novalidate>
+                                <form action="{{ route('verifikasi.update', $item->id) }}" method="POST" id="formFinal{{ $item->id }}">
                                     @csrf @method('PUT') <input type="hidden" name="tahap" value="final">
                                     <div class="mb-3">
-                                        <label class="small fw-bold">Jika Ditolak, beri alasan (Opsional):</label>
-                                        <textarea name="keterangan_ditolak" class="form-control form-control-sm border-secondary" rows="2" placeholder="Isi jika ditolak..."></textarea>
+                                        <label class="small text-danger">Alasan Penolakan (Wajib diisi jika ditolak)</label>
+                                        <textarea name="keterangan_ditolak" id="alasanTolak{{ $item->id }}" class="form-control form-control-sm border-secondary" rows="2" placeholder="Isi alasan jika Anda memilih tombol Tolak..."></textarea>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" name="status" value="Tidak Layak" class="btn btn-danger w-50 fw-bold shadow-sm" onclick="return confirm('Tolak?')"><i class="bi bi-x-circle"></i> TOLAK</button>
-                                        <button type="submit" name="status" value="Layak" class="btn btn-success w-50 fw-bold shadow-sm" onclick="return confirm('Setujui?')"><i class="bi bi-check-circle"></i> SETUJUI</button>
+                                        <button type="button" class="btn btn-danger w-50 fw-bold shadow-sm" onclick="validasiTolak({{ $item->id }})"><i class="bi bi-x-circle"></i> TOLAK</button>
+                                        <button type="button" class="btn btn-success w-50 fw-bold shadow-sm" onclick="konfirmasiSetuju({{ $item->id }})"><i class="bi bi-check-circle"></i> SETUJUI</button>
                                     </div>
                                 </form>
                             @else
@@ -411,32 +407,138 @@
 @endforeach
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const formsValidate = document.querySelectorAll('.needs-validation');
+    // Fungsi Cegat Tombol Tolak
+    function validasiTolak(id) {
+        const alasan = document.getElementById('alasanTolak' + id).value.trim();
         
+        if (alasan === '') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Belum Lengkap!',
+                text: 'Alasan Penolakan Wajib Diisi.',
+                confirmButtonColor: '#dc3545',
+                customClass: { popup: 'rounded-4 shadow-lg' }
+            });
+        } else {
+            Swal.fire({
+                title: 'Tolak pengajuan ini?',
+                text: "Anda yakin ingin menolak pengajuan warga ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-x-circle"></i> Ya, Tolak',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    const form = document.getElementById('formFinal' + id);
+                    const inputStatus = document.createElement('input');
+                    inputStatus.type = 'hidden';
+                    inputStatus.name = 'status';
+                    inputStatus.value = 'Tidak Layak';
+                    form.appendChild(inputStatus);
+                    form.submit();
+                }
+            });
+        }
+    }
+
+    // Fungsi Cegat Tombol Setuju (Baru)
+    function konfirmasiSetuju(id) {
+        Swal.fire({
+            title: 'Setujui Pengajuan?',
+            text: "Apakah Anda yakin warga ini layak menerima bantuan sosial?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-check-circle"></i> Ya, Setujui',
+            cancelButtonText: 'Batal',
+            customClass: { popup: 'rounded-4 shadow-lg' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('formFinal' + id);
+                const inputStatus = document.createElement('input');
+                inputStatus.type = 'hidden';
+                inputStatus.name = 'status';
+                inputStatus.value = 'Layak';
+                form.appendChild(inputStatus);
+                form.submit();
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // Popup untuk Error Validasi (jika masih ada dari sisi server)
+        @if($errors->any())
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Belum Lengkap!',
+                text: '{{ $errors->first() }}',
+                confirmButtonColor: '#dc3545',
+                customClass: { popup: 'rounded-4 shadow-lg' }
+            });
+        @endif
+
+        // Popup Peringatan Sukses/Gagal dari Server
+        @if(session('success'))
+            let pesan = "{!! session('success') !!}";
+            
+            if(pesan.includes('DISETUJUI')) {
+                Swal.fire({
+                    title: '<span class="text-success fw-bold">PENGAJUAN DISETUJUI!</span>',
+                    html: `
+                        <div class="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 mb-3 mt-2">
+                            <h6 class="text-success fw-bold mb-0">${pesan}</h6>
+                        </div>
+                        <p class="text-muted small mb-0">Selamat! Warga tersebut kini resmi disetujui untuk menerima bantuan.</p>
+                    `,
+                    icon: 'success',
+                    confirmButtonText: '<i class="bi"></i> Selesai',
+                    confirmButtonColor: '#198754',
+                    customClass: { popup: 'rounded-4 shadow-lg border-0' }
+                });
+            } else if(pesan.includes('DITOLAK')) {
+                Swal.fire({
+                    title: '<span class="text-danger fw-bold">PENGAJUAN DITOLAK</span>',
+                    html: `<p class="text-muted mb-0">${pesan}</p>`,
+                    icon: 'error',
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#dc3545',
+                    customClass: { popup: 'rounded-4 shadow-lg' }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: pesan,
+                    icon: 'success',
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#7D88DC',
+                    customClass: { popup: 'rounded-4 shadow-lg' }
+                });
+            }
+        @endif
+
+        // Cegat Form yang belum diisi (Sensus)
+        const formsValidate = document.querySelectorAll('.needs-validation');
         Array.from(formsValidate).forEach(form => {
             form.addEventListener('submit', event => {
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
                     
-                    // Cari field pertama yang kosong/belum dipilih
                     const firstInvalid = form.querySelector(':invalid');
                     if (firstInvalid) {
-                        
-                        // Cek apakah field tersebut tersembunyi di dalam Accordion
                         const collapseParent = firstInvalid.closest('.accordion-collapse');
                         if (collapseParent && !collapseParent.classList.contains('show')) {
-                            // Paksa buka accordion yang menyimpan field kosong tersebut
                             const bsCollapse = new bootstrap.Collapse(collapseParent, { toggle: false });
                             bsCollapse.show();
                         }
                         
-                        // Munculkan notifikasi ke Admin menggunakan SweetAlert2
                         Swal.fire({
                             icon: 'warning',
                             title: 'Gagal Menyimpan!',
@@ -446,8 +548,6 @@
                         });
                     }
                 }
-                
-                // Tambahkan class CSS bawaan Bootstrap untuk memunculkan garis merah
                 form.classList.add('was-validated');
             }, false);
         });

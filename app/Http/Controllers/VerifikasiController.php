@@ -39,7 +39,7 @@ class VerifikasiController extends Controller
                 'tgl_observasi' => $request->tgl_observasi
             ]);
 
-            return back()->with('success', 'Jadwal Observasi ditetapkan. Status berubah: Menunggu Verifikasi Lapangan.');
+            return back()->with('success', 'Jadwal Observasi ditetapkan.');
         }
         
         // TAHAP 2: Input Sensus Lapangan & Otomatisasi Skoring PMT
@@ -114,7 +114,13 @@ class VerifikasiController extends Controller
         
         // TAHAP 4: Keputusan Final
         elseif ($tahap == 'final') {
-            $request->validate(['status' => 'required|in:Layak,Tidak Layak']);
+            // PERBAIKAN: Tambahkan validasi required_if untuk keterangan_ditolak
+            $request->validate([
+                'status' => 'required|in:Layak,Tidak Layak',
+                'keterangan_ditolak' => 'required_if:status,Tidak Layak'
+            ], [
+                'keterangan_ditolak.required_if' => 'alasan wajib diisi.'
+            ]);
             
             $pengajuan->update([
                 'status_verifikasi_admin' => $request->status,

@@ -3,310 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Warga - Admin SI Bansos</title>
+    <title>Master Data Warga - SI Bansos Lamong</title>
     
-    <!-- Font Poppins & Bootstrap -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        /* 1. STRUKTUR PALET WARNA (KONTRAST TINGGI) */
-        :root {
-            --warna-paling-gelap: #2C3E50; 
-            --warna-utama: #7D88DC; 
-            --warna-soft: #BBD0EC; 
-            --warna-background: #FEFCFB; 
-        }
-
-        body { 
-            background-color: var(--warna-background) !important; 
-            color: var(--warna-paling-gelap);
-            font-family: 'Poppins', sans-serif !important; 
-        }
-
-        /* 2. OVERRIDE WARNA PRIMARY BOOTSTRAP */
-        .text-primary { color: var(--warna-utama) !important; }
-        .bg-primary { background-color: var(--warna-utama) !important; color: #ffffff !important; }
-        .border-primary { border-color: var(--warna-utama) !important; }
-
-        /* 3. STYLING TOMBOL */
-        .btn-primary { background-color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; color: #ffffff !important; box-shadow: 0 4px 6px rgba(125, 136, 220, 0.2); }
-        .btn-primary:hover { background-color: var(--warna-paling-gelap) !important; border-color: var(--warna-paling-gelap) !important; color: #ffffff !important; }
-        .btn-outline-primary { color: var(--warna-utama) !important; border-color: var(--warna-utama) !important; background-color: transparent !important; }
-        .btn-outline-primary:hover { background-color: var(--warna-utama) !important; color: #ffffff !important; }
-
-        /* 4. SIDEBAR & KARTU KONSISTEN */
+        :root { --warna-paling-gelap: #2C3E50; --warna-utama: #7D88DC; --warna-soft: #BBD0EC; --warna-background: #FEFCFB; }
+        body { background-color: var(--warna-background); font-family: 'Poppins', sans-serif; color: var(--warna-paling-gelap); }
         .sidebar { min-height: 100vh; background: var(--warna-paling-gelap); color: white; }
         .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; }
         .nav-link:hover, .nav-link.active { background: var(--warna-utama); color: white; }
         .nav-link i { width: 24px; display: inline-block; }
         .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--warna-soft); font-weight: 700; padding: 10px 20px; letter-spacing: 0.5px; opacity: 0.8; }
-
-        .card { border: 1px solid var(--warna-soft) !important; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .btn-action { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
-
-        /* 5. STYLING TABEL */
-        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--warna-utama); }
-        .table-custom tbody td { vertical-align: middle; border-bottom: 1px solid #f1f5f9; padding: 1rem 0.75rem; font-size: 0.95rem; }
+        .card { border: 1px solid var(--warna-soft); border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .table-custom thead th { background-color: var(--warna-soft); color: var(--warna-paling-gelap); font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid var(--warna-utama); text-transform: uppercase; padding: 15px; }
+        .table-custom tbody td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+        .btn-primary { background-color: var(--warna-utama); border-color: var(--warna-utama); }
+        .btn-primary:hover { background-color: #6a75ca; border-color: #6a75ca; }
     </style>
 </head>
 <body>
 
 <div class="container-fluid">
     <div class="row">
-        
-        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
-            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
-            </h5>
-            
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white"><i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL</h5>
             <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.rt.index') }}" class="nav-link {{ Request::routeIs('admin.rt.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-badge-fill"></i> Manajemen Akun RT
-                    </a>
-                </li>
-                
+                <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Akun RT</a></li>
                 <div class="sidebar-heading mt-3">Master Data</div>
-                <li class="nav-item">
-                    <a href="{{ route('warga.index') }}" class="nav-link {{ Request::routeIs('warga.*') ? 'active' : '' }}">
-                        <i class="bi bi-people-fill"></i> Data Warga
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('jenis-bansos.index') }}" class="nav-link {{ Request::routeIs('jenis-bansos.*') ? 'active' : '' }}">
-                        <i class="bi bi-gift-fill"></i> Jenis Bansos
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ Request::routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-event"></i> Jadwal Tahapan
-                    </a>
-                </li>
-                
+                <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link active"><i class="bi bi-people-fill"></i> Data Warga</a></li>
+                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
+                <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
                 <div class="sidebar-heading mt-3">Transaksi</div>
-                <li class="nav-item">
-                    <a href="{{ route('verifikasi.index') }}" class="nav-link {{ Request::routeIs('verifikasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('penyaluran.index') }}" class="nav-link {{ Request::routeIs('penyaluran.*') ? 'active' : '' }}">
-                        <i class="bi bi-truck"></i> Penyaluran
-                    </a>
-                </li>
-                
-                <!-- TOMBOL KELUAR -->
+                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>
+                <li class="nav-item"><a href="{{ route('penyaluran.index') }}" class="nav-link"><i class="bi bi-truck"></i> Penyaluran</a></li>
                 <li class="nav-item mt-5">
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="nav-link text-white w-100 text-start border-0 shadow-sm" style="background-color: #dc3545; border-radius: 8px;">
-                            <i class="bi bi-box-arrow-right"></i> Keluar
-                        </button>
-                    </form>
+                    <form action="{{ route('logout') }}" method="POST">@csrf<button type="submit" class="nav-link text-white w-100 text-start border-0 bg-danger rounded-3"><i class="bi bi-box-arrow-right"></i> Keluar</button></form>
                 </li>
             </ul>
         </div>
-        <!-- AKHIR SIDEBAR -->
 
         <div class="col-md-9 col-lg-10 p-4">
             
-            <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold"><i class="bi bi-people-fill me-2"></i>Data Warga</h5>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-sm btn-danger"><i class="bi bi-box-arrow-right"></i></button>
-                </form>
-            </div>
-
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 class="fw-bold mb-1">Data Kependudukan</h4>
-                    <p class="text-muted mb-0">Kelola data warga penerima bantuan sosial.</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('warga.template') }}" class="btn btn-outline-success">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> Template
-                    </a>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
-                        <i class="bi bi-file-earmark-arrow-up"></i> Import Excel
-                    </button>
-                    <a href="{{ route('warga.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i> Tambah Warga
-                    </a>
+                    <h3 class="fw-bold mb-1 text-dark">Master Data Warga</h3>
+                    <p class="text-muted mb-0">Kelola basis data penduduk Desa Lamong.</p>
                 </div>
             </div>
 
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+                <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-custom table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-4">NIK</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>Alamat Domisili</th>
-                                    <th>RT / RW</th>
-                                    <th>Pekerjaan</th>
-                                    <th class="text-end pe-4">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($wargas as $warga)
-                                <tr>
-                                    <td class="ps-4 fw-bold text-primary">{{ $warga->nik }}</td>
-                                    <td>
-                                        <div class="fw-bold text-dark d-flex align-items-center gap-2">
-                                            {{ $warga->nama_lengkap }}
-                                            @if($warga->desil)
-                                                @php
-                                                    $warna = $warga->desil == 1 ? 'danger' : ($warga->desil == 2 ? 'warning text-dark' : ($warga->desil == 3 ? 'info text-dark' : 'secondary'));
-                                                @endphp
-                                                <span class="badge bg-{{ $warna }} rounded-pill" style="font-size: 0.7rem;">Desil {{ $warga->desil }}</span>
-                                            @endif
-                                        </div>
-                                        <small class="text-muted">{{ $warga->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
-                                    </td>
-                                    <td>{{ Str::limit($warga->alamat_lengkap, 30) }}</td>
-                                    <td><span class="badge bg-light text-dark border">{{ $warga->rt }} / {{ $warga->rw }}</span></td>
-                                    <td>{{ $warga->pekerjaan }}</td>
-                                    <td class="text-end pe-4">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            
-                                            <button type="button" class="btn btn-action btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesil{{ $warga->nik }}" title="Hitung Kelayakan (Desil)">
-                                                <i class="bi bi-calculator"></i>
-                                            </button>
-
-                                            <a href="{{ route('warga.edit', $warga->nik) }}" class="btn btn-action btn-warning text-white btn-sm" title="Edit">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </a>
-                                            <form action="{{ route('warga.destroy', $warga->nik) }}" method="POST" onsubmit="return confirm('Hapus data warga ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-action btn-danger btn-sm" title="Hapus">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <div class="modal fade" id="modalDesil{{ $warga->nik }}" tabindex="-1">
-                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-primary text-white">
-                                                <h5 class="modal-title fw-bold"><i class="bi bi-calculator me-2"></i>Penilaian Kelayakan (Desil)</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form action="{{ route('warga.update_desil', $warga->nik) }}" method="POST">
-                                                @csrf @method('PUT')
-                                                <div class="modal-body p-4 text-start">
-                                                    <div class="alert alert-light border mb-4">
-                                                        Nama: <strong>{{ $warga->nama_lengkap }}</strong><br>
-                                                        NIK: <strong>{{ $warga->nik }}</strong><br>
-                                                        Desil Saat Ini: <span class="badge bg-dark">{{ $warga->desil ? 'Desil '.$warga->desil : 'Belum Dinilai' }}</span>
-                                                    </div>
-
-                                                    <p class="small text-muted mb-3">Centang kondisi di bawah ini untuk menghitung ulang skor kelayakan warga secara otomatis berdasarkan 14 Kriteria Kemiskinan BPS/DTSEN.</p>
-
-                                                    <div class="row g-2">
-                                                        @php
-                                                            $kriteria_list = [
-                                                                'Luas lantai bangunan tempat tinggal kurang dari 8m² per orang.',
-                                                                'Jenis lantai tempat tinggal terbuat dari tanah/bambu/kayu murahan.',
-                                                                'Jenis dinding tempat tinggal dari bambu/rumbia/kayu berkualitas rendah.',
-                                                                'Tidak memiliki fasilitas buang air besar (MCK) sendiri.',
-                                                                'Sumber penerangan rumah tangga tidak menggunakan listrik (PLN).',
-                                                                'Sumber air minum berasal dari sumur/mata air tidak terlindung/sungai.',
-                                                                'Bahan bakar untuk memasak sehari-hari adalah kayu bakar/arang.',
-                                                                'Hanya mengkonsumsi daging/susu/ayam dalam satu kali seminggu.',
-                                                                'Hanya membeli satu stel pakaian baru dalam setahun.',
-                                                                'Hanya sanggup makan sebanyak satu atau dua kali dalam sehari.',
-                                                                'Tidak sanggup membayar biaya pengobatan di puskesmas/poliklinik.',
-                                                                'Sumber penghasilan KK adalah petani gurem, buruh bangunan/perkebunan, atau pendapatan di bawah Rp 600.000/bulan.',
-                                                                'Pendidikan tertinggi Kepala Keluarga: Tidak sekolah / Tidak tamat SD.',
-                                                                'Tidak memiliki tabungan/barang yang mudah dijual bernilai minimal Rp 500.000.'
-                                                            ];
-                                                        @endphp
-
-                                                        @foreach($kriteria_list as $index => $kriteria)
-                                                        <div class="col-md-6">
-                                                            <label class="form-check p-2 border rounded h-100 bg-light text-wrap" style="cursor:pointer;">
-                                                                <input class="form-check-input mt-1 ms-1 me-2" type="checkbox" name="checklist[]" value="{{ $kriteria }}">
-                                                                <span class="form-check-label small" style="font-size: 0.8rem;">
-                                                                    {{ $index + 1 }}. {{ $kriteria }}
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer bg-light">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-save-fill me-1"></i> Simpan & Update Desil</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+            <div class="card border-0 shadow-sm bg-white mb-4 overflow-visible rounded-4">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-center justify-content-between">
+                        <div class="col-md-6 col-lg-5">
+                            <form action="{{ route('warga.index') }}" method="GET" class="d-flex gap-2">
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-secondary text-muted"><i class="bi bi-search"></i></span>
+                                    <input type="text" name="keyword" class="form-control border-secondary" placeholder="Cari NIK atau Nama Lengkap..." value="{{ request('keyword') }}">
+                                    <button class="btn btn-primary fw-bold" type="submit">Cari</button>
                                 </div>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="bi bi-people fs-1 d-block mb-3 opacity-25"></i>
-                                        Belum ada data warga. Silakan tambah atau import data.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                @if(request('keyword'))
+                                    <a href="{{ route('warga.index') }}" class="btn btn-outline-danger fw-bold shadow-sm d-flex align-items-center" title="Hapus Filter Pencarian">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                @endif
+                            </form>
+                        </div>
+
+                        <div class="col-md-6 col-lg-7 d-flex justify-content-md-end gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-success rounded-3 shadow-sm fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Import Excel
+                                </button>
+                                <ul class="dropdown-menu border-0 shadow-lg rounded-3">
+                                    <li><a class="dropdown-item" href="{{ route('warga.template') }}"><i class="bi bi-download me-2 text-primary"></i>1. Unduh Template</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="{{ route('warga.import') }}" method="POST" enctype="multipart/form-data" class="px-3 py-2">
+                                            @csrf
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold">2. Unggah File (.xlsx)</label>
+                                                <input class="form-control form-control-sm" type="file" name="file_excel" accept=".xlsx, .xls" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Proses Import</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            <a href="{{ route('warga.create') }}" class="btn btn-primary rounded-3 shadow-sm fw-bold">
+                                <i class="bi bi-plus-lg me-1"></i> Tambah Warga
+                            </a>
+                        </div>
                     </div>
                 </div>
-                @if($wargas->hasPages())
-                    <div class="card-footer bg-white py-3">
-                        {{ $wargas->links() }}
+            </div>
+
+            <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center" width="5%">No</th>
+                                <th>NIK</th>
+                                <th>Nama Lengkap</th>
+                                <th class="text-center">No. KK</th>
+                                <th class="text-center">RT/RW</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($wargas as $warga)
+                                <tr>
+                                    <td class="text-center fw-bold text-muted">{{ ($wargas->currentPage() - 1) * $wargas->perPage() + $loop->iteration }}</td>
+                                    <td class="fw-bold text-dark">{{ $warga->nik }}</td>
+                                    <td>{{ $warga->nama_lengkap }}</td>
+                                    <td class="text-center">{{ $warga->no_kk }}</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark border">{{ $warga->rt }} / {{ $warga->rw }}</span></td>
+                                    <td class="text-center">
+                                        <div class="btn-group gap-1">
+                                            <a href="{{ route('warga.edit', $warga->nik) }}" class="btn btn-sm btn-outline-primary rounded-2" title="Edit Data"><i class="bi bi-pencil-square"></i></a>
+                                            <form action="{{ route('warga.destroy', $warga->nik) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data warga ini? Seluruh riwayat pengajuannya juga akan ikut terhapus!');" class="d-inline">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger rounded-2" title="Hapus Data"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="bi bi-search fs-1 mb-3 d-block text-secondary opacity-50"></i>
+                                            <h6 class="fw-bold">Data Warga Tidak Ditemukan</h6>
+                                            @if(request('keyword'))
+                                                <p class="small mb-0">Tidak ada warga dengan NIK atau Nama <b>"{{ request('keyword') }}"</b>.</p>
+                                            @else
+                                                <p class="small mb-0">Belum ada data warga yang tersimpan di dalam sistem.</p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if ($wargas->hasPages())
+                    <div class="card-footer bg-white border-top py-3">
+                        {{ $wargas->links('pagination::bootstrap-5') }}
                     </div>
                 @endif
             </div>
 
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="importModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Import Data Warga</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('warga.import') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Pilih File Excel (.xlsx / .csv)</label>
-                        <input type="file" name="file" class="form-control" required>
-                        <small class="text-muted">Pastikan format sesuai template.</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Upload & Import</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>

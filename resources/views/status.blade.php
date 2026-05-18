@@ -71,18 +71,32 @@
                             <p class="fw-bold mb-4" style="color: var(--warna-utama);">{{ $pengajuan->jenisBansos->nama_bansos }}</p>
 
                             <div class="stepper d-none d-md-flex">
-                                @php $s = $pengajuan->status_verifikasi_admin; @endphp
+                                @php 
+                                    $s = $pengajuan->status_verifikasi_admin; 
+                                    
+                                    // LOGIKA BARU: Jika relasi penyaluran tidak kosong (!= null), berarti sudah disalurkan.
+                                    $isDisalurkan = $pengajuan->penyaluran !== null;
+                                @endphp
+
                                 <div class="step completed"><div class="step-icon"><i class="bi bi-file-earmark-text"></i></div><div class="step-label">Diusulkan</div></div>
+                                
                                 <div class="step {{ in_array($s, ['Menunggu Musdes','Siap Keputusan','Layak','Tidak Layak']) ? 'completed' : ($s == 'Verifikasi Lapangan' ? 'active' : '') }}"><div class="step-icon"><i class="bi bi-house"></i></div><div class="step-label">Survei</div></div>
+                                
                                 <div class="step {{ in_array($s, ['Siap Keputusan','Layak','Tidak Layak']) ? 'completed' : ($s == 'Menunggu Musdes' ? 'active' : '') }}"><div class="step-icon"><i class="bi bi-people"></i></div><div class="step-label">Musdes</div></div>
+                                
                                 <div class="step {{ in_array($s, ['Layak']) ? 'completed' : ($s == 'Tidak Layak' ? 'rejected' : ($s == 'Siap Keputusan' ? 'active' : '')) }}"><div class="step-icon"><i class="bi bi-flag"></i></div><div class="step-label">Keputusan</div></div>
+                                
+                                <div class="step {{ ($s == 'Layak' && $isDisalurkan) ? 'completed' : ($s == 'Layak' ? 'active' : '') }}"><div class="step-icon"><i class="bi bi-truck"></i></div><div class="step-label">Penyaluran</div></div>
                             </div>
 
                             <div class="alert border-0 rounded-4 mt-4 text-start bg-light">
                                 <div class="d-flex align-items-center">
-                                    @if($s == 'Layak')
+                                    @if($s == 'Layak' && $isDisalurkan)
                                         <i class="bi bi-check-circle-fill fs-1 me-3 text-success"></i>
-                                        <div><strong class="d-block text-success">Pengajuan Disetujui</strong><span class="small">Selamat! Anda dinyatakan layak menerima bantuan.</span></div>
+                                        <div><strong class="d-block text-success">Bantuan Telah Disalurkan!</strong><span class="small">Selamat! Bantuan sosial Anda telah berhasil didistribusikan oleh pihak desa. Proses pengajuan selesai.</span></div>
+                                    @elseif($s == 'Layak')
+                                        <i class="bi bi-truck fs-1 me-3" style="color: var(--warna-utama);"></i>
+                                        <div><strong class="d-block" style="color: var(--warna-utama);">Pengajuan Disetujui & Masuk Tahap Penyaluran</strong><span class="small">Selamat! Anda dinyatakan layak menerima bantuan. Saat ini Anda sedang menunggu jadwal distribusi bantuan dari pihak desa.</span></div>
                                     @elseif($s == 'Tidak Layak')
                                         <i class="bi bi-x-circle-fill fs-1 me-3 text-danger"></i>
                                         <div><strong class="d-block text-danger">Pengajuan Ditolak</strong><span class="small">Alasan: {{ $pengajuan->keterangan_ditolak }}</span></div>

@@ -37,18 +37,17 @@ class JenisBansosController extends Controller
             'nominal'           => 'required|string',
             'frekuensi'         => 'required|string',
             'tahun_anggaran'    => 'required|numeric',
+            'kuota'             => 'required|numeric', // PERBAIKAN: Menambahkan validasi kuota saat tambah data
+        ], [
+            'kuota.required' => 'field kuota harus diisi.' // PESAN KUSTOM
         ]);
 
         $data = $request->all();
         
-        // Handle checkbox Desil
         $data['kriteria_desil'] = $request->kriteria_desil ?? [];
-        
-        // MENGAKALI ERROR 1364 (Kolom-kolom lama yang masih Wajib Isi di database)
         $data['kriteria_penerima'] = '-'; 
         $data['bentuk_bantuan'] = '-'; 
 
-        // Simpan
         JenisBansos::create($data);
 
         return redirect()->route('jenis-bansos.index')->with('success', 'Program Bansos berhasil ditambahkan!');
@@ -79,17 +78,16 @@ class JenisBansosController extends Controller
             'deskripsi_bantuan' => 'nullable|string',
             'kriteria_lainnya'  => 'nullable|string',
             'deskripsi_kuota'   => 'nullable|string',
-            'kuota'             => 'nullable|numeric',
+            'kuota'             => 'required|numeric', // PERBAIKAN: Ubah nullable menjadi required
+        ], [
+            'kuota.required' => 'field kuota harus diisi.' // PESAN KUSTOM
         ]);
 
         $jenisBansos = JenisBansos::findOrFail($id);
         
         $data = $request->all();
         
-        // Handle checkbox Desil update
         $data['kriteria_desil'] = $request->kriteria_desil ?? [];
-        
-        // MENGAKALI ERROR 1364 UNTUK UPDATE
         $data['kriteria_penerima'] = '-';
         $data['bentuk_bantuan'] = '-';
 

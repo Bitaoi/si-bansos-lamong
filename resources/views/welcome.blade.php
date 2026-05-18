@@ -395,11 +395,18 @@
                     <button type="button" class="btn-close btn-close-white position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
+                    
+                    @if($errors->has('login_error'))
+                        <div class="alert alert-danger mb-3 py-2 text-center shadow-sm" style="font-size: 0.85rem; border-radius: 10px;">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> {{ $errors->first('login_error') }}
+                        </div>
+                    @endif
+
                     <form action="{{ route('login') }}" method="POST">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Username</label>
-                            <input type="text" name="username" class="form-control" placeholder="Username" required>
+                            <input type="text" name="username" class="form-control" placeholder="Username" value="{{ old('username') }}" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-muted">Password</label>
@@ -414,6 +421,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @if($errors->has('login_error'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var myModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            myModal.show();
+        });
+    </script>
+    @endif
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // DATA GRAFIK

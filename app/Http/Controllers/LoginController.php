@@ -36,7 +36,7 @@ class LoginController extends Controller
 
         // JIKA GAGAL: Kembali ke Home dengan Error khusus 'login_error'
         return back()->withErrors([
-            'login_error' => 'Username atau Password salah!',
+            'login_error' => 'username dan password yang anda masukkan salah.',
         ])->onlyInput('username');
     }
 

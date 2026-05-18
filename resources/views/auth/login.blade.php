@@ -28,7 +28,8 @@
                 @endif
 
                 <form action="/login" method="POST">
-                    @csrf <div class="mb-3">
+                    @csrf 
+                    <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" value="{{ old('username') }}" required autofocus>
                     </div>

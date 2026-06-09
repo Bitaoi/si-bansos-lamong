@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jenis Bansos - Admin SI Bansos</title>
+    <title>Jenis Bansos - Kasi Kesejahteraan Desa</title>
     
     <!-- Font Poppins & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@
         <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
+                <i class=""></i>KASI KESEJAHTERAAN
             </h5>
             
             <ul class="nav flex-column">

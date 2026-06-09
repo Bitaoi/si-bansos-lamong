@@ -5,17 +5,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class SurveiEkonomi extends Model 
 {
-    protected $fillable = [
-        'pengajuan_id', 
-        'luas_lantai', 'jenis_lantai', 'jenis_dinding', 'sumber_air', 'daya_listrik', 
-        'kendaraan', 'elektronik', 'ternak_lahan', 
-        'pendidikan_kk', 'pekerjaan', 'jml_tanggungan', 
-        'total_skor', 'desil_hasil'
-    ];
+    protected $guarded = [];
 
     public function pengajuan() {
         return $this->belongsTo(Pengajuan::class);
     }
+
+    // Tambahkan ini agar saat diakses, foto otomatis menjadi array
+    public function getFotoLantaiAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoDindingAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoSumberAirAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoWcAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoListrikAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoKendaraanAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoElektronikAttribute($value) { return json_decode($value, true) ?? []; }
+    public function getFotoTernakAttribute($value) { return json_decode($value, true) ?? []; }
 
     /**
      * Algoritma Perhitungan Desil (Metode Ambang Batas / Skor Real-time)

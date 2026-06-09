@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rincian Kuota Bansos - Admin</title>
+    <title>Rincian Kuota Bansos</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +36,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
-            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white">ADMIN PANEL</h5>
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white">KASI KESEJAHTERAAN DESA</h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="{{ route('admin.kuota.index') }}" class="nav-link active"><i class="bi bi-bar-chart-fill"></i> Rincian Kuota</a></li>

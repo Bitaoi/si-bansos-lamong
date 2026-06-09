@@ -28,51 +28,75 @@ class VerifikasiController extends Controller
         $pengajuan = Pengajuan::findOrFail($id);
         $tahap = $request->tahap; 
 
-        // TAHAP 1: Jadwalkan Observasi (Menyimpan Tanggal)
+        // TAHAP 1: Jadwalkan Observasi
         if ($tahap == 'jadwal_observasi') {
-            $request->validate([
-                'tgl_observasi' => 'required|date'
-            ]);
-
+            $request->validate(['tgl_observasi' => 'required|date']);
             $pengajuan->update([
                 'status_verifikasi_admin' => 'Verifikasi Lapangan',
                 'tgl_observasi' => $request->tgl_observasi
             ]);
-
             return back()->with('success', 'Jadwal Observasi ditetapkan.');
         }
         
-        // TAHAP 2: Input Sensus Lapangan & Otomatisasi Skoring PMT
+        // TAHAP 2: Input Sensus Lapangan & Foto Multiple
         elseif ($tahap == 'hasil_observasi') {
             $request->validate([
                 'luas_lantai' => 'required|string',
+                'foto_lantai.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'jenis_lantai' => 'required|string',
                 'jenis_dinding' => 'required|string',
+                'foto_dinding.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'foto_wc_air.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'sumber_air' => 'required|string',
+                'foto_sumber_air.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'daya_listrik' => 'required|string',
+                'foto_listrik.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'kendaraan' => 'required|string',
+                'foto_kendaraan.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'elektronik' => 'required|string',
+                'foto_elektronik.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'ternak_lahan' => 'required|string',
+                'foto_ternak.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'pendidikan_kk' => 'required|string',
                 'pekerjaan' => 'required|string',
                 'jml_tanggungan' => 'required|string',
                 'berkas_observasi' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'catatan_observasi' => 'nullable|string'
             ]);
             
             $hasilKalkulasi = SurveiEkonomi::kalkulasiDesil($request->all());
+
+            // Upload Multiple Foto
+            $kategoriFoto = ['foto_lantai', 'foto_dinding', 'foto_sumber_air', 'foto_wc_air', 'foto_listrik', 'foto_kendaraan', 'foto_elektronik', 'foto_ternak'];
+            $fotoPaths = [];
+            foreach ($kategoriFoto as $kategori) {
+                $paths = [];
+                if ($request->hasFile($kategori)) {
+                    foreach ($request->file($kategori) as $file) {
+                        $paths[] = $file->store('observasi/kategori', 'public');
+                    }
+                }
+                $fotoPaths[$kategori] = json_encode($paths); 
+            }
 
             SurveiEkonomi::updateOrCreate(
                 ['pengajuan_id' => $id],
                 [
                     'luas_lantai' => $request->luas_lantai,
+                    'foto_lantai' => $fotoPaths['foto_lantai'],
                     'jenis_lantai' => $request->jenis_lantai,
                     'jenis_dinding' => $request->jenis_dinding,
+                    'foto_dinding' => $fotoPaths['foto_dinding'],
+                    'foto_wc_air' => $fotoPaths['foto_wc_air'],
+                    'foto_sumber_air' => $fotoPaths['foto_sumber_air'],
                     'sumber_air' => $request->sumber_air,
                     'daya_listrik' => $request->daya_listrik,
+                    'foto_listrik' => $fotoPaths['foto_listrik'],
                     'kendaraan' => $request->kendaraan,
+                    'foto_kendaraan' => $fotoPaths['foto_kendaraan'],
                     'elektronik' => $request->elektronik,
+                    'foto_elektronik' => $fotoPaths['foto_elektronik'],
                     'ternak_lahan' => $request->ternak_lahan,
+                    'foto_ternak' => $fotoPaths['foto_ternak'],
                     'pendidikan_kk' => $request->pendidikan_kk,
                     'pekerjaan' => $request->pekerjaan,
                     'jml_tanggungan' => $request->jml_tanggungan,
@@ -81,40 +105,27 @@ class VerifikasiController extends Controller
                 ]
             );
 
-            $path = null;
-            if ($request->hasFile('berkas_observasi')) {
-                $path = $request->file('berkas_observasi')->store('verifikasi/observasi', 'public');
-            }
-            
+            $berkasPath = $request->hasFile('berkas_observasi') ? $request->file('berkas_observasi')->store('verifikasi/observasi', 'public') : $pengajuan->berkas_observasi;
             $pengajuan->update([
-                'berkas_observasi' => $path ?? $pengajuan->berkas_observasi,
+                'berkas_observasi' => $berkasPath,
                 'catatan_observasi' => $request->catatan_observasi,
                 'status_verifikasi_admin' => 'Menunggu Musdes'
             ]);
 
             $pengajuan->warga->update(['desil' => $hasilKalkulasi['desil']]);
-
-            return back()->with('success', "Sensus tersimpan! Warga mendapat Skor " . $hasilKalkulasi['total_skor'] . " (Desil " . $hasilKalkulasi['desil'] . "). Status berlanjut ke Menunggu Musdes.");
+            return back()->with('success', "Sensus tersimpan! Skor: " . $hasilKalkulasi['total_skor']);
         }
         
-        // TAHAP 3: Input Berita Acara Musdes
+        // TAHAP 3: Berita Acara Musdes
         elseif ($tahap == 'hasil_musdes') {
-            $request->validate([
-                'berita_acara_musdes' => 'required|file|mimes:jpg,png,pdf|max:2048'
-            ]);
-            
+            $request->validate(['berita_acara_musdes' => 'required|file|mimes:jpg,png,pdf|max:2048']);
             $path = $request->file('berita_acara_musdes')->store('verifikasi/musdes', 'public');
-            
-            $pengajuan->update([
-                'berita_acara_musdes' => $path,
-                'status_verifikasi_admin' => 'Siap Keputusan'
-            ]);
-            return back()->with('success', 'Berita Acara Musdes diunggah. Tombol Keputusan Akhir telah dibuka!');
+            $pengajuan->update(['berita_acara_musdes' => $path, 'status_verifikasi_admin' => 'Siap Keputusan']);
+            return back()->with('success', 'Berita Acara Musdes diunggah.');
         }
         
         // TAHAP 4: Keputusan Final
         elseif ($tahap == 'final') {
-            // PERBAIKAN: Tambahkan validasi required_if untuk keterangan_ditolak
             $request->validate([
                 'status' => 'required|in:Layak,Tidak Layak',
                 'keterangan_ditolak' => 'required_if:status,Tidak Layak'

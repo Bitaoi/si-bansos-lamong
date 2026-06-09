@@ -29,7 +29,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
-            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white"><i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL</h5>
+            <h5 class="fw-bold mb-4 px-2 py-2 border-bottom border-secondary text-white"><i class=""></i>KASI KESEJAHTERAAN</h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Akun RT</a></li>

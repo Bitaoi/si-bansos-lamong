@@ -37,7 +37,7 @@
     <div class="row">
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class="bi bi-shield-lock-fill me-2"></i>ADMIN PANEL
+                <i class="bi bi-shield-lock-fill me-2"></i>KASI KESEJAHTERAAN DESA
             </h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>

@@ -61,12 +61,23 @@
                                 PENOLAKAN SISTEM: Warga ini sudah terdaftar bantuan sosial di periode bulan ini. Tidak bisa diajukan kembali!
                             </div>
 
+                            <input type="hidden" name="nik" id="nik" value="{{ old('nik') }}">
+
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label fw-bold">NIK</label><input type="text" name="nik" id="nik" class="form-control readonly-input fw-bold text-primary" value="{{ old('nik') }}" readonly></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Nama Lengkap</label><input type="text" id="nama" class="form-control readonly-input fw-bold text-dark" readonly></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">No. Kartu Keluarga</label><input type="text" id="no_kk" class="form-control readonly-input" readonly></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Jumlah Anggota Keluarga</label><input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold" readonly></div>
-                                <div class="col-12"><label class="form-label fw-bold">Alamat Domisili</label><textarea id="alamat" class="form-control readonly-input" rows="2" readonly></textarea></div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Nama Lengkap</label>
+                                    <input type="text" id="nama" class="form-control readonly-input fw-bold text-dark" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Jumlah Anggota Keluarga</label>
+                                    <input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold mb-2" readonly>
+                                    <ul id="list_anggota_keluarga" class="text-muted small ps-3 mb-0" style="list-style-type: decimal;">
+                                        </ul>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Alamat Domisili</label>
+                                    <textarea id="alamat" class="form-control readonly-input" rows="2" readonly></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -136,7 +147,6 @@
         let keyword = document.getElementById('searchKeyword').value;
         if(!keyword) { alert('Silakan isi NIK atau Nama terlebih dahulu!'); return; }
         
-        // Memunculkan efek loading pada tombol saat mencari data
         let btnCari = document.querySelector('button[onclick="cariWarga()"]');
         let originalText = btnCari.innerHTML;
         btnCari.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mencari...';
@@ -150,27 +160,36 @@
 
                 if(data.status === 'success') {
                     document.getElementById('resultArea').style.display = 'block';
+                    
+                    // Input Hidden & Readonly Data
                     document.getElementById('nik').value = data.data.nik_pendaftar;
-                    document.getElementById('nama').value = data.data.nama_pendaftar;
-                    document.getElementById('no_kk').value = data.data.no_kk;
                     document.getElementById('jumlah_keluarga').value = data.data.jumlah_keluarga + ' Orang';
                     document.getElementById('alamat').value = data.data.alamat;
 
-                    // LOGIKA CEK DAFTAR GANDA
+                    // Menggabungkan Nama Lengkap + Status Otomatis yang sudah dihitung Controller
+                    document.getElementById('nama').value = data.data.nama_pendaftar + " (" + data.data.peran_pendaftar + ")";
+
+                    // Me-Render List Anggota Keluarga Beserta Status Otomatisnya
+                    let listAnggotaHtml = '';
+                    if(data.data.anggota_keluarga && data.data.anggota_keluarga.length > 0) {
+                        data.data.anggota_keluarga.forEach(function(anggota) {
+                            listAnggotaHtml += `<li class="mt-1"><span class="fw-bold text-dark">${anggota.nama}</span> - <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1">${anggota.peran}</span></li>`;
+                        });
+                    }
+                    document.getElementById('list_anggota_keluarga').innerHTML = listAnggotaHtml;
+
+                    // LOGIKA CEK DAFTAR GANDA 1 KK
                     let alertPeringatan = document.getElementById('alertSudahDaftar');
                     let btnSubmit = document.getElementById('btnSubmitPengajuan');
 
-                    if(data.data.sudah_daftar) {
-                        // Jika sudah daftar: Munculkan Alert Merah & Matikan Tombol Submit
+                    if(data.data.blokir_kk) {
                         alertPeringatan.style.display = 'block';
+                        alertPeringatan.innerHTML = `<i class="bi bi-shield-x fs-5 me-2"></i> ${data.data.pesan_blokir}`;
                         btnSubmit.disabled = true;
                         btnSubmit.innerHTML = '<i class="bi bi-x-circle me-2"></i> TIDAK BISA DIAJUKAN';
                         btnSubmit.classList.replace('btn-primary', 'btn-danger');
-                        
-                        // Scroll otomatis ke alert agar RT langsung membaca penolakan
                         alertPeringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     } else {
-                        // Jika belum daftar: Sembunyikan Alert & Hidupkan Tombol Submit
                         alertPeringatan.style.display = 'none';
                         btnSubmit.disabled = false;
                         btnSubmit.innerHTML = '<i class="bi bi-send-fill me-2"></i> KIRIM USULAN';
@@ -181,7 +200,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Tidak Ditemukan',
-                        text: 'Data warga tidak ditemukan! Pastikan NIK atau Nama sudah benar.',
+                        text: 'Data warga tidak ditemukan! Pastikan NIK atau No. KK sudah benar.',
                     });
                     document.getElementById('resultArea').style.display = 'none';
                 }
@@ -189,11 +208,10 @@
             .catch(error => {
                 btnCari.innerHTML = originalText;
                 btnCari.disabled = false;
-                Swal.fire('Error', 'Terjadi kesalahan pada server.', 'error');
+                Swal.fire('Error', 'Terjadi kesalahan pada server. Pastikan koneksi internet stabil.', 'error');
             });
     }
 
-    // Tampilkan notifikasi jika masih tembus lewat validasi server
     document.addEventListener("DOMContentLoaded", function() {
         @if(session('error'))
             Swal.fire({

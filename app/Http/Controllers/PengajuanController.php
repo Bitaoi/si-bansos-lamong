@@ -38,80 +38,98 @@ class PengajuanController extends Controller
     {
         $keyword = $request->keyword;
         
-        // PERBAIKAN 1: Menggunakan 'hubungan_keluarga' sesuai Model Warga.php
         $warga = Warga::where('nik', $keyword)
             ->orWhere('no_kk', $keyword)
-            ->orderByRaw("FIELD(hubungan_keluarga, 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Anggota Keluarga', 'Hidup Mandiri')")
             ->first();
 
         $periodeAktif = PeriodeBansos::where('status', 'Aktif')->first();
 
         if ($warga && $periodeAktif) {
             
-            // Ambil seluruh keluarga dalam 1 KK yang sama
+            // 1. Ambil seluruh anggota keluarga dan URUTKAN dari yang TERTUA (tanggal_lahir ASC)
             $anggotaKeluarga = Warga::where('no_kk', $warga->no_kk)
-                ->orderByRaw("FIELD(hubungan_keluarga, 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Anggota Keluarga', 'Hidup Mandiri')")
                 ->orderBy('tanggal_lahir', 'asc')
                 ->get();
             
+            // =========================================================================
+            // LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (MENGABAIKAN "Belum Diisi")
+            // =========================================================================
+            // A. Kepala Keluarga: Laki-laki tertua. Jika tidak ada Laki-laki, maka orang tertua (index 0).
+            $kepalaKeluarga = $anggotaKeluarga->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->first() 
+                              ?? $anggotaKeluarga->first();
+
+            // B. Istri: Perempuan tertua yang sudah kawin/cerai, dan BUKAN Kepala Keluarga
+            $istri = $anggotaKeluarga->whereIn('jenis_kelamin', ['P', 'Perempuan'])
+                              ->where('nik', '!=', $kepalaKeluarga->nik)
+                              ->whereIn('status_kawin', ['Kawin', 'Cerai Hidup', 'Cerai Mati', 'S'])
+                              ->first();
+
             $statusBlokirKK = false;
             $pesanBlokir = '';
             $listKeluarga = [];
 
-            // Pengecekan Riwayat per individu dalam 1 KK
+            // Pengecekan Riwayat & Assign Peran
             foreach ($anggotaKeluarga as $ak) {
-                // 1. Cek daftar di periode berjalan
-                $cekDaftar = Pengajuan::where('nik', $ak->nik)
-                                ->where('id_periode', $periodeAktif->id)
-                                ->first();
-
+                // Pengecekan Daftar Ganda & Jeda 1 Periode
+                $cekDaftar = Pengajuan::where('nik', $ak->nik)->where('id_periode', $periodeAktif->id)->first();
                 if ($cekDaftar) {
                     $statusBlokirKK = true;
                     $pesanBlokir = "Ditolak! Keluarga ini sudah diajukan atas nama {$ak->nama_lengkap} pada periode ini.";
                 }
 
-                // 2. Cek Riwayat Penerima di periode sebelumnya (Jeda 1 Periode)
-                $riwayatLama = Pengajuan::where('nik', $ak->nik)
-                                ->whereIn('status_verifikasi_admin', ['Layak', 'Siap Keputusan'])
-                                ->latest('id_periode')->first();
-
+                $riwayatLama = Pengajuan::where('nik', $ak->nik)->whereIn('status_verifikasi_admin', ['Layak', 'Siap Keputusan'])->latest('id_periode')->first();
                 if ($riwayatLama && $riwayatLama->id_periode == ($periodeAktif->id - 1)) {
                     $statusBlokirKK = true;
                     $pesanBlokir = "Ditolak! Keluarga ini baru saja menerima bantuan pada periode sebelumnya. Pemerataan mengharuskan adanya jeda 1 periode.";
                 }
 
-                // PERBAIKAN 2: Menggunakan field 'hubungan_keluarga'
+                // C. PENERAPAN STATUS
                 $peran = $ak->hubungan_keluarga;
 
-                // Fallback (Jaga-jaga jika ada data warga lama yang statusnya masih 'Anggota Keluarga')
-                if ($peran == 'Anggota Keluarga') {
-                    if ($ak->jenis_kelamin == 'Laki-laki' && in_array($ak->status_kawin, ['Kawin', 'Cerai Hidup', 'Cerai Mati'])) {
-                        $peran = 'Suami / Ayah';
-                    } elseif ($ak->jenis_kelamin == 'Perempuan' && in_array($ak->status_kawin, ['Kawin', 'Cerai Hidup', 'Cerai Mati'])) {
-                        $peran = 'Istri / Ibu';
+                // Jika data dari database 'Belum Diisi', '-', kosong, atau hanya 'Anggota Keluarga'
+                if (in_array($peran, ['Belum Diisi', '-', 'Anggota Keluarga', null, ''])) {
+                    if ($ak->nik === $kepalaKeluarga->nik) {
+                        $peran = ($anggotaKeluarga->count() == 1) ? 'Kepala Keluarga (Mandiri)' : 'Kepala Keluarga';
+                    } elseif ($istri && $ak->nik === $istri->nik) {
+                        $peran = 'Istri';
                     } else {
-                        $peran = 'Anak / Lainnya';
+                        $peran = 'Anak';
                     }
                 }
 
-                // PERBAIKAN 3: Menggunakan field 'status_kawin'
                 $listKeluarga[] = [
                     'nik' => $ak->nik,
                     'nama' => $ak->nama_lengkap,
                     'peran' => $peran,
-                    'umur' => Carbon::parse($ak->tanggal_lahir)->age . ' Thn',
+                    'umur' => $ak->tanggal_lahir ? Carbon::parse($ak->tanggal_lahir)->age . ' Thn' : '-',
                     'status_kawin' => $ak->status_kawin, 
                     'sudah_daftar' => $cekDaftar ? true : false,
                     'status_pengajuan' => $cekDaftar ? $cekDaftar->status_verifikasi_admin : 'Belum Ada',
                 ];
             }
 
-            // PERBAIKAN 4: Key JSON disamakan persis dengan file Javascript di frontend
+            // D. Urutkan Tampilan: Kepala Keluarga di atas, Istri, lalu Anak
+            $urutanPeran = ['Kepala Keluarga (Mandiri)' => 1, 'Kepala Keluarga' => 2, 'Istri' => 3, 'Anak' => 4];
+            usort($listKeluarga, function($a, $b) use ($urutanPeran) {
+                $posA = $urutanPeran[$a['peran']] ?? 5;
+                $posB = $urutanPeran[$b['peran']] ?? 5;
+                return $posA <=> $posB;
+            });
+
+            // Tentukan peran si pendaftar (warga yang NIK-nya diketik di kolom pencarian)
+            $peranPendaftar = 'Anggota Keluarga';
+            foreach ($listKeluarga as $lk) {
+                if ($lk['nik'] === $warga->nik) {
+                    $peranPendaftar = $lk['peran']; break;
+                }
+            }
+
             return response()->json([
                 'status' => 'success',
                 'data' => [
                     'nik_pendaftar' => $warga->nik, 
                     'nama_pendaftar' => $warga->nama_lengkap, 
+                    'peran_pendaftar' => $peranPendaftar,
                     'no_kk' => $warga->no_kk,
                     'alamat' => $warga->alamat_lengkap . " RT " . $warga->rt . " RW " . $warga->rw,
                     'jumlah_keluarga' => $anggotaKeluarga->count(),
@@ -159,7 +177,7 @@ class PengajuanController extends Controller
         if ($cekDoubleKK) {
             $namaPendaftarTerdahulu = Warga::where('nik', $cekDoubleKK->nik)->value('nama_lengkap');
             return redirect()->back()
-                ->with('error', "PENDAFTARAN DITOLAK! 1 KK hanya boleh 1 pengajuan. Warga dengan NIK/KK ini sudah diajukan atas nama {$namaPendaftarTerdahulu} pada periode ini.")
+                ->with('error', "PENDAFTARAN DITOLAK! 1 KK hanya boleh 1 pengajuan. Keluarga dengan KK ini sudah diajukan atas nama {$namaPendaftarTerdahulu} pada periode ini.")
                 ->withInput();
         }
 

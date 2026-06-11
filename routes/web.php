@@ -13,6 +13,8 @@ use App\Http\Controllers\PenyaluranController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifikasiController;
+use App\Http\Controllers\PeriodeBansosController;
+use App\Http\Controllers\KonfigurasiController;
 use App\Http\Controllers\GaleriController;
 
 // ====================================================
@@ -24,6 +26,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Halaman Khusus Cek Status Warga
 Route::get('/cek-status', [StatusController::class, 'index'])->name('status.index');
+
+//rute info bansos
+Route::get('/info-bansos', [App\Http\Controllers\HomeController::class, 'infoBansos'])->name('info.bansos');
 
 // --- REVISI: RUTE LOGIN ---
 // Route GET untuk menampilkan form login (menghilangkan error GET not supported)
@@ -88,6 +93,13 @@ Route::middleware(['auth'])->group(function () {
     // --- EKSPOR REKAPITULASI ---
     Route::get('/admin/dashboard/export', [DashboardController::class, 'exportRekapAdmin'])->name('admin.rekap.export');
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportRekapAdminPdf'])->name('admin.rekap.export.pdf');
+
+    // --- MANAJEMEN PERIODE BANSOS ---
+    Route::resource('admin/periode', PeriodeBansosController::class)->names('admin.periode');
+
+    //rute konfigurasi
+    Route::get('/admin/konfigurasi', [KonfigurasiController::class,'index'])->name('admin.konfigurasi');
+    Route::post('/admin/konfigurasi/store-kuota-rt', [KonfigurasiController::class, 'storeKuotaRT'])->name('admin.konfigurasi.store-kuota-rt');
 
     // ====================================================
     // 2. AREA KHUSUS RT

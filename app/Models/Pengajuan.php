@@ -26,6 +26,7 @@ class Pengajuan extends Model
         'berkas_observasi',
         'catatan_observasi',
         'berita_acara_musdes',
+        'id_periode',
         'tgl_observasi',
     ];
 
@@ -34,6 +35,11 @@ class Pengajuan extends Model
         'tgl_pengajuan' => 'date',
         'tgl_observasi' => 'date',
     ];
+
+    public function periode()
+    {
+        return $this->belongsTo(PeriodeBansos::class, 'id_periode','id');
+    }
 
     // ================= RELASI =================
 

@@ -74,10 +74,6 @@
                             <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', $warga->tanggal_lahir) }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Nama Ibu Kandung</label>
-                            <input type="text" name="nama_ibu_kandung" class="form-control" value="{{ old('nama_ibu_kandung', $warga->nama_ibu_kandung) }}" required>
-                        </div>
-                        <div class="col-md-6">
                             <label class="form-label">Status Perkawinan</label>
                             <select name="status_perkawinan" class="form-select" required>
                                 <option value="Belum Kawin" {{ $warga->status_perkawinan == 'Belum Kawin' ? 'selected' : '' }}>Belum Kawin</option>

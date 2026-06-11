@@ -41,7 +41,8 @@ class WargaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nik' => 'required|digits:16|unique:wargas',
+            'nik' => 'required|digits:16|unique:wargas,nik',
+            'status_keluarga' => 'required|string|in:Kepala Keluarga,Anggota Keluarga,Hidup Mandiri',
             'nama_lengkap' => 'required|string|max:150',
             'no_kk' => 'required|digits:16',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -50,7 +51,7 @@ class WargaController extends Controller
             'agama' => 'required|string',
             'pendidikan' => 'required|string',
             'pekerjaan' => 'required|string',
-            'status_perkawinan' => 'required|string',
+            'status_perkawinan' => 'required|string|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati,Belum Kawin (Mandiri)',
             'nama_ibu_kandung' => 'required|string|max:150',
             'jumlah_keluarga' => 'required|integer|min:1',
             'alamat_lengkap' => 'required|string',
@@ -76,6 +77,7 @@ class WargaController extends Controller
         $warga = Warga::where('nik', $nik)->firstOrFail();
 
         $request->validate([
+            'status_keluarga' => 'required|string|in:Kepala Keluarga,Anggota Keluarga,Hidup Mandiri',
             'nama_lengkap' => 'required|string|max:150',
             'no_kk' => 'required|digits:16',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -84,7 +86,7 @@ class WargaController extends Controller
             'agama' => 'required|string',
             'pendidikan' => 'required|string',
             'pekerjaan' => 'required|string',
-            'status_perkawinan' => 'required|string',
+            'status_perkawinan' => 'required|string|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati,Belum Kawin (Mandiri)',
             'nama_ibu_kandung' => 'required|string|max:150',
             'jumlah_keluarga' => 'required|integer|min:1',
             'alamat_lengkap' => 'required|string',

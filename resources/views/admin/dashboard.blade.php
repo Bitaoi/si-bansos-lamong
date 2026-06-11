@@ -59,8 +59,13 @@
                 
                 <div class="sidebar-heading mt-3">Data Warga</div>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
-                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
-                <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
+                
+                <div class="sidebar-heading mt-3">Pengaturan Master</div>
+                <li class="nav-item">
+                    <a href="{{ route('admin.konfigurasi') }}" class="nav-link">
+                        <i class="bi bi-sliders"></i> Pusat Konfigurasi
+                    </a>
+                </li>
                 
                 <div class="sidebar-heading mt-3">Transaksi</div>
                 <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>
@@ -120,6 +125,34 @@
                 </form>
             </div>
 
+            @php
+                // Ambil data periode aktif untuk Admin
+                $periode = \App\Models\PeriodeBansos::where('status', 'Aktif')->first();
+            @endphp
+            <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, var(--warna-utama), var(--warna-paling-gelap)); color: white;">
+                <div class="card-body p-4 position-relative overflow-hidden d-flex justify-content-between align-items-center flex-wrap">
+                    <i class="bi bi-calendar2-check position-absolute" style="font-size: 8rem; right: 20px; top: -20px; opacity: 0.1;"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2 text-white-50"><i class="bi bi-calendar-event me-2"></i> Status Periode Bansos Aktif</h5>
+                        @if($periode)
+                            <h3 class="fw-bold text-white mb-1">{{ $periode->nama_periode }}</h3>
+                            <p class="mb-0 text-white-50">
+                                Berlaku: {{ \Carbon\Carbon::parse($periode->tanggal_mulai)->translatedFormat('d F Y') }} s/d {{ \Carbon\Carbon::parse($periode->tanggal_akhir)->translatedFormat('d F Y') }}
+                            </p>
+                        @else
+                            <h4 class="fw-bold text-white mb-0">Belum Ada Periode Aktif</h4>
+                            <p class="mb-0 text-white-50">Silakan atur periode pendataan baru di menu pengaturan.</p>
+                        @endif
+                    </div>
+                    @if($periode)
+                    <div class="mt-3 mt-md-0 position-relative z-1">
+                        <span class="badge bg-success bg-opacity-25 border border-success text-white px-3 py-2 rounded-pill fs-6 shadow-sm">
+                            <i class="bi bi-broadcast me-1"></i> Sedang Berlangsung
+                        </span>
+                    </div>
+                    @endif
+                </div>
+            </div>
             <div class="row g-4 mb-4">
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card stat-card shadow-sm h-100">

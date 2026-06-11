@@ -19,7 +19,7 @@ class Warga extends Model
     protected $fillable = [
         'nik', 'no_kk', 'nama_lengkap', 
         'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama',
-        'pendidikan', 'pekerjaan', 'status_kawin', 'hubungan_keluarga',
+        'pendidikan', 'pekerjaan', 'status_perkawinan', 'hubungan_keluarga','status_keluarga',
         'kewarganegaraan', 'alamat_lengkap', 'rt', 'rw', 'golongan_darah',
         'nama_bank', 'no_rekening', 'desil'
     ];

@@ -8,6 +8,8 @@ use App\Models\Pengajuan;
 use App\Models\JenisBansos;
 use App\Models\Galeri;
 use App\Models\JadwalBansos;
+use App\Models\PeriodeBansos;
+use App\Models\KuotaRT;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -28,7 +30,6 @@ class HomeController extends Controller
         // =======================================================
         // LOGIKA FILTER TAHUN (INPUT KETIK)
         // =======================================================
-        // Menangkap filter tahun yang diketik user dari URL
         $tahunFilter = $request->get('tahun');
 
         // 3. GRAFIK TREN PENGAJUAN (DINAMIS - TAHUNAN)
@@ -59,7 +60,6 @@ class HomeController extends Controller
             ->select('jenis_bansos.kode_bansos', DB::raw('count(pengajuans.id) as total'))
             ->groupBy('jenis_bansos.kode_bansos');
 
-        // Jika user mengetik tahun, filter berdasarkan tahun dari tgl_pengajuan
         if (!empty($tahunFilter)) {
             $querySebaran->whereYear('pengajuans.tgl_pengajuan', $tahunFilter);
         }
@@ -83,11 +83,9 @@ class HomeController extends Controller
         foreach ($semuaBansos as $b) {
             $labelPerbandingan[] = $b->kode_bansos;
             
-            // Siapkan query untuk menghitung status pengajuan per bansos
             $qDiterima = Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Layak');
             $qDitolak = Pengajuan::where('id_bansos', $b->id)->where('status_verifikasi_admin', 'Tidak Layak');
 
-            // Terapkan filter tahun jika ada
             if (!empty($tahunFilter)) {
                 $qDiterima->whereYear('tgl_pengajuan', $tahunFilter);
                 $qDitolak->whereYear('tgl_pengajuan', $tahunFilter);
@@ -112,7 +110,63 @@ class HomeController extends Controller
             'labelPerbandingan',
             'dataDiterima',
             'dataDitolak',
-            'tahunFilter'     // <--- Passing inputan tahun ke view
+            'tahunFilter'
+        ));
+    }
+
+    public function infoBansos(Request $request)
+    {
+        // 1. Ambil Periode dan Jadwal yang sedang aktif
+        $periode = PeriodeBansos::where('status', 'Aktif')->first();
+        $jadwals = $periode ? JadwalBansos::where('id_periode', $periode->id)->get() : collect();
+        
+        // 2. Ambil Semua Jenis Bansos untuk Dropdown
+        $semuaBansos = JenisBansos::where('status', 'Aktif')->get();
+        
+        // 3. Inisialisasi awal variabel agar aman dari error Undefined Variable
+        $bansosTerpilih = null;
+        $statusKetersediaan = 'Tidak Tersedia';
+        $sisaKuotaLokal = 0;
+        $rincianKuotaRT = collect(); 
+
+        // 4. Jika Warga Melakukan Filter Pencarian
+        if ($request->has('jenis_bantuan') && $request->jenis_bantuan != '') {
+            $bansosTerpilih = JenisBansos::find($request->jenis_bantuan);
+            
+            if ($bansosTerpilih && $periode) {
+                // Ambil semua RT yang masih memiliki sisa kuota (kuota > terpakai) di periode ini
+                $rincianKuotaRT = KuotaRT::where('id_periode', $periode->id)
+                                     ->where('id_bansos', $bansosTerpilih->id)
+                                     ->whereRaw('kuota > terpakai')
+                                     ->orderBy('rt', 'asc')
+                                     ->get();
+
+                // Hitung total kuota kumulatif dari seluruh wilayah desa
+                $totalKuota = KuotaRT::where('id_periode', $periode->id)
+                                     ->where('id_bansos', $bansosTerpilih->id)
+                                     ->sum('kuota');
+                                     
+                $totalTerpakai = KuotaRT::where('id_periode', $periode->id)
+                                        ->where('id_bansos', $bansosTerpilih->id)
+                                        ->sum('terpakai');
+                
+                $sisaKuotaLokal = $totalKuota - $totalTerpakai;
+                
+                // Tentukan Status Utama
+                if ($totalKuota == 0) {
+                    $statusKetersediaan = 'Belum Dibuka / Tidak Ada Kuota';
+                } elseif ($sisaKuotaLokal > 0) {
+                    $statusKetersediaan = 'Tersedia';
+                } else {
+                    $statusKetersediaan = 'Kuota Penuh';
+                }
+            }
+        }
+
+        // PERBAIKAN: Memasukkan 'rincianKuotaRT' ke dalam compact
+        return view('info_bansos', compact(
+            'periode', 'jadwals', 'semuaBansos', 
+            'bansosTerpilih', 'statusKetersediaan', 'sisaKuotaLokal', 'rincianKuotaRT'
         ));
     }
 }

@@ -42,25 +42,42 @@ class VerifikasiController extends Controller
         elseif ($tahap == 'hasil_observasi') {
             $request->validate([
                 'luas_lantai' => 'required|string',
+                'foto_lantai' => 'required|array',
                 'foto_lantai.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'jenis_lantai' => 'required|string',
                 'jenis_dinding' => 'required|string',
+                'foto_dinding' => 'required|array',
                 'foto_dinding.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'foto_wc_air' => 'required|array',
                 'foto_wc_air.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'sumber_air' => 'required|string',
+                'foto_sumber_air' => 'required|array',
                 'foto_sumber_air.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'daya_listrik' => 'required|string',
+                'foto_listrik' => 'required|array',
                 'foto_listrik.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'kendaraan' => 'required|string',
+                'foto_kendaraan' => 'required|array',
                 'foto_kendaraan.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'elektronik' => 'required|string',
+                'foto_elektronik' => 'required|array',
                 'foto_elektronik.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'ternak_lahan' => 'required|string',
+                'foto_ternak' => 'required|array',
                 'foto_ternak.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'pendidikan_kk' => 'required|string',
                 'pekerjaan' => 'required|string',
                 'jml_tanggungan' => 'required|string',
                 'berkas_observasi' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            ], [
+                'foto_lantai.required' => 'Foto dokumentasi lantai wajib diunggah.',
+                'foto_dinding.required' => 'Foto dokumentasi dinding wajib diunggah.',
+                'foto_wc_air.required' => 'Foto dokumentasi WC/Sanitasi wajib diunggah.',
+                'foto_sumber_air.required' => 'Foto dokumentasi sumber air wajib diunggah.',
+                'foto_listrik.required' => 'Foto dokumentasi meteran listrik wajib diunggah.',
+                'foto_kendaraan.required' => 'Foto dokumentasi kendaraan wajib diunggah.',
+                'foto_elektronik.required' => 'Foto dokumentasi barang elektronik wajib diunggah.',
+                'foto_ternak.required' => 'Foto dokumentasi hewan ternak/lahan wajib diunggah.'
             ]);
             
             $hasilKalkulasi = SurveiEkonomi::kalkulasiDesil($request->all());

@@ -211,6 +211,10 @@
             <a href="{{ route('status.index') }}" class="btn btn-light btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg mt-3 text-primary fade-in-up" style="animation-delay: 0.6s;">
                 <i class="bi bi-search me-2"></i> CEK STATUS PENGAJUAN ANDA
             </a>
+
+            <a href="{{ route('info.bansos') }}" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg mt-3 ms-3 text-white fade-in-up" style="animation-delay: 0.8s;">
+                <i class="bi bi-info-circle-fill me-2"></i> INFO BANSOS
+            </a>
         </div>
     </section>
 

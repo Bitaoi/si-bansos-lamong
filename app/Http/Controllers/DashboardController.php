@@ -8,6 +8,8 @@ use App\Models\Pengajuan;
 use App\Models\JenisBansos;
 use App\Models\User;
 use App\Models\Warga;
+use App\Models\PeriodeBansos;
+use App\Models\KuotaRT; // Disesuaikan dengan nama model yang Anda gunakan
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
@@ -17,37 +19,56 @@ class DashboardController extends Controller
     // =================================================================
     public function indexAdmin(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect('/');
+        }
+        
         if (Auth::user()->role !== 'Admin') {
             abort(403, 'Akses Ditolak. Halaman ini khusus Admin.');
         }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
+        // 1. Manajemen Periode (Menggantikan Filter Bulan & Tahun)
+        $dataPeriodes = PeriodeBansos::orderBy('id', 'desc')->get();
+        $periodeIdFilter = $request->get('id_periode');
 
-        $totalPengajuan     = Pengajuan::whereMonth('tgl_pengajuan', $bulanFilter)->whereYear('tgl_pengajuan', $tahunFilter)->count();
-        $menungguVerifikasi = Pengajuan::whereIn('status_verifikasi_admin', ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan'])
-                                       ->whereMonth('tgl_pengajuan', $bulanFilter)->whereYear('tgl_pengajuan', $tahunFilter)->count();
-        $penerimaLayak      = Pengajuan::where('status_verifikasi_admin', 'Layak')
-                                       ->whereMonth('tgl_pengajuan', $bulanFilter)->whereYear('tgl_pengajuan', $tahunFilter)->count();
+        if ($periodeIdFilter) {
+            $periodeTerpilih = PeriodeBansos::find($periodeIdFilter);
+        } else {
+            $periodeTerpilih = PeriodeBansos::where('status', 'Aktif')->first() ?? $dataPeriodes->first();
+        }
+
+        $idPeriode = $periodeTerpilih ? $periodeTerpilih->id : null;
+
+        // 2. Statistik Pengajuan Berdasarkan Periode
+        $totalPengajuan     = Pengajuan::where('id_periode', $idPeriode)->count();
+        $menungguVerifikasi = Pengajuan::where('id_periode', $idPeriode)
+                                       ->whereIn('status_verifikasi_admin', ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan'])->count();
+        $penerimaLayak      = Pengajuan::where('id_periode', $idPeriode)
+                                       ->where('status_verifikasi_admin', 'Layak')->count();
         $totalWarga         = Warga::count(); 
 
-        $totalKuota = JenisBansos::sum('kuota_penerima'); 
-        $terpakai   = Pengajuan::where('status_verifikasi_admin', 'Layak')->count();
-        $sisaKuota  = $totalKuota - $terpakai;
+        // 3. Monitoring Kuota Wilayah Berjenjang (Seluruh RT)
+        $monitoringKuota = KuotaRT::with('jenisBansos')
+                            ->where('id_periode', $idPeriode)
+                            ->orderBy('rw')->orderBy('rt')
+                            ->get()
+                            ->map(function($q) {
+                                $q->persentase = ($q->kuota > 0) ? round(($q->terpakai / $q->kuota) * 100, 2) : 0;
+                                $q->sisa_kuota = $q->kuota - $q->terpakai;
+                                return $q;
+                            });
 
-        // ===========================================================================
-        // PERBAIKAN: Tabel Status Pengajuan Terkini difilter berdasarkan bulan & tahun
-        // ===========================================================================
+        $jadwals = $idPeriode ? \App\Models\JadwalBansos::all() : collect(); // Sesuaikan jika jadwal terikat periode
+
+        // 4. Tabel Status Pengajuan Terkini di Periode Tersebut
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
-                            ->whereMonth('tgl_pengajuan', $bulanFilter)
-                            ->whereYear('tgl_pengajuan', $tahunFilter)
+                            ->where('id_periode', $idPeriode)
                             ->latest('tgl_pengajuan')
-                            ->get(); // Menampilkan semua riwayat di periode terkait
+                            ->get();
 
-        $rekapBansos = JenisBansos::all()->map(function($bansos) use ($bulanFilter, $tahunFilter) {
+        $rekapBansos = JenisBansos::all()->map(function($bansos) use ($idPeriode) {
             $baseQuery = Pengajuan::where('id_bansos', $bansos->id)
-                            ->whereMonth('tgl_pengajuan', $bulanFilter)
-                            ->whereYear('tgl_pengajuan', $tahunFilter);
+                                  ->where('id_periode', $idPeriode);
 
             return (object) [
                 'nama_bansos' => $bansos->nama_bansos,
@@ -59,18 +80,16 @@ class DashboardController extends Controller
             ];
         });
 
-        $daftarTahun = Pengajuan::selectRaw('YEAR(tgl_pengajuan) as tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
-        if($daftarTahun->isEmpty()) { $daftarTahun = collect([date('Y')]); }
-
         return view('admin.dashboard', compact(
-            'totalPengajuan', 'menungguVerifikasi', 'penerimaLayak', 'totalWarga', 'sisaKuota',
-            'pengajuanTerbaru', 'rekapBansos', 'bulanFilter', 'tahunFilter', 'daftarTahun'
+            'totalPengajuan', 'menungguVerifikasi', 'penerimaLayak', 'totalWarga',
+            'pengajuanTerbaru', 'rekapBansos', 'monitoringKuota', 
+            'dataPeriodes', 'periodeTerpilih', 'jadwals'
         ));
     }
 
     public function kuotaDetail()
     {
-        if (Auth::user()->role !== 'Admin') { abort(403); }
+        if (!Auth::check() || Auth::user()->role !== 'Admin') { abort(403); }
         $bansos = \App\Models\JenisBansos::with('pengajuan')->get();
         return view('admin.kuota.index', compact('bansos'));
     }
@@ -80,55 +99,72 @@ class DashboardController extends Controller
     // =================================================================
     public function indexRT(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect('/');
+        }
+
         $user = Auth::user();
 
         if ($user->role !== 'RT') { abort(403, 'Akses Ditolak. Halaman ini khusus Ketua RT.'); }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
+        // 1. Manajemen Periode
+        $dataPeriodes = PeriodeBansos::orderBy('id', 'desc')->get();
+        $periodeIdFilter = $request->get('id_periode');
 
-        $wilayah = explode('/', $user->wilayah_rt_rw);
+        if ($periodeIdFilter) {
+            $periodeTerpilih = PeriodeBansos::find($periodeIdFilter);
+        } else {
+            $periodeTerpilih = PeriodeBansos::where('status', 'Aktif')->first() ?? $dataPeriodes->first();
+        }
+
+        $idPeriode = $periodeTerpilih ? $periodeTerpilih->id : null;
+
+        $wilayah = explode('/', $user->wilayah_rt_rw ?? '000/000');
         $rt = $wilayah[0] ?? ''; 
+        $rw = $wilayah[1] ?? ''; 
         
         $wargaSaya          = Warga::where('rt', $rt)->count(); 
-        $totalUsulanSaya    = Pengajuan::where('id_user_pengusul', $user->id_user)->count();
+        $totalUsulanSaya    = Pengajuan::where('id_user_pengusul', $user->id_user)->where('id_periode', $idPeriode)->count();
         $menungguVerifikasi = Pengajuan::where('id_user_pengusul', $user->id_user)
+                                      ->where('id_periode', $idPeriode)
                                       ->where('status_verifikasi_admin', 'Proses')->count();
         $siapDisalurkan     = Pengajuan::where('id_user_pengusul', $user->id_user)
+                                  ->where('id_periode', $idPeriode)
                                   ->where('status_verifikasi_admin', 'Layak')->count();
 
-        // ===========================================================================
-        // PERBAIKAN: Tabel Status Pengajuan Terkini difilter berdasarkan bulan & tahun
-        // ===========================================================================
+        // 2. Monitoring Kuota Khusus RT Tersebut
+        $kuotaRTSaya = KuotaRT::with('jenisBansos')
+                            ->where('id_periode', $idPeriode)
+                            ->where('rt', $rt)
+                            ->where('rw', $rw)
+                            ->get()
+                            ->map(function($q) {
+                                $q->sisa_kuota = $q->kuota - $q->terpakai;
+                                return $q;
+                            });
+
+        // 3. Tabel Status Pengajuan Terkini
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
                             ->where('id_user_pengusul', $user->id_user)
-                            ->whereMonth('tgl_pengajuan', $bulanFilter)
-                            ->whereYear('tgl_pengajuan', $tahunFilter)
+                            ->where('id_periode', $idPeriode)
                             ->orderBy('tgl_pengajuan', 'desc')
                             ->orderBy('id', 'desc')
-                            ->get(); // Menampilkan semua riwayat di periode terkait
-
-        $totalUsulanRT = Pengajuan::where('id_user_pengusul', $user->id_user)
-                              ->whereMonth('tgl_pengajuan', $bulanFilter)
-                              ->whereYear('tgl_pengajuan', $tahunFilter)->count();
+                            ->get(); 
 
         $usulanDiproses = Pengajuan::where('id_user_pengusul', $user->id_user)
                               ->whereIn('status_verifikasi_admin', ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan'])
-                              ->whereMonth('tgl_pengajuan', $bulanFilter)
-                              ->whereYear('tgl_pengajuan', $tahunFilter)->count();
+                              ->where('id_periode', $idPeriode)->count();
 
         $usulanDisetujui = Pengajuan::where('id_user_pengusul', $user->id_user)
                               ->where('status_verifikasi_admin', 'Layak')
-                              ->whereMonth('tgl_pengajuan', $bulanFilter)
-                              ->whereYear('tgl_pengajuan', $tahunFilter)->count();
+                              ->where('id_periode', $idPeriode)->count();
 
         $riwayatPengajuan = $pengajuanTerbaru->take(10); 
 
-        $rekapBansosRT = JenisBansos::all()->map(function($bansos) use ($user, $bulanFilter, $tahunFilter) {
+        $rekapBansosRT = JenisBansos::all()->map(function($bansos) use ($user, $idPeriode) {
             $baseQuery = Pengajuan::where('id_user_pengusul', $user->id_user)
                             ->where('id_bansos', $bansos->id)
-                            ->whereMonth('tgl_pengajuan', $bulanFilter)
-                            ->whereYear('tgl_pengajuan', $tahunFilter);
+                            ->where('id_periode', $idPeriode);
 
             return (object) [
                 'nama_bansos' => $bansos->nama_bansos,
@@ -140,13 +176,10 @@ class DashboardController extends Controller
             ];
         });
 
-        $daftarTahun = Pengajuan::selectRaw('YEAR(tgl_pengajuan) as tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
-        if($daftarTahun->isEmpty()) { $daftarTahun = collect([date('Y')]); }
-
         return view('rt.dashboard', compact(
             'user', 'wargaSaya', 'totalUsulanSaya', 'menungguVerifikasi', 'siapDisalurkan',
-            'pengajuanTerbaru', 'totalUsulanRT', 'usulanDiproses', 'usulanDisetujui',
-            'riwayatPengajuan', 'rekapBansosRT', 'bulanFilter', 'tahunFilter', 'daftarTahun'
+            'pengajuanTerbaru', 'usulanDiproses', 'usulanDisetujui', 'kuotaRTSaya',
+            'riwayatPengajuan', 'rekapBansosRT', 'dataPeriodes', 'periodeTerpilih'
         ));
     }
 
@@ -155,19 +188,19 @@ class DashboardController extends Controller
     // =================================================================
     public function exportRekapAdmin(Request $request)
     {
-        if (Auth::user()->role !== 'Admin') { abort(403); }
+        if (!Auth::check() || Auth::user()->role !== 'Admin') { abort(403); }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
+        $periodeId = $request->get('id_periode');
+        $periode = PeriodeBansos::find($periodeId);
+        $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua_Periode';
 
-        $namaBulan = \Carbon\Carbon::create()->month((int)$bulanFilter)->translatedFormat('F');
-        $fileName = "Rekap_Bansos_Desa_Lamong_Admin_{$namaBulan}_{$tahunFilter}.xlsx";
+        $fileName = "Rekap_Bansos_Desa_Lamong_Admin_{$namaPeriode}.xlsx";
 
-        $pengajuans = Pengajuan::with(['warga', 'jenisBansos', 'pengusul'])
-                        ->whereMonth('tgl_pengajuan', $bulanFilter)
-                        ->whereYear('tgl_pengajuan', $tahunFilter)
-                        ->orderBy('tgl_pengajuan', 'asc')
-                        ->get();
+        $query = Pengajuan::with(['warga', 'jenisBansos', 'pengusul'])->orderBy('tgl_pengajuan', 'asc');
+        if ($periodeId) {
+            $query->where('id_periode', $periodeId);
+        }
+        $pengajuans = $query->get();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -216,21 +249,22 @@ class DashboardController extends Controller
 
     public function exportRekapRT(Request $request)
     {
-        if (Auth::user()->role !== 'RT') { abort(403); }
+        if (!Auth::check() || Auth::user()->role !== 'RT') { abort(403); }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
+        $periodeId = $request->get('id_periode');
+        $periode = PeriodeBansos::find($periodeId);
+        $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua_Periode';
         $idRT = Auth::user()->id_user;
 
-        $namaBulan = \Carbon\Carbon::create()->month((int)$bulanFilter)->translatedFormat('F');
-        $fileName = "Rekap_Usulan_RT_{$namaBulan}_{$tahunFilter}.xlsx";
+        $fileName = "Rekap_Usulan_RT_{$namaPeriode}.xlsx";
 
-        $pengajuans = Pengajuan::with(['warga', 'jenisBansos'])
-                        ->where('id_user_pengusul', $idRT)
-                        ->whereMonth('tgl_pengajuan', $bulanFilter)
-                        ->whereYear('tgl_pengajuan', $tahunFilter)
-                        ->orderBy('tgl_pengajuan', 'asc')
-                        ->get();
+        $query = Pengajuan::with(['warga', 'jenisBansos'])
+                          ->where('id_user_pengusul', $idRT)
+                          ->orderBy('tgl_pengajuan', 'asc');
+        if ($periodeId) {
+            $query->where('id_periode', $periodeId);
+        }
+        $pengajuans = $query->get();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -275,42 +309,49 @@ class DashboardController extends Controller
     // =================================================================
     public function exportRekapAdminPdf(Request $request)
     {
-        if (Auth::user()->role !== 'Admin') { abort(403); }
+        if (!Auth::check() || Auth::user()->role !== 'Admin') { abort(403); }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
-        $namaBulan = \Carbon\Carbon::create()->month((int)$bulanFilter)->translatedFormat('F');
+        $periodeId = $request->get('id_periode');
+        $periode = PeriodeBansos::find($periodeId);
+        $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua Periode';
+        $namaBulan = $namaPeriode; // Menggunakan variabel namaBulan agar view PDF tidak error
+        $tahunFilter = ''; // Dikosongkan agar tampilan PDF lebih rapi tanpa mengulang tahun
 
-        $pengajuans = Pengajuan::with(['warga', 'jenisBansos'])
-                        ->whereMonth('tgl_pengajuan', $bulanFilter)
-                        ->whereYear('tgl_pengajuan', $tahunFilter)
-                        ->orderBy('tgl_pengajuan', 'asc')
-                        ->get();
+        $query = Pengajuan::with(['warga', 'jenisBansos'])->orderBy('tgl_pengajuan', 'asc');
+        if ($periodeId) {
+            $query->where('id_periode', $periodeId);
+        }
+        $pengajuans = $query->get();
 
         $pdf = Pdf::loadView('pdf.rekap_bansos', compact('pengajuans', 'namaBulan', 'tahunFilter'));
         $pdf->setPaper('a4', 'landscape');
 
-        return $pdf->download("Rekap_Bansos_Desa_Lamong_Admin_{$namaBulan}_{$tahunFilter}.pdf");
+        $fileName = str_replace(' ', '_', $namaPeriode);
+        return $pdf->download("Rekap_Bansos_Desa_Lamong_Admin_{$fileName}.pdf");
     }
 
     public function exportRekapRTPdf(Request $request)
     {
-        if (Auth::user()->role !== 'RT') { abort(403); }
+        if (!Auth::check() || Auth::user()->role !== 'RT') { abort(403); }
 
-        $bulanFilter = $request->get('bulan', date('m'));
-        $tahunFilter = $request->get('tahun', date('Y'));
-        $namaBulan = \Carbon\Carbon::create()->month((int)$bulanFilter)->translatedFormat('F');
+        $periodeId = $request->get('id_periode');
+        $periode = PeriodeBansos::find($periodeId);
+        $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua Periode';
+        $namaBulan = $namaPeriode; // Menjaga kompatibilitas dengan view PDF lama
+        $tahunFilter = '';
 
-        $pengajuans = Pengajuan::with(['warga', 'jenisBansos'])
-                        ->where('id_user_pengusul', Auth::user()->id_user)
-                        ->whereMonth('tgl_pengajuan', $bulanFilter)
-                        ->whereYear('tgl_pengajuan', $tahunFilter)
-                        ->orderBy('tgl_pengajuan', 'asc')
-                        ->get();
+        $query = Pengajuan::with(['warga', 'jenisBansos'])
+                          ->where('id_user_pengusul', Auth::user()->id_user)
+                          ->orderBy('tgl_pengajuan', 'asc');
+        if ($periodeId) {
+            $query->where('id_periode', $periodeId);
+        }
+        $pengajuans = $query->get();
 
         $pdf = Pdf::loadView('pdf.rekap_bansos', compact('pengajuans', 'namaBulan', 'tahunFilter'));
         $pdf->setPaper('a4', 'landscape');
 
-        return $pdf->download("Rekap_Usulan_RT_{$namaBulan}_{$tahunFilter}.pdf");
+        $fileName = str_replace(' ', '_', $namaPeriode);
+        return $pdf->download("Rekap_Usulan_RT_{$fileName}.pdf");
     }
 }

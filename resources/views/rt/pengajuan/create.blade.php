@@ -150,8 +150,8 @@
 
                 if(data.status === 'success') {
                     document.getElementById('resultArea').style.display = 'block';
-                    document.getElementById('nik').value = data.data.nik;
-                    document.getElementById('nama').value = data.data.nama;
+                    document.getElementById('nik').value = data.data.nik_pendaftar;
+                    document.getElementById('nama').value = data.data.nama_pendaftar;
                     document.getElementById('no_kk').value = data.data.no_kk;
                     document.getElementById('jumlah_keluarga').value = data.data.jumlah_keluarga + ' Orang';
                     document.getElementById('alamat').value = data.data.alamat;

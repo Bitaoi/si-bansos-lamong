@@ -441,7 +441,7 @@
                     </div>
                 </div>
                 <div class="alert alert-info border-0 p-3 small mb-0 rounded-3">
-                    <i class="bi bi-info-circle-fill me-1"></i> Periode baru otomatis diaktifkan dan yang lama akan ditutup.
+                    <i class="bi bi-info-circle-fill me-1"></i> Anda dapat membuat multiple periode aktif bersamaan. Atur status sesuai kebutuhan.
                 </div>
             </div>
             <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
@@ -454,7 +454,7 @@
 
 <div class="modal fade" id="modalTambahJadwal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="#" method="POST" class="modal-content border-0 shadow-lg rounded-4">
+        <form action="{{ route('admin.jadwal.store') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4">
             @csrf
             <div class="modal-header border-bottom-0 pb-0">
                 <h5 class="fw-bold"><i class="bi bi-clock-plus text-primary me-2"></i>Tambah Jadwal Tahapan</h5>
@@ -476,7 +476,7 @@
             </div>
             <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
                 <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" disabled>Fungsi Simpan Belum Tersedia di Route</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-save me-2"></i>Simpan</button>
             </div>
         </form>
     </div>

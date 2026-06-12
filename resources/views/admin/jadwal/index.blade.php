@@ -113,6 +113,9 @@
                     <h4 class="fw-bold mb-1">Pengaturan Kalender Bansos</h4>
                     <p class="text-muted mb-0">Atur rentang tanggal dan deskripsi untuk setiap tahapan (siklus bulanan).</p>
                 </div>
+                <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#tambahJadwalModal">
+                    <i class="bi bi-plus-circle me-2"></i>Tambah Jadwal Tahapan
+                </button>
             </div>
 
             @if(session('success'))
@@ -195,6 +198,49 @@
     </div>
 </div>
 @endforeach
+
+<!-- MODAL TAMBAH JADWAL TAHAPAN -->
+<div class="modal fade" id="tambahJadwalModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none; border-radius:15px; overflow:hidden;">
+            <div class="modal-header text-white" style="background-color: var(--warna-paling-gelap);">
+                <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i>Tambah Jadwal Tahapan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.jadwal.store') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nama Tahapan</label>
+                        <input type="text" name="nama_tahapan" class="form-control border-secondary" placeholder="Contoh: Tahapan Usulan Bantuan Sosial" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Tgl Mulai (1-31)</label>
+                            <input type="number" name="hari_mulai" class="form-control border-secondary" min="1" max="31" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Tgl Selesai (1-31)</label>
+                            <input type="number" name="hari_selesai" class="form-control border-secondary" min="1" max="31" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Warna Label Background</label>
+                        <input type="color" name="warna_bg" class="form-control border-secondary" value="#6BBF8B" style="height: 50px; cursor: pointer;" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Deskripsi (Opsional)</label>
+                        <textarea name="deskripsi" class="form-control border-secondary" rows="3" placeholder="Masukkan deskripsi tahapan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm"><i class="bi bi-save me-1"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

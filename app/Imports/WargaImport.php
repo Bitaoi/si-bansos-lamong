@@ -11,60 +11,55 @@ class WargaImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        // 1. Lewati baris kosong jika NIK tidak ada
-        if (!isset($row['nik']) || empty($row['nik'])) {
-            return null;
+        // 1. Fleksibilitas nama kolom header
+        $nik = $row['nik'] ?? $row['nik_ktp'] ?? null;
+        $nkk = $row['nkk'] ?? $row['no_kk'] ?? null;
+        $nama = $row['nama'] ?? $row['nama_lengkap'] ?? null;
+
+        // 2. Lewati (skip) baris yang kosong
+        if (!$nik || !$nama) return null;
+
+        // 3. Cek Duplikasi NIK
+        if (Warga::where('nik', $nik)->exists()) return null;
+
+        // 4. PERBAIKAN: Format Jenis Kelamin (Sesuai ENUM database yaitu 'L' atau 'P')
+        $kelaminRaw = strtoupper($row['kelamin'] ?? 'L');
+        $kelamin = ($kelaminRaw == 'P' || $kelaminRaw == 'PEREMPUAN') ? 'P' : 'L';
+
+        // 5. Translasi Tanggal Lahir khusus format .xlsx
+        $tglLahir = null;
+        if (isset($row['tanggal_lahir'])) {
+            if (is_numeric($row['tanggal_lahir'])) {
+                $tglLahir = Date::excelToDateTimeObject($row['tanggal_lahir'])->format('Y-m-d');
+            } else {
+                $tglLahir = date('Y-m-d', strtotime($row['tanggal_lahir']));
+            }
         }
 
-        // 2. Bersihkan NIK dan KK
-        $nik = str_replace("'", "", $row['nik']);
-        $no_kk = isset($row['nkk']) ? str_replace("'", "", $row['nkk']) : '-';
-
-        // 3. Format Tanggal Lahir (Mengatasi format angka Excel atau string Y-m-d)
-        $tanggal_lahir = $row['tanggal_lahir'] ?? null;
-        if (is_numeric($tanggal_lahir)) {
-            $tanggal_lahir = Date::excelToDateTimeObject($tanggal_lahir)->format('Y-m-d');
-        }
-
-        // 4. Terjemahkan Status Kawin (S = Kawin, B = Belum Kawin, dll)
-        $sts_kawin = 'Belum Diisi';
-        if (isset($row['sts_kawin'])) {
-            $s = strtoupper(trim($row['sts_kawin']));
-            if ($s == 'S') $sts_kawin = 'Kawin';
-            elseif ($s == 'B') $sts_kawin = 'Belum Kawin';
-            elseif ($s == 'P') $sts_kawin = 'Cerai Hidup';
-            else $sts_kawin = $s;
-        }
-
-        // 5. Cek Duplikasi NIK (Agar data yang sudah ada tidak error saat diimport ulang)
-        $wargaAda = Warga::where('nik', $nik)->first();
-        if ($wargaAda) {
-            return null; // Skip jika NIK sudah ada
-        }
-
-        // 6. Masukkan ke Database
+        // 6. Mapping data ke Database dengan penambahan default untuk kolom Wajib (NOT NULL)
         return new Warga([
             'nik'               => $nik,
-            'no_kk'             => $no_kk,
-            'nama_lengkap'      => $row['nama'] ?? 'Tanpa Nama', // Dari header 'NAMA'
-            'jenis_kelamin'     => isset($row['kelamin']) ? strtoupper(trim($row['kelamin'])) : 'L',
+            'no_kk'             => $nkk,
+            'nama_lengkap'      => $nama,
             'tempat_lahir'      => $row['tempat_lahir'] ?? '-',
-            'tanggal_lahir'     => $tanggal_lahir ?? '1970-01-01',
+            'tanggal_lahir'     => $tglLahir ?? '1970-01-01', // Fallback tanggal
             
-            // Kolom yang TIDAK ADA di file Excel diisi default
-            'agama'             => 'Belum Diisi',
-            'pendidikan'        => 'Belum Diisi',
-            'pekerjaan'         => 'Belum Diisi', 
-            'hubungan_keluarga' => 'Belum Diisi', 
-            'kewarganegaraan'   => 'WNI',
-            'golongan_darah'    => '-',
-            'nama_bank'         => null,
-            'no_rekening'       => null,
+            'jenis_kelamin'     => $kelamin, // SEKARANG HANYA MENGIRIM 'L' atau 'P'
             
-            'status_kawin'      => $sts_kawin,
+            // Kolom wajib di database yang tidak ada di CSV diberi nilai default
+            'agama'             => $row['agama'] ?? 'Islam',
+            'pendidikan'        => $row['pendidikan'] ?? 'Belum Diisi',
+            'pekerjaan'         => $row['pekerjaan'] ?? 'Belum Diisi',
+            
+            'status_kawin'      => $row['sts_kawin'] ?? '-',
             'alamat_lengkap'    => $row['alamat'] ?? '-',
-            'rt'                => $row['rt'] ?? '-',
-            'rw'                => $row['rw'] ?? '-',
+            
+            'rt'                => isset($row['rt']) ? str_pad($row['rt'], 3, '0', STR_PAD_LEFT) : '000',
+            'rw'                => isset($row['rw']) ? str_pad($row['rw'], 3, '0', STR_PAD_LEFT) : '000',
+            
+            'hubungan_keluarga' => 'Belum Diisi',
+            'status_keluarga'   => 'Anggota Keluarga',
+            'desil'             => null
         ]);
     }
 }

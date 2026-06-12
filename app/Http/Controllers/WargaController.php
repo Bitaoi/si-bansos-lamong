@@ -119,27 +119,37 @@ class WargaController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file_excel' => 'required|mimes:xlsx,xls'
-        ]);
+        // 1. Cek Manual: Mencegah file gagal masuk karena ukurannya melebihi batas 2MB
+        if (!$request->hasFile('file_excel')) {
+            return redirect()->back()->with('error', 'GAGAL: File tidak ditemukan atau ukuran file terlalu besar (Maksimal 2MB).');
+        }
+
+        $file = $request->file('file_excel');
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        // 2. Cek Ekstensi Manual: Mencegah Laravel memblokir MIME Type bawaan Windows secara diam-diam
+        if (!in_array($extension, ['xlsx', 'xls', 'csv'])) {
+            return redirect()->back()->with('error', 'GAGAL: Format file tidak didukung! Harus berupa .xlsx, .xls, atau .csv');
+        }
 
         try {
             DB::beginTransaction();
             
-            Excel::import(new WargaImport, $request->file('file_excel'));
+            Excel::import(new \App\Imports\WargaImport, $file);
             
             DB::commit();
-            return redirect()->route('warga.index')->with('success', 'Data warga berhasil di-import massal!');
+            return redirect()->route('warga.index')->with('success', 'Luar Biasa! Data warga berhasil di-import massal!');
             
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             DB::rollBack();
             $failures = $e->failures();
-            $pesanError = "Gagal Import. Cek Baris ke-" . $failures[0]->row() . ": " . $failures[0]->errors()[0];
+            $pesanError = "Gagal Import. Cek Baris Excel ke-" . $failures[0]->row() . ": " . $failures[0]->errors()[0];
             return redirect()->route('warga.index')->with('error', $pesanError);
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('warga.index')->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            // 3. TANGKAP ERROR: Akan memunculkan peringatan merah di layar jika format kolom berantakan
+            return redirect()->route('warga.index')->with('error', 'Terjadi kesalahan pembacaan sistem: ' . $e->getMessage());
         }
     }
     

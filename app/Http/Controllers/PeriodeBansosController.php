@@ -26,10 +26,6 @@ class PeriodeBansosController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        // Secara default, periode baru kita set aktif
-        // Jika hanya boleh 1 periode yang aktif, matikan yang lain dulu
-        PeriodeBansos::query()->update(['status' => 'Tutup']);
-
         PeriodeBansos::create([
             'nama_periode' => $request->nama_periode,
             'tanggal_mulai' => $request->tanggal_mulai,
@@ -37,7 +33,7 @@ class PeriodeBansosController extends Controller
             'status' => 'Aktif'
         ]);
 
-        return back()->with('success', 'Periode Bantuan baru berhasil ditambahkan dan diaktifkan.');
+        return back()->with('success', 'Periode Bantuan baru berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
@@ -50,11 +46,6 @@ class PeriodeBansosController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
             'status' => 'required|in:Aktif,Tutup'
         ]);
-
-        // Jika status diubah menjadi Aktif, matikan periode yang lain
-        if ($request->status == 'Aktif') {
-            PeriodeBansos::where('id', '!=', $id)->update(['status' => 'Tutup']);
-        }
 
         $periode = PeriodeBansos::findOrFail($id);
         $periode->update($request->all());

@@ -62,6 +62,13 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             <div class="card border-0 shadow-sm bg-white mb-4 overflow-visible rounded-4">
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-center justify-content-between">
@@ -92,8 +99,8 @@
                                         <form action="{{ route('warga.import') }}" method="POST" enctype="multipart/form-data" class="px-3 py-2">
                                             @csrf
                                             <div class="mb-2">
-                                                <label class="form-label small fw-bold">2. Unggah File (.xlsx)</label>
-                                                <input class="form-control form-control-sm" type="file" name="file_excel" accept=".xlsx, .xls" required>
+                                                <label class="form-label small fw-bold">2. Unggah File (.xlsx / .csv)</label>
+                                                <input class="form-control form-control-sm" type="file" name="file_excel" accept=".xlsx, .xls, .csv" required>
                                             </div>
                                             <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Proses Import</button>
                                         </form>

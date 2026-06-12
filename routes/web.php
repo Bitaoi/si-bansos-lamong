@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
 
     // --- PENGATURAN JADWAL ---
     Route::get('/admin/jadwal', [JadwalController::class, 'indexAdmin'])->name('admin.jadwal.index');
+    Route::post('/admin/jadwal', [JadwalController::class, 'store'])->name('admin.jadwal.store');
     Route::put('/admin/jadwal/{id}', [JadwalController::class, 'update'])->name('admin.jadwal.update');
 
     // --- MANAJEMEN GALERI ---

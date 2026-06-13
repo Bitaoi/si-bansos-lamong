@@ -57,15 +57,13 @@
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link active"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Akun RT</a></li>
                 
-                <div class="sidebar-heading mt-3">Data Warga</div>
+                <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
+                <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
                 
-                <div class="sidebar-heading mt-3">Pengaturan Master</div>
-                <li class="nav-item">
-                    <a href="{{ route('admin.konfigurasi') }}" class="nav-link">
-                        <i class="bi bi-sliders"></i> Pusat Konfigurasi
-                    </a>
-                </li>
+                <div class="sidebar-heading mt-3">Pengaturan Sistem</div>
+                <li class="nav-item"><a href="{{ route('admin.galeri.index') }}" class="nav-link"><i class="bi bi-images"></i> Galeri Desa</a></li>
+                <li class="nav-item"><a href="{{ route('admin.konfigurasi') }}" class="nav-link"><i class="bi bi-sliders"></i> Pusat Konfigurasi</a></li>
                 
                 <div class="sidebar-heading mt-3">Transaksi</div>
                 <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>

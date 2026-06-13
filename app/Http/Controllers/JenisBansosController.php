@@ -12,8 +12,9 @@ class JenisBansosController extends Controller
     public function index()
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
-
+        
         $bansos = JenisBansos::all();
+        
         return view('admin.jenis_bansos.index', compact('bansos'));
     }
 
@@ -24,30 +25,46 @@ class JenisBansosController extends Controller
         return view('admin.jenis_bansos.create');
     }
 
-    // 3. SIMPAN DATA 
+    // 3. SIMPAN DATA (CREATE)
     public function store(Request $request)
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
+        // Validasi input
         $request->validate([
-            'nama_bansos'       => 'required|string|max:100',
-            'kode_bansos'       => 'required|string|max:50',
-            'sumber_dana'       => 'required|string',
-            'bentuk_penyerahan' => 'required|string',
-            'nominal'           => 'required|string',
-            'frekuensi'         => 'required|string',
-            'tahun_anggaran'    => 'required|numeric',
-            'kuota'             => 'required|numeric', // PERBAIKAN: Menambahkan validasi kuota saat tambah data
-        ], [
-            'kuota.required' => 'field kuota harus diisi.' // PESAN KUSTOM
+            'nama_bansos'          => 'required|string|max:100',
+            'kode_bansos'          => 'required|string|max:50',
+            'sumber_dana'          => 'required|string',
+            'deskripsi_singkat'    => 'nullable|string',
+            'bentuk_penyerahan'    => 'required|string',
+            'nominal'              => 'required|string',
+            'frekuensi_penyaluran' => 'required|string',
+            'tahun_anggaran'       => 'required|numeric',
+            'kriteria_tambahan'    => 'nullable|string',
+            'kuota_penerima'       => 'required|numeric',
+            'sasaran_kuota'        => 'nullable|string',
+            'status'               => 'required|in:Aktif,Nonaktif',
         ]);
 
-        $data = $request->all();
+        // MAPPING: Sesuaikan dengan migrasi 'create_jenis_bansos_table'
+        $data = [
+            'nama_bansos'       => $request->nama_bansos,
+            'kode_bansos'       => $request->kode_bansos,
+            'sumber_dana'       => $request->sumber_dana,
+            'deskripsi_bantuan' => $request->deskripsi_singkat, 
+            'bentuk_penyerahan' => $request->bentuk_penyerahan,
+            'bentuk_bantuan'    => '-', 
+            'nominal'           => $request->nominal,
+            'frekuensi'         => $request->frekuensi_penyaluran, 
+            'tahun_anggaran'    => $request->tahun_anggaran,
+            'kuota'             => $request->kuota_penerima, 
+            'deskripsi_kuota'   => $request->sasaran_kuota, 
+            'kriteria_penerima' => '-', 
+            'kriteria_lainnya'  => $request->kriteria_tambahan, 
+            'status'            => $request->status,
+            'kriteria_desil'    => json_encode($request->kriteria_desil ?? []) // Pastikan di-encode jadi JSON
+        ];
         
-        $data['kriteria_desil'] = $request->kriteria_desil ?? [];
-        $data['kriteria_penerima'] = '-'; 
-        $data['bentuk_bantuan'] = '-'; 
-
         JenisBansos::create($data);
 
         return redirect()->route('jenis-bansos.index')->with('success', 'Program Bansos berhasil ditambahkan!');
@@ -59,6 +76,7 @@ class JenisBansosController extends Controller
         if (Auth::user()->role !== 'Admin') { abort(403); }
         
         $jenisBansos = JenisBansos::findOrFail($id);
+        
         return view('admin.jenis_bansos.edit', compact('jenisBansos'));
     }
 
@@ -68,42 +86,51 @@ class JenisBansosController extends Controller
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
         $request->validate([
-            'nama_bansos'       => 'required|string|max:100',
-            'kode_bansos'       => 'required|string|max:50',
-            'sumber_dana'       => 'required|string',
-            'bentuk_penyerahan' => 'required|string',
-            'nominal'           => 'required|string',
-            'frekuensi'         => 'required|string',
-            'tahun_anggaran'    => 'required|numeric',
-            'deskripsi_bantuan' => 'nullable|string',
-            'kriteria_lainnya'  => 'nullable|string',
-            'deskripsi_kuota'   => 'nullable|string',
-            'kuota'             => 'required|numeric', // PERBAIKAN: Ubah nullable menjadi required
-        ], [
-            'kuota.required' => 'field kuota harus diisi.' // PESAN KUSTOM
+            'nama_bansos'          => 'required|string|max:100',
+            'kode_bansos'          => 'required|string|max:50',
+            'sumber_dana'          => 'required|string',
+            'deskripsi_singkat'    => 'nullable|string',
+            'bentuk_penyerahan'    => 'required|string',
+            'nominal'              => 'required|string',
+            'frekuensi_penyaluran' => 'required|string',
+            'tahun_anggaran'       => 'required|numeric',
+            'kriteria_tambahan'    => 'nullable|string',
+            'kuota_penerima'       => 'required|numeric',
+            'sasaran_kuota'        => 'nullable|string',
+            'status'               => 'required|in:Aktif,Nonaktif',
         ]);
 
         $jenisBansos = JenisBansos::findOrFail($id);
         
-        $data = $request->all();
+        $data = [
+            'nama_bansos'       => $request->nama_bansos,
+            'kode_bansos'       => $request->kode_bansos,
+            'sumber_dana'       => $request->sumber_dana,
+            'deskripsi_bantuan' => $request->deskripsi_singkat,
+            'bentuk_penyerahan' => $request->bentuk_penyerahan,
+            'nominal'           => $request->nominal,
+            'frekuensi'         => $request->frekuensi_penyaluran,
+            'tahun_anggaran'    => $request->tahun_anggaran,
+            'kuota'             => $request->kuota_penerima,
+            'deskripsi_kuota'   => $request->sasaran_kuota,
+            'kriteria_lainnya'  => $request->kriteria_tambahan,
+            'status'            => $request->status,
+            'kriteria_desil'    => json_encode($request->kriteria_desil ?? [])
+        ];
         
-        $data['kriteria_desil'] = $request->kriteria_desil ?? [];
-        $data['kriteria_penerima'] = '-';
-        $data['bentuk_bantuan'] = '-';
-
         $jenisBansos->update($data);
 
-        return redirect()->route('jenis-bansos.index')->with('success', 'Data program Bansos berhasil diperbarui!');
+        return redirect()->route('jenis-bansos.index')->with('success', 'Data Program Bansos berhasil diperbarui!');
     }
 
     // 6. HAPUS DATA
     public function destroy($id)
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
-
+        
         $bansos = JenisBansos::findOrFail($id);
         $bansos->delete();
 
-        return redirect()->route('jenis-bansos.index')->with('success', 'Data program Bansos berhasil dihapus!');
+        return redirect()->route('jenis-bansos.index')->with('success', 'Data Program Bansos berhasil dihapus!');
     }
 }

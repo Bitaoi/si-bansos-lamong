@@ -204,7 +204,7 @@ class PengajuanController extends Controller
                           ->first();
 
         if ($kuotaRT) {
-            if ($kuotaRT->terpakai >= $kuotaRT->kuota) {
+            if ($kuotaRT->terpakai >= $kuotaRT->kuota_maksimal) {
                 return redirect()->back()->with('error', 'Gagal mengajukan! Kuota wilayah RT ' . $rt . '/RW ' . $rw . ' untuk bansos ini sudah penuh.')->withInput();
             }
             $kuotaRT->increment('terpakai');

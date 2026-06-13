@@ -37,17 +37,17 @@
     <div class="row">
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class="bi bi-shield-lock-fill me-2"></i>KASI KESEJAHTERAAN DESA
+                <i class="bi bi-shield-lock-fill me-2"></i>KASI KESEJAHTERAAN
             </h5>
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Manajemen Akun RT</a></li>
+                <li class="nav-item"><a href="{{ route('admin.rt.index') }}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Akun RT</a></li>
                 <div class="sidebar-heading mt-3">Master Data</div>
                 <li class="nav-item"><a href="{{ route('warga.index') }}" class="nav-link"><i class="bi bi-people-fill"></i> Data Warga</a></li>
                 <li class="nav-item"><a href="{{ route('jenis-bansos.index') }}" class="nav-link active"><i class="bi bi-gift-fill"></i> Jenis Bansos</a></li>
                 <li class="nav-item"><a href="{{ route('admin.jadwal.index') }}" class="nav-link"><i class="bi bi-calendar-event"></i> Jadwal Tahapan</a></li>
                 <div class="sidebar-heading mt-3">Transaksi</div>
-                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi Pengajuan</a></li>
+                <li class="nav-item"><a href="{{ route('verifikasi.index') }}" class="nav-link"><i class="bi bi-file-earmark-check-fill"></i> Verifikasi</a></li>
                 <li class="nav-item"><a href="{{ route('penyaluran.index') }}" class="nav-link"><i class="bi bi-truck"></i> Penyaluran</a></li>
             </ul>
         </div>
@@ -63,30 +63,55 @@
                 </a>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <strong>Data Ditolak Sistem!</strong> Silakan perbaiki isian berikut:
+                    <ul class="mb-0 mt-2 fw-medium">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5">
-                <form action="{{ route('jenis-bansos.store') }}" method="POST">
+                <form action="{{ route('jenis-bansos.store') }}" method="POST" novalidate>
                     @csrf
                     
                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Informasi Dasar Bansos</h6>
-                    
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Nama Program Bansos <span class="text-danger">*</span></label>
-                            <input type="text" name="nama_bansos" class="form-control" placeholder="Cth: Program Keluarga Harapan (PKH)" required>
+                            <input type="text" name="nama_bansos" class="form-control" value="{{ old('nama_bansos') }}" placeholder="Cth: Program Keluarga Harapan (PKH)" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Kode / Singkatan <span class="text-danger">*</span></label>
-                            <input type="text" name="kode_bansos" class="form-control" placeholder="Cth: PKH-2026" required>
+                            <input type="text" name="kode_bansos" class="form-control" value="{{ old('kode_bansos') }}" placeholder="Cth: PKH-2026" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Sumber Dana <span class="text-danger">*</span></label>
-                            <input type="text" name="sumber_dana" class="form-control" placeholder="Cth: APBN / Dana Desa / APBD" required>
+                            <input type="text" name="sumber_dana" class="form-control" value="{{ old('sumber_dana') }}" placeholder="Cth: APBN / Dana Desa" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Deskripsi Singkat Bantuan</label>
-                        <textarea name="deskripsi_bantuan" class="form-control" rows="2" placeholder="Jelaskan secara singkat tujuan program bantuan ini..."></textarea>
+                        <textarea name="deskripsi_bantuan" class="form-control" rows="2" placeholder="Jelaskan secara singkat tujuan program...">{{ old('deskripsi_bantuan') }}</textarea>
                     </div>
 
                     <div class="row g-3 mb-4">
@@ -94,22 +119,22 @@
                             <label class="form-label small fw-bold">Bentuk Penyerahan <span class="text-danger">*</span></label>
                             <select name="bentuk_penyerahan" class="form-select" required>
                                 <option value="">-- Pilih --</option>
-                                <option value="Uang Tunai">Uang Tunai</option>
-                                <option value="Transfer Bank">Transfer Bank / KKS</option>
-                                <option value="Barang / Sembako">Barang / Sembako</option>
+                                <option value="Uang Tunai" {{ old('bentuk_penyerahan') == 'Uang Tunai' ? 'selected' : '' }}>Uang Tunai</option>
+                                <option value="Transfer Bank" {{ old('bentuk_penyerahan') == 'Transfer Bank' ? 'selected' : '' }}>Transfer Bank / KKS</option>
+                                <option value="Barang / Sembako" {{ old('bentuk_penyerahan') == 'Barang / Sembako' ? 'selected' : '' }}>Barang / Sembako</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold">Nominal/Nilai (Rp) <span class="text-danger">*</span></label>
-                            <input type="text" name="nominal" class="form-control" placeholder="Cth: 600.000" required>
+                            <input type="text" name="nominal" class="form-control" value="{{ old('nominal') }}" placeholder="Cth: 600.000" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold">Frekuensi Penyaluran <span class="text-danger">*</span></label>
-                            <input type="text" name="frekuensi" class="form-control" placeholder="Cth: 3 Bulan Sekali" required>
+                            <input type="text" name="frekuensi" class="form-control" value="{{ old('frekuensi') }}" placeholder="Cth: 3 Bulan Sekali" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold">Tahun Anggaran <span class="text-danger">*</span></label>
-                            <input type="number" name="tahun_anggaran" class="form-control" value="{{ date('Y') }}" required>
+                            <input type="number" name="tahun_anggaran" class="form-control" value="{{ old('tahun_anggaran', date('Y')) }}" required>
                         </div>
                     </div>
 
@@ -123,33 +148,32 @@
                             @for($i = 1; $i <= 10; $i++)
                             <div class="col-6 col-md-4 col-lg-2">
                                 <div class="form-check">
-                                    <input class="form-check-input border-secondary shadow-sm" type="checkbox" name="kriteria_desil[]" value="{{ $i }}" id="desil{{ $i }}">
-                                    <label class="form-check-label text-dark" for="desil{{ $i }}">
-                                        Desil {{ $i }}
-                                    </label>
+                                    <input class="form-check-input border-secondary shadow-sm" type="checkbox" name="kriteria_desil[]" value="{{ $i }}" id="desil{{ $i }}" {{ is_array(old('kriteria_desil')) && in_array($i, old('kriteria_desil')) ? 'checked' : '' }}>
+                                    <label class="form-check-label text-dark" for="desil{{ $i }}">Desil {{ $i }}</label>
                                 </div>
                             </div>
                             @endfor
                         </div>
-                        <div class="form-text mt-2"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Centang desil mana saja yang berhak menerima bantuan ini.</div>
+                        <div class="form-text mt-2"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Centang desil mana saja yang berhak.</div>
                     </div>
 
                     <div class="mb-4 mt-3">
-                        <label class="form-label small fw-bold">Deskripsi Kriteria Tambahan (Selain Desil)</label>
-                        <textarea name="kriteria_lainnya" class="form-control" rows="2" placeholder="Cth: Diutamakan lansia di atas 60 tahun, janda/duda, atau memiliki balita/anak sekolah..."></textarea>
+                        <label class="form-label small fw-bold">Deskripsi Kriteria Tambahan</label>
+                        <textarea name="kriteria_lainnya" class="form-control" rows="2" placeholder="Cth: Diutamakan lansia di atas 60 tahun...">{{ old('kriteria_lainnya') }}</textarea>
                     </div>
 
-                    <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-people me-2"></i>Alokasi Kuota</h6>
+                    <h6 class="fw-bold text-primary mb-3 mt-4"><i class="bi bi-people me-2"></i>Alokasi Kuota & Status</h6>
                     <div class="row g-3 mb-4">
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold">Kuota Maksimal (Angka)</label>
-                            <input type="number" name="kuota" class="form-control" placeholder="Cth: 150">
+                            <label class="form-label small fw-bold">Kuota Maksimal (KPM) <span class="text-danger">*</span></label>
+                            <input type="number" name="kuota" class="form-control" value="{{ old('kuota') }}" placeholder="Cth: 150" required>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-6">
                             <label class="form-label small fw-bold">Sasaran / Deskripsi Kuota Tambahan</label>
-                            <input type="text" name="deskripsi_kuota" class="form-control" placeholder="Cth: Menjangkau anak yatim piatu di seluruh Indonesia sesuai validasi data DTSEN...">
+                            <input type="text" name="deskripsi_kuota" class="form-control" value="{{ old('deskripsi_kuota') }}" placeholder="Cth: Menjangkau anak yatim piatu...">
                         </div>
-                    </div>
+                        
+                        </div>
 
                     <div class="text-end mt-5">
                         <button type="reset" class="btn btn-light fw-bold me-2 px-4 shadow-sm border">Reset</button>
@@ -166,39 +190,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Pop-up jika ada Error Validasi (Form kosong/salah)
-        @if($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Data Belum Lengkap!',
-                html: `
-                    <div class="text-danger mb-2">Mohon periksa kembali isian form Anda:</div>
-                    <ul style="text-align: left; font-size: 0.9rem; margin-bottom: 0;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                `,
-                confirmButtonColor: '#dc3545',
-                confirmButtonText: 'Saya Mengerti',
-                customClass: { popup: 'rounded-4 shadow-lg' }
-            });
-        @endif
-
-        // Pop-up jika Berhasil (Opsional, untuk notif sukses)
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                confirmButtonColor: '#7D88DC',
-                customClass: { popup: 'rounded-4 shadow-lg' }
-            });
-        @endif
-    });
-</script>
 </html>

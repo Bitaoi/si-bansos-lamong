@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jenis Bansos - Kasi Kesejahteraan Desa</title>
     
-    <!-- Font Poppins & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -56,10 +55,9 @@
 <div class="container-fluid">
     <div class="row">
         
-        <!-- SIDEBAR PINTAR (Otomatis Mendeteksi Halaman Aktif) -->
         <div class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
             <h5 class="fw-bold mb-4 px-2 py-2 border-bottom text-white" style="border-color: var(--warna-soft) !important;">
-                <i class=""></i>KASI KESEJAHTERAAN
+                <i class="bi bi-shield-lock-fill me-2"></i>KASI KESEJAHTERAAN
             </h5>
             
             <ul class="nav flex-column">
@@ -103,7 +101,6 @@
                     </a>
                 </li>
                 
-                <!-- TOMBOL KELUAR -->
                 <li class="nav-item mt-5">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -114,8 +111,6 @@
                 </li>
             </ul>
         </div>
-        <!-- AKHIR SIDEBAR -->
-
         <div class="col-md-9 col-lg-10 p-4">
             
             <div class="d-md-none d-flex justify-content-between align-items-center mb-4">
@@ -174,7 +169,7 @@
                                         <small class="text-muted">{{ $item->bentuk_penyerahan ?? '-' }}</small>
                                     </td>
                                     <td>
-                                        @if($item->kuota > 0)
+                                        @if(isset($item->kuota) && $item->kuota > 0)
                                             {{ $item->kuota }} Orang
                                         @else
                                             <span class="text-success"><i class="bi bi-infinity"></i> Unlimited</span>

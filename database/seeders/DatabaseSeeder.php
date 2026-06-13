@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         // Panggil UserSeeder yang baru kita buat
         $this->call([
             UserSeeder::class,
+            JadwalBansosSeeder::class,
         ]);
     }
 }

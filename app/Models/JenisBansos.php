@@ -11,22 +11,9 @@ class JenisBansos extends Model
     
     protected $table = 'jenis_bansos';
 
-    protected $fillable = [
-        'nama_bansos', 
-        'kode_bansos', 
-        'sumber_dana',
-        'deskripsi_bantuan',
-        'bentuk_penyerahan',
-        'bentuk_bantuan',
-        'nominal', 
-        'frekuensi', 
-        'tahun_anggaran',
-        'kuota',
-        'deskripsi_kuota', 
-        'kriteria_penerima',
-        'kriteria_desil',
-        'kriteria_lainnya'   
-    ];
+    // PERBAIKAN: Kurung sikunya dibiarkan KOSONG. 
+    // Artinya: "Tidak ada kolom yang dilarang, izinkan semuanya masuk ke database."
+    protected $guarded = [];
 
     // Beri tahu Laravel untuk mengubah JSON dari DB menjadi Array otomatis
     protected $casts = [
@@ -38,6 +25,7 @@ class JenisBansos extends Model
     {
         return $this->hasMany(Pengajuan::class, 'id_bansos');
     }
+    
     // Fungsi untuk menghitung sisa kuota secara otomatis
     public function getSisaKuotaAttribute()
     {
@@ -45,5 +33,4 @@ class JenisBansos extends Model
         $terpakai = $this->pengajuan()->where('status_verifikasi_admin', 'Layak')->count();
         return $this->kuota - $terpakai;
     }
-    
 }

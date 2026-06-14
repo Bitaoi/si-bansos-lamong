@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('terpakai')->default(0);
             
             $table->foreign('id_bansos')->references('id')->on('jenis_bansos')->onDelete('cascade');
+            $table->foreign('id_periode')->references('id')->on('periode_bansos')->onDelete('cascade');
             $table->timestamps();
         });
     }

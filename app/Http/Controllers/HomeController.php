@@ -9,7 +9,7 @@ use App\Models\JenisBansos;
 use App\Models\Galeri;
 use App\Models\JadwalBansos;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaRT;
+use App\Models\KuotaWilayah; // PERBAIKAN: Gunakan KuotaWilayah
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -123,7 +123,7 @@ class HomeController extends Controller
         // 2. Ambil Semua Jenis Bansos untuk Dropdown
         $semuaBansos = JenisBansos::where('status', 'Aktif')->get();
         
-        // 3. Inisialisasi awal variabel agar aman dari error Undefined Variable
+        // 3. Inisialisasi awal variabel
         $bansosTerpilih = null;
         $statusKetersediaan = 'Tidak Tersedia';
         $sisaKuotaLokal = 0;
@@ -134,21 +134,21 @@ class HomeController extends Controller
             $bansosTerpilih = JenisBansos::find($request->jenis_bantuan);
             
             if ($bansosTerpilih && $periode) {
-                // Ambil semua RT yang masih memiliki sisa kuota (kuota > terpakai) di periode ini
-                $rincianKuotaRT = KuotaRT::where('id_periode', $periode->id)
+                // PERBAIKAN: Gunakan KuotaWilayah & kolom kuota_maksimal, kuota_terpakai
+                $rincianKuotaRT = KuotaWilayah::where('id_periode', $periode->id)
                                      ->where('id_bansos', $bansosTerpilih->id)
-                                     ->whereRaw('kuota > terpakai')
+                                     ->whereRaw('kuota_maksimal > kuota_terpakai')
                                      ->orderBy('rt', 'asc')
                                      ->get();
 
                 // Hitung total kuota kumulatif dari seluruh wilayah desa
-                $totalKuota = KuotaRT::where('id_periode', $periode->id)
+                $totalKuota = KuotaWilayah::where('id_periode', $periode->id)
                                      ->where('id_bansos', $bansosTerpilih->id)
-                                     ->sum('kuota');
+                                     ->sum('kuota_maksimal');
                                      
-                $totalTerpakai = KuotaRT::where('id_periode', $periode->id)
+                $totalTerpakai = KuotaWilayah::where('id_periode', $periode->id)
                                         ->where('id_bansos', $bansosTerpilih->id)
-                                        ->sum('terpakai');
+                                        ->sum('kuota_terpakai');
                 
                 $sisaKuotaLokal = $totalKuota - $totalTerpakai;
                 
@@ -163,7 +163,6 @@ class HomeController extends Controller
             }
         }
 
-        // PERBAIKAN: Memasukkan 'rincianKuotaRT' ke dalam compact
         return view('info_bansos', compact(
             'periode', 'jadwals', 'semuaBansos', 
             'bansosTerpilih', 'statusKetersediaan', 'sisaKuotaLokal', 'rincianKuotaRT'

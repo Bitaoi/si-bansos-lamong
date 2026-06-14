@@ -98,7 +98,7 @@
                                             <tr>
                                                 <td class="fw-bold text-dark">RT {{ $k->rt }}</td>
                                                 <td>RW {{ $k->rw }}</td>
-                                                <td><span class="badge bg-success rounded-pill px-3 py-1">{{ $k->kuota - $k->terpakai }} KK / KPM</span></td>
+                                                <td><span class="badge bg-success rounded-pill px-3 py-1">{{ $k->kuota_maksimal - $k->kuota_terpakai }} KK / KPM</span></td>
                                             </tr>
                                             @empty
                                             <tr><td colspan="3" class="text-center py-3 text-muted">Tidak ditemukan kuota aktif untuk tingkat wilayah RT.</td></tr>

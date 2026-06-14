@@ -10,10 +10,17 @@ class KuotaWilayah extends Model
     use HasFactory;
     
     protected $table = 'kuota_wilayahs';
-    protected $fillable = ['id_bansos', 'rt', 'rw', 'kuota_maksimal', 'kuota_terpakai'];
+    
+    // Ganti $fillable menjadi $guarded kosong agar semua data (termasuk id_periode) aman masuk
+    protected $guarded = [];
 
     public function jenisBansos()
     {
         return $this->belongsTo(JenisBansos::class, 'id_bansos', 'id');
+    }
+
+    public function periode()
+    {
+        return $this->belongsTo(PeriodeBansos::class, 'id_periode', 'id');
     }
 }

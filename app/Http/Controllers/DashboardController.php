@@ -9,7 +9,7 @@ use App\Models\JenisBansos;
 use App\Models\User;
 use App\Models\Warga;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaRT; // Disesuaikan dengan nama model yang Anda gunakan
+use App\Models\KuotaWilayah; // Disesuaikan dengan nama model yang Anda gunakan
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
@@ -48,7 +48,7 @@ class DashboardController extends Controller
         $totalWarga         = Warga::count(); 
 
         // 3. Monitoring Kuota Wilayah Berjenjang (Seluruh RT)
-        $monitoringKuota = KuotaRT::with('jenisBansos')
+        $monitoringKuota = KuotaWilayah::with('jenisBansos')
                             ->where('id_periode', $idPeriode)
                             ->orderBy('rw')->orderBy('rt')
                             ->get()
@@ -133,7 +133,7 @@ class DashboardController extends Controller
                                   ->where('status_verifikasi_admin', 'Layak')->count();
 
         // 2. Monitoring Kuota Khusus RT Tersebut
-        $kuotaRTSaya = KuotaRT::with('jenisBansos')
+        $kuotaRTSaya = KuotaWilayah::with('jenisBansos')
                             ->where('id_periode', $idPeriode)
                             ->where('rt', $rt)
                             ->where('rw', $rw)

@@ -79,7 +79,6 @@
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-header bg-white pt-3 pb-0 border-bottom-0 rounded-top-4">
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item"><button class="nav-link active" id="bansos-tab" data-bs-toggle="tab" data-bs-target="#bansos" type="button"><i class="bi bi-gift-fill me-2"></i>Program Bansos</button></li>
                         <li class="nav-item"><button class="nav-link" id="periode-tab" data-bs-toggle="tab" data-bs-target="#periode" type="button"><i class="bi bi-calendar-range-fill me-2"></i>Periode Bantuan</button></li>
                         <li class="nav-item"><button class="nav-link" id="jadwal-tab" data-bs-toggle="tab" data-bs-target="#jadwal" type="button"><i class="bi bi-clock-history me-2"></i>Jadwal Tahapan</button></li>
                     </ul>
@@ -88,46 +87,6 @@
                 <div class="card-body p-0">
                     <div class="tab-content" id="myTabContent">
                         
-                        <div class="tab-pane fade show active p-4" id="bansos">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div><h5 class="fw-bold mb-0">Data Master Program Bansos</h5></div>
-                                <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalTambahBansos"><i class="bi bi-plus-circle me-1"></i> Tambah Program</button>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-custom mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Kode</th>
-                                            <th>Nama Program</th>
-                                            <th>Sumber Dana</th>
-                                            <th>Kuota Global</th>
-                                            <th>Status</th>
-                                            <th class="text-end">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($jenisBansos as $b)
-                                        <tr>
-                                            <td class="fw-bold">{{ $b->kode_bansos }}</td>
-                                            <td>{{ $b->nama_bansos }}</td>
-                                            <td>{{ $b->sumber_dana ?? '-' }}</td>
-                                            <td>{{ $b->kuota_penerima }} KPM</td>
-                                            <td><span class="badge {{ $b->status == 'Aktif' ? 'bg-success' : 'bg-danger' }}">{{ $b->status }}</span></td>
-                                            <td class="text-end">
-                                                <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#modalEditBansos{{ $b->id }}"><i class="bi bi-pencil"></i></button>
-                                                <form action="{{ route('jenis-bansos.destroy', $b->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus bansos ini?');">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        @empty
-                                        <tr><td colspan="6" class="text-center py-3">Data belum tersedia.</td></tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
 
                         <div class="tab-pane fade p-4" id="periode">
                             <div class="d-flex justify-content-between mb-3">

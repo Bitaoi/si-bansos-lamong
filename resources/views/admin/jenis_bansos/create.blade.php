@@ -93,6 +93,25 @@
                 <form action="{{ route('jenis-bansos.store') }}" method="POST" novalidate>
                     @csrf
                     
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-link-45deg me-2"></i>Integrasi Periode Bantuan</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Terikat Pada Periode <span class="text-danger">*</span></label>
+                            <select name="id_periode" class="form-select bg-light text-primary fw-bold border-primary" required>
+                                <option value="">-- Wajib Pilih Periode --</option>
+                                @if(isset($periodes) && count($periodes) > 0)
+                                    @foreach($periodes as $p)
+                                        <option value="{{ $p->id }}" {{ old('id_periode') == $p->id ? 'selected' : '' }}>
+                                            {{ $p->nama_periode }} {{ $p->status == 'Aktif' ? '(Aktif)' : '' }}
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="" disabled>BELUM ADA PERIODE. BUAT DULU DI MANAJEMEN PERIODE!</option>
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+
                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Informasi Dasar Bansos</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
@@ -173,7 +192,14 @@
                             <input type="text" name="deskripsi_kuota" class="form-control" value="{{ old('deskripsi_kuota') }}" placeholder="Cth: Menjangkau anak yatim piatu...">
                         </div>
                         
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Status Aktif <span class="text-danger">*</span></label>
+                            <select name="status" class="form-select" required>
+                                <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="Nonaktif" {{ old('status') == 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                            </select>
                         </div>
+                    </div>
 
                     <div class="text-end mt-5">
                         <button type="reset" class="btn btn-light fw-bold me-2 px-4 shadow-sm border">Reset</button>

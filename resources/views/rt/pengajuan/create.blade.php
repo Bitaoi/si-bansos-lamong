@@ -36,16 +36,26 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <h4 class="fw-bold mb-1 text-primary">Form Pengajuan Bantuan</h4>
-                    <p class="text-muted mb-0">Usulkan warga yang layak menerima bantuan sosial ke Admin Desa.</p>
+                    <p class="text-muted mb-2">Usulkan warga yang layak menerima bantuan sosial ke Admin Desa.</p>
+                    
+                    @if(isset($periodeAktif))
+                    <div class="d-inline-block px-3 py-1 rounded-pill bg-success bg-opacity-10 border border-success text-success fw-bold small shadow-sm">
+                        <i class="bi bi-calendar2-check-fill me-1"></i> Periode Berjalan: {{ $periodeAktif->nama_periode }}
+                    </div>
+                    @endif
                 </div>
-                <a href="{{ route('rt.dashboard') }}" class="btn btn-outline-secondary fw-bold"><i class="bi bi-arrow-left"></i> Kembali</a>
+                <a href="{{ route('rt.dashboard') }}" class="btn btn-outline-secondary fw-bold mt-1"><i class="bi bi-arrow-left"></i> Kembali</a>
             </div>
 
             <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                
+                @if(isset($periodeAktif))
+                <input type="hidden" name="id_periode" value="{{ $periodeAktif->id }}">
+                @endif
 
                 <div class="card mb-4">
                     <div class="card-body p-4">
@@ -72,7 +82,7 @@
                                     <label class="form-label fw-bold">Jumlah Anggota Keluarga</label>
                                     <input type="text" id="jumlah_keluarga" class="form-control readonly-input text-danger fw-bold mb-2" readonly>
                                     <ul id="list_anggota_keluarga" class="text-muted small ps-3 mb-0" style="list-style-type: decimal;">
-                                        </ul>
+                                    </ul>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-bold">Alamat Domisili</label>

@@ -11,6 +11,10 @@ return new class extends Migration
         Schema::create('periode_bansos', function (Blueprint $table) {
             $table->id();
             $table->string('nama_periode'); // Contoh: "Tahap 1 - 2026"
+
+            $table->date('tanggal_mulai');
+            $table->date('tanggal_akhir');
+            
             $table->enum('status', ['Aktif', 'Tutup'])->default('Tutup');
             $table->timestamps();
         });

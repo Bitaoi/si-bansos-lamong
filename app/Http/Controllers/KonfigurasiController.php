@@ -89,7 +89,7 @@ class KonfigurasiController extends Controller
         if ($cekKuota) {
             // Jika data alokasi sudah ada, akumulasikan kuota_maksimal-nya
             $cekKuota->update([
-                'kuota_maksimal' => $cekKuota->kuota_maksimal + $request->kuota
+                'kuota' => $cekKuota->kuota + $request->kuota
             ]);
         } else {
             // Jika benar-benar baru, gunakan KuotaWilayah::create
@@ -98,8 +98,8 @@ class KonfigurasiController extends Controller
                 'id_bansos'      => $request->id_bansos,
                 'rt'             => $rtValue,
                 'rw'             => $rwValue,
-                'kuota_maksimal' => $request->kuota,
-                'kuota_terpakai' => 0, // Nilai default awal pemakaian
+                'kuota'          => $request->kuota,
+                'terpakai'       => 0, // Nilai default awal pemakaian
             ]);
         }
 

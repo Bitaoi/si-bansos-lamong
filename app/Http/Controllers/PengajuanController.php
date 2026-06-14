@@ -8,7 +8,7 @@ use App\Models\Warga;
 use App\Models\JenisBansos;
 use App\Models\JadwalBansos;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaRT;
+use App\Models\KuotaWilayah;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -197,17 +197,17 @@ class PengajuanController extends Controller
         $rt = $wilayah[0] ?? $warga->rt;
         $rw = $wilayah[1] ?? $warga->rw;
 
-        $kuotaRT = KuotaRT::where('id_bansos', $request->id_bansos)
+        $kuotaWilayah = KuotaWilayah::where('id_bansos', $request->id_bansos)
                           ->where('id_periode', $periodeAktif->id)
                           ->where('rt', $rt)
                           ->where('rw', $rw)
                           ->first();
 
-        if ($kuotaRT) {
-            if ($kuotaRT->terpakai >= $kuotaRT->kuota_maksimal) {
-                return redirect()->back()->with('error', 'Gagal mengajukan! Kuota wilayah RT ' . $rt . '/RW ' . $rw . ' untuk bansos ini sudah penuh.')->withInput();
+        if ($kuotaWilayah) {
+            if ($kuotaWilayah->terpakai >= $kuotaWilayah->kuota) {
+                redirect()->back()->with('error', 'Gagal mengajukan! Kuota wilayah RT ' . $rt . '/RW ' . $rw . ' untuk bansos ini sudah penuh.')->withInput();
             }
-            $kuotaRT->increment('terpakai');
+            $kuotaWilayah->increment('terpakai');
         }
 
         $pathDepan = $request->file('foto_rumah_depan')->store('pengajuan/rumah', 'public');
@@ -237,14 +237,14 @@ class PengajuanController extends Controller
             
             // Kembalikan Kuota RT
             $warga = $pengajuan->warga;
-            $kuotaRT = KuotaRT::where('id_bansos', $pengajuan->id_bansos)
-                              ->where('id_periode', $pengajuan->id_periode)
-                              ->where('rt', $warga->rt)
-                              ->where('rw', $warga->rw)
-                              ->first();
-                              
-            if($kuotaRT && $kuotaRT->terpakai > 0) {
-                $kuotaRT->decrement('terpakai');
+            $kuotaWilayah = KuotaWilayah::where('id_bansos', $pengajuan->id_bansos)
+                                          ->where('id_periode', $pengajuan->id_periode)
+                                          ->where('rt', $warga->rt)
+                                          ->where('rw', $warga->rw)
+                                          ->first();
+                                          
+            if($kuotaWilayah && $kuotaWilayah->terpakai > 0) {
+                $kuotaWilayah->decrement('terpakai');
             }
 
             if ($pengajuan->foto_rumah_depan) Storage::disk('public')->delete($pengajuan->foto_rumah_depan);

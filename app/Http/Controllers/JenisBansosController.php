@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JenisBansos;
+use App\Models\PeriodeBansos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,7 +23,9 @@ class JenisBansosController extends Controller
     public function create()
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
-        return view('admin.jenis_bansos.create');
+
+        $periodes = PeriodeBansos::all(); 
+        return view('admin.jenis_bansos.create', compact('periodes'));
     }
 
     // 3. SIMPAN DATA (CREATE)
@@ -30,39 +33,40 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        // Validasi input
+        // PERBAIKAN: Nama-nama ini sekarang sudah 100% SAMA dengan name="..." di HTML form
         $request->validate([
-            'nama_bansos'          => 'required|string|max:100',
-            'kode_bansos'          => 'required|string|max:50',
-            'sumber_dana'          => 'required|string',
-            'deskripsi_singkat'    => 'nullable|string',
-            'bentuk_penyerahan'    => 'required|string',
-            'nominal'              => 'required|string',
-            'frekuensi_penyaluran' => 'required|string',
-            'tahun_anggaran'       => 'required|numeric',
-            'kriteria_tambahan'    => 'nullable|string',
-            'kuota_penerima'       => 'required|numeric',
-            'sasaran_kuota'        => 'nullable|string',
-            'status'               => 'required|in:Aktif,Nonaktif',
+            'id_periode'        => 'required|exists:periode_bansos,id',
+            'nama_bansos'       => 'required|string|max:100',
+            'kode_bansos'       => 'required|string|max:50',
+            'sumber_dana'       => 'required|string',
+            'deskripsi_bantuan' => 'nullable|string',
+            'bentuk_penyerahan' => 'required|string',
+            'nominal'           => 'required|string',
+            'frekuensi'         => 'required|string',
+            'tahun_anggaran'    => 'required|numeric',
+            'kriteria_lainnya'  => 'nullable|string',
+            'kuota'             => 'required|numeric',
+            'deskripsi_kuota'   => 'nullable|string',
+            'status'            => 'required|in:Aktif,Nonaktif',
         ]);
 
-        // MAPPING: Sesuaikan dengan migrasi 'create_jenis_bansos_table'
         $data = [
+            'id_periode'        => $request->id_periode,
             'nama_bansos'       => $request->nama_bansos,
             'kode_bansos'       => $request->kode_bansos,
             'sumber_dana'       => $request->sumber_dana,
-            'deskripsi_bantuan' => $request->deskripsi_singkat, 
+            'deskripsi_bantuan' => $request->deskripsi_bantuan, 
             'bentuk_penyerahan' => $request->bentuk_penyerahan,
             'bentuk_bantuan'    => '-', 
             'nominal'           => $request->nominal,
-            'frekuensi'         => $request->frekuensi_penyaluran, 
+            'frekuensi'         => $request->frekuensi, 
             'tahun_anggaran'    => $request->tahun_anggaran,
-            'kuota'             => $request->kuota_penerima, 
-            'deskripsi_kuota'   => $request->sasaran_kuota, 
+            'kuota'             => $request->kuota, 
+            'deskripsi_kuota'   => $request->deskripsi_kuota, 
             'kriteria_penerima' => '-', 
-            'kriteria_lainnya'  => $request->kriteria_tambahan, 
+            'kriteria_lainnya'  => $request->kriteria_lainnya, 
             'status'            => $request->status,
-            'kriteria_desil'    => json_encode($request->kriteria_desil ?? []) // Pastikan di-encode jadi JSON
+            'kriteria_desil'    => json_encode($request->kriteria_desil ?? []) 
         ];
         
         JenisBansos::create($data);
@@ -76,8 +80,9 @@ class JenisBansosController extends Controller
         if (Auth::user()->role !== 'Admin') { abort(403); }
         
         $jenisBansos = JenisBansos::findOrFail($id);
+        $periodes = PeriodeBansos::all();
         
-        return view('admin.jenis_bansos.edit', compact('jenisBansos'));
+        return view('admin.jenis_bansos.edit', compact('jenisBansos', 'periodes'));
     }
 
     // 5. UPDATE DATA 
@@ -85,35 +90,38 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
+        // PERBAIKAN: Disamakan dengan form HTML
         $request->validate([
-            'nama_bansos'          => 'required|string|max:100',
-            'kode_bansos'          => 'required|string|max:50',
-            'sumber_dana'          => 'required|string',
-            'deskripsi_singkat'    => 'nullable|string',
-            'bentuk_penyerahan'    => 'required|string',
-            'nominal'              => 'required|string',
-            'frekuensi_penyaluran' => 'required|string',
-            'tahun_anggaran'       => 'required|numeric',
-            'kriteria_tambahan'    => 'nullable|string',
-            'kuota_penerima'       => 'required|numeric',
-            'sasaran_kuota'        => 'nullable|string',
-            'status'               => 'required|in:Aktif,Nonaktif',
+            'id_periode'        => 'required|exists:periode_bansos,id',
+            'nama_bansos'       => 'required|string|max:100',
+            'kode_bansos'       => 'required|string|max:50',
+            'sumber_dana'       => 'required|string',
+            'deskripsi_bantuan' => 'nullable|string',
+            'bentuk_penyerahan' => 'required|string',
+            'nominal'           => 'required|string',
+            'frekuensi'         => 'required|string',
+            'tahun_anggaran'    => 'required|numeric',
+            'kriteria_lainnya'  => 'nullable|string',
+            'kuota'             => 'required|numeric',
+            'deskripsi_kuota'   => 'nullable|string',
+            'status'            => 'required|in:Aktif,Nonaktif',
         ]);
 
         $jenisBansos = JenisBansos::findOrFail($id);
         
         $data = [
+            'id_periode'        => $request->id_periode,
             'nama_bansos'       => $request->nama_bansos,
             'kode_bansos'       => $request->kode_bansos,
             'sumber_dana'       => $request->sumber_dana,
-            'deskripsi_bantuan' => $request->deskripsi_singkat,
+            'deskripsi_bantuan' => $request->deskripsi_bantuan,
             'bentuk_penyerahan' => $request->bentuk_penyerahan,
             'nominal'           => $request->nominal,
-            'frekuensi'         => $request->frekuensi_penyaluran,
+            'frekuensi'         => $request->frekuensi,
             'tahun_anggaran'    => $request->tahun_anggaran,
-            'kuota'             => $request->kuota_penerima,
-            'deskripsi_kuota'   => $request->sasaran_kuota,
-            'kriteria_lainnya'  => $request->kriteria_tambahan,
+            'kuota'             => $request->kuota,
+            'deskripsi_kuota'   => $request->deskripsi_kuota,
+            'kriteria_lainnya'  => $request->kriteria_lainnya,
             'status'            => $request->status,
             'kriteria_desil'    => json_encode($request->kriteria_desil ?? [])
         ];

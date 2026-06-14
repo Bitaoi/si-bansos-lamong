@@ -137,18 +137,18 @@ class HomeController extends Controller
                 // PERBAIKAN: Gunakan KuotaWilayah & kolom kuota_maksimal, kuota_terpakai
                 $rincianKuotaRT = KuotaWilayah::where('id_periode', $periode->id)
                                      ->where('id_bansos', $bansosTerpilih->id)
-                                     ->whereRaw('kuota_maksimal > kuota_terpakai')
+                                     ->whereRaw('kuota > terpakai')
                                      ->orderBy('rt', 'asc')
                                      ->get();
 
                 // Hitung total kuota kumulatif dari seluruh wilayah desa
                 $totalKuota = KuotaWilayah::where('id_periode', $periode->id)
                                      ->where('id_bansos', $bansosTerpilih->id)
-                                     ->sum('kuota_maksimal');
+                                     ->sum('kuota');
                                      
                 $totalTerpakai = KuotaWilayah::where('id_periode', $periode->id)
                                         ->where('id_bansos', $bansosTerpilih->id)
-                                        ->sum('kuota_terpakai');
+                                        ->sum('terpakai');
                 
                 $sisaKuotaLokal = $totalKuota - $totalTerpakai;
                 

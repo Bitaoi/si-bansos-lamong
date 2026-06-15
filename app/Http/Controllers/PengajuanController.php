@@ -30,7 +30,26 @@ class PengajuanController extends Controller
             return redirect()->route('rt.dashboard')->with('error', 'Akses ditolak! Masa pengajuan bansos sedang ditutup. Silakan ajukan kembali pada tanggal ' . $jadwalUsulan->hari_mulai . ' s/d ' . $jadwalUsulan->hari_selesai . ' bulan depan.');
         }
 
-        $bansos = JenisBansos::where('status', 'Aktif')->get();
+        // wilayah rt yang login
+        $wilayah = explode('/', Auth::user()->wilayah_rt_rw ?? '000/000');
+        $rt = $wilayah[0];
+        $rw = $wilayah[1];
+
+        // LOGIKA TUNGGAL YANG BENAR:
+        // Gunakan map() untuk menyuntikkan sisa kuota RT tanpa merusak Eloquent Model
+        $bansos = JenisBansos::where('status', 'Aktif')->get()->map(function($b) use ($periodeAktif, $rt, $rw) {
+            $kuotaRT = KuotaWilayah::where('id_bansos', $b->id)
+                                   ->where('id_periode', $periodeAktif->id)
+                                   ->where('rt', $rt)
+                                   ->where('rw', $rw)
+                                   ->first();
+
+            // Suntikkan properti 'sisa_kuota_rt' (Pastikan View Anda memanggil nama ini)
+            $b->sisa_kuota_rt = $kuotaRT ? ($kuotaRT->kuota - $kuotaRT->terpakai) : 0;
+            
+            return $b;
+        });
+
         return view('rt.pengajuan.create', compact('bansos', 'periodeAktif'));
     }
 
@@ -205,7 +224,7 @@ class PengajuanController extends Controller
 
         if ($kuotaWilayah) {
             if ($kuotaWilayah->terpakai >= $kuotaWilayah->kuota) {
-                redirect()->back()->with('error', 'Gagal mengajukan! Kuota wilayah RT ' . $rt . '/RW ' . $rw . ' untuk bansos ini sudah penuh.')->withInput();
+                return redirect()->back()->with('error', 'Gagal mengajukan! Kuota wilayah RT ' . $rt . '/RW ' . $rw . ' untuk bansos ini sudah penuh.')->withInput();
             }
             $kuotaWilayah->increment('terpakai');
         }

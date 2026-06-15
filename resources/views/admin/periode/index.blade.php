@@ -92,6 +92,10 @@
                                         @endif
                                     </td>
                                     <td class="text-end pe-4">
+                                        <button type="button" class="btn btn-sm btn-outline-info rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalInfoKuota{{ $p->id }}" title="Lihat Distribusi Kuota RT">
+                                            <i class="bi bi-pie-chart-fill"></i>
+                                        </button>
+                                        
                                         <button class="btn btn-sm btn-outline-primary rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $p->id }}"><i class="bi bi-pencil-square"></i></button>
                                         <form action="{{ route('admin.periode.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus periode ini secara permanen? Data pengajuan yang terikat mungkin akan terdampak.');">
                                             @csrf @method('DELETE')
@@ -100,8 +104,49 @@
                                     </td>
                                 </tr>
 
-                                <div class="modal fade" id="modalEdit{{ $p->id }}" tabindex="-1">
-                                    <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal fade" id="modalInfoKuota{{ $p->id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow-lg rounded-4 text-dark">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="fw-bold"><i class="bi bi-pie-chart-fill text-info me-2"></i>Distribusi Kuota RT ({{ $p->nama_periode }})</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="table-responsive border rounded-3">
+                                                    <table class="table table-hover align-middle mb-0 text-center">
+                                                        <thead class="table-light small text-secondary">
+                                                            <tr>
+                                                                <th>Program Bansos</th>
+                                                                <th>Wilayah (RT/RW)</th>
+                                                                <th>Kuota Utama Dibagikan</th>
+                                                                <th>Sisa Kuota Belum Dipakai</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @php
+                                                                $kuotaPeriodeIni = isset($kuotaWilayahs) ? $kuotaWilayahs->where('id_periode', $p->id) : collect();
+                                                            @endphp
+                                                            @forelse($kuotaPeriodeIni as $k)
+                                                            <tr>
+                                                                <td class="fw-bold text-start ps-3">{{ $k->jenisBansos->nama_bansos ?? '-' }}</td>
+                                                                <td>{{ $k->rt }} / {{ $k->rw }}</td>
+                                                                <td><span class="badge bg-primary rounded-pill px-3">{{ $k->kuota }} KPM</span></td>
+                                                                <td><span class="badge bg-success rounded-pill px-3">{{ $k->kuota - $k->terpakai }} KPM</span></td>
+                                                            </tr>
+                                                            @empty
+                                                            <tr><td colspan="4" class="text-center py-4 text-muted">Belum ada kuota RT yang dibagikan untuk periode ini.</td></tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
+                                                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm" data-bs-dismiss="modal">Tutup</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="modalEdit{{ $p->id }}" tabindex="-1">                                    <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content border-0 shadow-lg rounded-4 text-dark">
                                             <div class="modal-header border-bottom-0 pb-0">
                                                 <h5 class="fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Periode</h5>

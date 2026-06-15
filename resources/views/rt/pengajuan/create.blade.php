@@ -102,7 +102,7 @@
                                 <select name="id_bansos" class="form-select border-secondary" required>
                                     <option value="">-- Pilih Program --</option>
                                     @foreach($bansos as $b)
-                                        <option value="{{ $b->id }}" {{ old('id_bansos') == $b->id ? 'selected' : '' }}>{{ $b->nama_bansos }} (Sisa: {{ $b->sisa_kuota }} Orang)</option>
+                                        <option value="{{ $b->id }}" {{ old('id_bansos') == $b->id ? 'selected' : '' }}>{{ $b->nama_bansos }} (Sisa: {{ $b->sisa_kuota_rt }} Orang)</option>
                                     @endforeach
                                 </select>
                             </div>

@@ -106,13 +106,16 @@
                             <label class="form-label">Pekerjaan Utama</label>
                             <input type="text" name="pekerjaan" class="form-control" value="{{ old('pekerjaan', $warga->pekerjaan) }}" required>
                         </div>
+                        
                         <div class="col-md-4">
                             <label class="form-label">Jumlah Tanggungan Keluarga</label>
                             <div class="input-group">
-                                <input type="number" name="jumlah_keluarga" class="form-control" min="1" value="{{ old('jumlah_keluarga', $warga->jumlah_keluarga) }}" required>
+                                <input type="number" class="form-control readonly-input fw-bold" value="{{ isset($anggotaKeluarga) ? $anggotaKeluarga->count() : $warga->jumlah_keluarga }}" readonly disabled>
                                 <span class="input-group-text bg-light border-secondary">Orang</span>
                             </div>
+                            <small class="text-muted mt-1 d-block" style="font-size: 0.72rem;"><i class="bi bi-info-circle"></i> Otomatis dihitung oleh sistem berdasarkan kesamaan No. KK.</small>
                         </div>
+                        
                         <div class="col-md-4">
                             <label class="form-label">RT</label>
                             <input type="text" name="rt" class="form-control" placeholder="Contoh: 001" maxlength="3" value="{{ old('rt', $warga->rt) }}" required>
@@ -121,7 +124,43 @@
                             <label class="form-label">RW</label>
                             <input type="text" name="rw" class="form-control" placeholder="Contoh: 005" maxlength="3" value="{{ old('rw', $warga->rw) }}" required>
                         </div>
-                        <div class="col-12">
+                        
+                        <div class="col-12 mt-2">
+                            <label class="form-label d-block text-secondary small fw-bold mb-2"><i class="bi bi-people-fill me-1"></i> Daftar Anggota Keluarga Terdaftar (Satu KK)</label>
+                            <div class="card bg-light border p-3 rounded-3" style="max-height: 250px; overflow-y: auto;">
+                                @if(isset($anggotaKeluarga) && $anggotaKeluarga->count() > 0)
+                                    <ul class="list-group list-group-flush bg-transparent">
+                                        @foreach($anggotaKeluarga as $ak)
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2 px-1 border-bottom-0">
+                                                <div>
+                                                    <span class="fw-bold {{ $ak->nik == $warga->nik ? 'text-primary' : 'text-dark' }}">{{ $ak->nama_lengkap }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">NIK: {{ $ak->nik }}</small>
+                                                </div>
+                                                
+                                                @php
+                                                    $badgeColor = 'bg-secondary text-secondary border-secondary'; // Default
+                                                    if(str_contains($ak->peran_otomatis, 'Kepala Keluarga')) {
+                                                        $badgeColor = 'bg-primary text-primary border-primary';
+                                                    } elseif($ak->peran_otomatis == 'Istri') {
+                                                        $badgeColor = 'bg-info text-info border-info';
+                                                    } elseif($ak->peran_otomatis == 'Anak') {
+                                                        $badgeColor = 'bg-success text-success border-success';
+                                                    }
+                                                @endphp
+                                                
+                                                <span class="badge {{ $badgeColor }} bg-opacity-10 border px-3 py-1 rounded-pill small">
+                                                    {{ $ak->peran_otomatis }}
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <span class="text-muted small italic">Belum ada rincian data anggota keluarga terdaftar untuk Nomor KK ini.</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-3">
                             <label class="form-label">Alamat Lengkap Domisili</label>
                             <textarea name="alamat_lengkap" class="form-control" rows="2" required>{{ old('alamat_lengkap', $warga->alamat_lengkap) }}</textarea>
                         </div>

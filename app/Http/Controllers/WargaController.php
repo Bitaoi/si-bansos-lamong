@@ -16,10 +16,7 @@ class WargaController extends Controller
     
     public function index(Request $request)
     {
-        // Fitur Pencarian untuk Admin
         $keyword = $request->get('keyword');
-
-        // Gunakan $query builder agar pagination tidak error
         $query = Warga::query();
 
         if ($keyword) {
@@ -27,9 +24,7 @@ class WargaController extends Controller
                   ->orWhere('nama_lengkap', 'LIKE', "%{$keyword}%");
         }
 
-        // Terapkan pagination ke variabel $warga
         $wargas = $query->latest()->paginate(10)->withQueryString();
-
         return view('admin.warga.index', compact('wargas', 'keyword'));
     }
 
@@ -62,14 +57,57 @@ class WargaController extends Controller
         ]);
 
         Warga::create($request->all());
-
         return redirect()->route('warga.index')->with('success', 'Data Warga berhasil ditambahkan!');
     }
 
     public function edit($nik)
     {
         $warga = Warga::where('nik', $nik)->firstOrFail();
-        return view('admin.warga.edit', compact('warga'));
+        
+        // 1. Ambil semua anggota keluarga berdasarkan KK yang sama, urutkan dari yang tertua
+        $anggotaKeluarga = Warga::where('no_kk', $warga->no_kk)
+                            ->orderBy('tanggal_lahir', 'asc')
+                            ->get();
+
+        // 2. LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (DISEMPURNAKAN)
+        // Kepala Keluarga: Laki-laki tertua. Jika tidak ada laki-laki, ambil orang tertua di KK.
+        $kepalaKeluarga = $anggotaKeluarga->filter(function($item) {
+            return in_array(strtolower($item->jenis_kelamin), ['l', 'laki-laki', 'laki - laki']);
+        })->first() ?? $anggotaKeluarga->first();
+
+        // Istri: Perempuan tertua yang BUKAN Kepala Keluarga, dan status perkawinannya BUKAN "Belum Kawin"
+        $istri = $anggotaKeluarga->filter(function($item) use ($kepalaKeluarga) {
+            $isPerempuan = in_array(strtolower($item->jenis_kelamin), ['p', 'perempuan']);
+            $bukanKk = $item->nik !== $kepalaKeluarga->nik;
+            $sudahKawin = !str_contains(strtolower($item->status_perkawinan ?? ''), 'belum kawin');
+            return $isPerempuan && $bukanKk && $sudahKawin;
+        })->first();
+
+        // 3. Terapkan peran otomatis ke masing-masing anggota keluarga
+        foreach ($anggotaKeluarga as $ak) {
+            $peran = $ak->status_keluarga;
+
+            // Jika status kependudukan di database masih kosong/umum, lakukan klasifikasi pintar
+            if (in_array($peran, ['Belum Diisi', '-', 'Anggota Keluarga', null, ''])) {
+                if ($ak->nik === $kepalaKeluarga->nik) {
+                    $peran = ($anggotaKeluarga->count() == 1) ? 'Kepala Keluarga (Mandiri)' : 'Kepala Keluarga';
+                } elseif ($istri && $ak->nik === $istri->nik) {
+                    $peran = 'Istri';
+                } else {
+                    // REVISI UTAMA: Mengubah dari label "Anak" menjadi "Anggota Keluarga" agar lebih universal & akurat
+                    $peran = 'Anggota Keluarga';
+                }
+            }
+            $ak->peran_otomatis = $peran;
+        }
+
+        // 4. Urutkan Tampilan di Form: Kepala Keluarga -> Istri -> Anggota Keluarga lainnya
+        $urutanPeran = ['Kepala Keluarga (Mandiri)' => 1, 'Kepala Keluarga' => 2, 'Istri' => 3, 'Anggota Keluarga' => 4];
+        $anggotaKeluarga = $anggotaKeluarga->sortBy(function($ak) use ($urutanPeran) {
+            return $urutanPeran[$ak->peran_otomatis] ?? 5;
+        })->values();
+        
+        return view('admin.warga.edit', compact('warga', 'anggotaKeluarga'));
     }
 
     public function update(Request $request, $nik)
@@ -88,29 +126,28 @@ class WargaController extends Controller
             'pekerjaan' => 'required|string',
             'status_perkawinan' => 'required|string|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati,Belum Kawin (Mandiri)',
             'nama_ibu_kandung' => 'required|string|max:150',
-            'jumlah_keluarga' => 'required|integer|min:1',
             'alamat_lengkap' => 'required|string',
             'rt' => 'required|string|max:3',
             'rw' => 'required|string|max:3',
         ]);
 
-        $warga->update($request->except(['nik'])); // NIK tidak boleh diupdate
+        $warga->update($request->except(['nik', 'jumlah_keluarga']));
 
-        return redirect()->route('warga.index')->with('success', 'Data Warga berhasil diperbarui!');
+        $jumlahKeluargaAktual = Warga::where('no_kk', $warga->no_kk)->count();
+        Warga::where('no_kk', $warga->no_kk)->update([
+            'jumlah_keluarga' => $jumlahKeluargaAktual
+        ]);
+
+        return redirect()->route('warga.index')->with('success', 'Data Warga berhasil diperbarui, dan status tanggungan keluarga telah disinkronkan otomatis!');
     }
 
     public function destroy($nik)
     {
         $warga = Warga::where('nik', $nik)->firstOrFail();
         $warga->delete();
-
         return redirect()->route('warga.index')->with('success', 'Data Warga berhasil dihapus!');
     }
 
-    // =========================================================================
-    // FITUR IMPORT EXCEL (ADMIN)
-    // =========================================================================
-    
     public function downloadTemplate()
     {
         $filepath = public_path('template/Template_Import_Warga.xlsx');
@@ -119,7 +156,6 @@ class WargaController extends Controller
 
     public function import(Request $request)
     {
-        // 1. Cek Manual: Mencegah file gagal masuk karena ukurannya melebihi batas 2MB
         if (!$request->hasFile('file_excel')) {
             return redirect()->back()->with('error', 'GAGAL: File tidak ditemukan atau ukuran file terlalu besar (Maksimal 2MB).');
         }
@@ -127,49 +163,34 @@ class WargaController extends Controller
         $file = $request->file('file_excel');
         $extension = strtolower($file->getClientOriginalExtension());
 
-        // 2. Cek Ekstensi Manual: Mencegah Laravel memblokir MIME Type bawaan Windows secara diam-diam
         if (!in_array($extension, ['xlsx', 'xls', 'csv'])) {
             return redirect()->back()->with('error', 'GAGAL: Format file tidak didukung! Harus berupa .xlsx, .xls, atau .csv');
         }
 
         try {
             DB::beginTransaction();
-            
             Excel::import(new \App\Imports\WargaImport, $file);
-            
             DB::commit();
             return redirect()->route('warga.index')->with('success', 'Luar Biasa! Data warga berhasil di-import massal!');
-            
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             DB::rollBack();
             $failures = $e->failures();
-            $pesanError = "Gagal Import. Cek Baris Excel ke-" . $failures[0]->row() . ": " . $failures[0]->errors()[0];
-            return redirect()->route('warga.index')->with('error', $pesanError);
-            
+            return redirect()->route('warga.index')->with('error', "Gagal Import. Cek Baris Excel ke-" . $failures[0]->row() . ": " . $failures[0]->errors()[0]);
         } catch (\Exception $e) {
             DB::rollBack();
-            // 3. TANGKAP ERROR: Akan memunculkan peringatan merah di layar jika format kolom berantakan
             return redirect()->route('warga.index')->with('error', 'Terjadi kesalahan pembacaan sistem: ' . $e->getMessage());
         }
     }
     
-    // =========================================================================
-    // MENU DATA WARGA (UNTUK RT)
-    // =========================================================================
-    
     public function indexRT(Request $request)
     {
         $user = auth()->user();
-        if ($user->role !== 'RT') {
-            abort(403);
-        }
+        if ($user->role !== 'RT') { abort(403); }
 
-        // 1. Ambil RT dan RW dari format wilayah_rt_rw (misal "001/005")
         $wilayah = explode('/', $user->wilayah_rt_rw);
         $rt = $wilayah[0] ?? '-'; 
         $rw = $wilayah[1] ?? '-'; 
 
-        // 2. Tampilan Blade milikmu menggunakan input name="search"
         $keyword = $request->get('search');
         $query = Warga::where('rt', $rt);
 
@@ -180,10 +201,7 @@ class WargaController extends Controller
             });
         }
 
-        // 3. Tampilan Blade mengharapkan variabel bernama $wargas (pakai 's')
         $wargas = $query->paginate(15)->withQueryString();
-        
-        // 4. Kirim semua variabel yang dibutuhkan oleh Blade ($wargas, $rt, dan $rw)
         return view('rt.warga.index', compact('wargas', 'rt', 'rw'));
     }
 }

@@ -153,7 +153,12 @@
 
                             <div class="mb-4">
                                 <label class="form-label small fw-bold">Password <span class="text-danger">*</span></label>
-                                <input type="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
+                                <div class="input-group">
+                                    <input type="password" id="password_rt" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
+                                    <button class="btn btn-outline-secondary border" style="border-color: #e2e8f0;" type="button" id="btnTogglePwdRt">
+                                        <i class="bi bi-eye-fill" id="iconPwdRt"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="d-grid mt-5">
@@ -182,5 +187,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('btnTogglePwdRt').addEventListener('click', function() {
+        const pwd = document.getElementById('password_rt');
+        const icon = document.getElementById('iconPwdRt');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+        } else {
+            pwd.type = 'password';
+            icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+        }
+    });
+</script>
 </body>
 </html>

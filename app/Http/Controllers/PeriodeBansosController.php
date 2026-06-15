@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PeriodeBansos;
+use App\Models\KuotaWilayah;
 use Illuminate\Support\Facades\Auth;
 
 class PeriodeBansosController extends Controller
@@ -13,7 +14,10 @@ class PeriodeBansosController extends Controller
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
         $periodes = PeriodeBansos::orderBy('created_at', 'desc')->get();
-        return view('admin.periode.index', compact('periodes'));
+
+        $kuotaWilayahs = KuotaWilayah::with('jenisBansos')->get();
+        
+        return view('admin.periode.index', compact('periodes', 'kuotaWilayahs'));
     }
 
     public function store(Request $request)

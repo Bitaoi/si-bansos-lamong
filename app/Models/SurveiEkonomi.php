@@ -5,17 +5,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class SurveiEkonomi extends Model 
 {
+    // Mengizinkan semua kolom untuk diisi secara massal
     protected $guarded = [];
 
     public function pengajuan() {
         return $this->belongsTo(Pengajuan::class);
     }
 
-    // Tambahkan ini agar saat diakses, foto otomatis menjadi array
+    // Accessor agar saat diakses, JSON string otomatis berubah menjadi array
     public function getFotoLantaiAttribute($value) { return json_decode($value, true) ?? []; }
     public function getFotoDindingAttribute($value) { return json_decode($value, true) ?? []; }
     public function getFotoSumberAirAttribute($value) { return json_decode($value, true) ?? []; }
-    public function getFotoWcAttribute($value) { return json_decode($value, true) ?? []; }
+    
+    // PERBAIKAN: Penamaan disesuaikan dengan kolom 'foto_wc_air'
+    public function getFotoWcAirAttribute($value) { return json_decode($value, true) ?? []; }
+    
     public function getFotoListrikAttribute($value) { return json_decode($value, true) ?? []; }
     public function getFotoKendaraanAttribute($value) { return json_decode($value, true) ?? []; }
     public function getFotoElektronikAttribute($value) { return json_decode($value, true) ?? []; }

@@ -40,7 +40,7 @@
             <ul class="nav flex-column">
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="{{ route('admin.kuota.index') }}" class="nav-link active"><i class="bi bi-bar-chart-fill"></i> Rincian Kuota</a></li>
-                </ul>
+            </ul>
         </div>
 
         <div class="col-md-9 col-lg-10 p-4">
@@ -92,14 +92,18 @@
 
                             <div class="row text-center pt-3 border-top">
                                 <div class="col-6 border-end">
-                                    <div class="small text-muted">Total Kuota</div>
+                                    <div class="small text-muted">Total Kuota Global</div>
                                     <div class="fw-bold">{{ $item->kuota }}</div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="small text-muted">Terpakai</div>
+                                    <div class="small text-muted">Total Terpakai</div>
                                     <div class="fw-bold text-success">{{ $terpakai }}</div>
                                 </div>
                             </div>
+
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalKuotaRT{{ $item->id }}">
+                                <i class="bi bi-diagram-3-fill me-1"></i> Rincian Pembagian per RT
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -108,6 +112,75 @@
         </div>
     </div>
 </div>
+
+@foreach($bansos as $item)
+<div class="modal fade" id="modalKuotaRT{{ $item->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-light border-bottom px-4">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-diagram-3-fill me-2 text-primary"></i>Distribusi Kuota RT</h5>
+                    <small class="text-muted">Program: {{ $item->nama_bansos }}</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                @php
+                    // Mengambil data distribusi RT pada periode yang sedang aktif
+                    $periodeAktif = \App\Models\PeriodeBansos::where('status', 'Aktif')->first();
+                    $distribusiRT = collect();
+                    
+                    if($periodeAktif) {
+                        $distribusiRT = \App\Models\KuotaWilayah::where('id_bansos', $item->id)
+                            ->where('id_periode', $periodeAktif->id)
+                            ->orderBy('rw', 'asc')
+                            ->orderBy('rt', 'asc')
+                            ->get();
+                    }
+                @endphp
+
+                @if(!$periodeAktif)
+                    <div class="alert alert-warning text-center border-0 small">Belum ada Periode Bansos yang Aktif. Data distribusi tidak dapat ditampilkan.</div>
+                @elseif($distribusiRT->isEmpty())
+                    <div class="alert alert-info text-center border-0 small">Data distribusi kuota RT belum dikalkulasi. Silakan buat atau update kuota program ini di menu Jenis Bansos.</div>
+                @else
+                    <div class="alert alert-success bg-opacity-10 text-success border border-success border-opacity-25 small fw-semibold mb-3">
+                        <i class="bi bi-check-circle-fill me-1"></i> Sistem telah membagi {{ $item->kuota }} kuota secara merata ke {{ $distribusiRT->count() }} RT aktif.
+                    </div>
+                    <div class="table-responsive border rounded-3">
+                        <table class="table table-custom table-hover align-middle mb-0 text-center">
+                            <thead>
+                                <tr>
+                                    <th>Wilayah (RW/RT)</th>
+                                    <th>Kuota Utama</th>
+                                    <th>Terpakai</th>
+                                    <th>Sisa Jatah RT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($distribusiRT as $dist)
+                                    <tr>
+                                        <td class="fw-bold">RW {{ $dist->rw }} / RT {{ $dist->rt }}</td>
+                                        <td><span class="badge bg-primary rounded-pill px-3">{{ $dist->kuota }}</span></td>
+                                        <td><span class="badge bg-secondary rounded-pill px-3">{{ $dist->terpakai }}</span></td>
+                                        <td>
+                                            @if(($dist->kuota - $dist->terpakai) > 0)
+                                                <span class="badge bg-success rounded-pill px-3">{{ $dist->kuota - $dist->terpakai }}</span>
+                                            @else
+                                                <span class="badge bg-danger rounded-pill px-3">Habis</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

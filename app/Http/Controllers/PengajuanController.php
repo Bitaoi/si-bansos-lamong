@@ -56,11 +56,7 @@ class PengajuanController extends Controller
     public function searchWarga(Request $request)
     {
         $keyword = $request->keyword;
-        
-        $warga = Warga::where('nik', $keyword)
-            ->orWhere('no_kk', $keyword)
-            ->first();
-
+        $warga = Warga::where('nik', $keyword)->orWhere('no_kk', $keyword)->first();
         $periodeAktif = PeriodeBansos::where('status', 'Aktif')->first();
 
         if ($warga && $periodeAktif) {
@@ -74,14 +70,17 @@ class PengajuanController extends Controller
             // LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (MENGABAIKAN "Belum Diisi")
             // =========================================================================
             // A. Kepala Keluarga: Laki-laki tertua. Jika tidak ada Laki-laki, maka orang tertua (index 0).
-            $kepalaKeluarga = $anggotaKeluarga->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->first() 
-                              ?? $anggotaKeluarga->first();
+            $kepalaKeluarga = $anggotaKeluarga->filter(function($item) {
+                return in_array(strtolower($item->jenis_kelamin), ['L', 'laki-laki','Laki-laki']);
+            })->first() ?? $anggotaKeluarga->first();
 
             // B. Istri: Perempuan tertua yang sudah kawin/cerai, dan BUKAN Kepala Keluarga
-            $istri = $anggotaKeluarga->whereIn('jenis_kelamin', ['P', 'Perempuan'])
-                              ->where('nik', '!=', $kepalaKeluarga->nik)
-                              ->whereIn('status_kawin', ['Kawin', 'Cerai Hidup', 'Cerai Mati', 'S'])
-                              ->first();
+            $istri = $anggotaKeluarga->filter(function($item) use ($kepalaKeluarga) {
+                $isPerempuan = in_array(strtolower($item->jenis_kelamin), ['p', 'perempuan']);
+                $bukanKk = $item->nik !== $kepalaKeluarga->nik;
+                $sudahKawin = !str_contains(strtolower($item->status_perkawinan ?? ''), 'belum kawin');
+                return $isPerempuan && $bukanKk && $sudahKawin;
+            })->first();
 
             $statusBlokirKK = false;
             $pesanBlokir = '';
@@ -93,13 +92,18 @@ class PengajuanController extends Controller
                 $cekDaftar = Pengajuan::where('nik', $ak->nik)->where('id_periode', $periodeAktif->id)->first();
                 if ($cekDaftar) {
                     $statusBlokirKK = true;
-                    $pesanBlokir = "Ditolak! Keluarga ini sudah diajukan atas nama {$ak->nama_lengkap} pada periode ini.";
+                    // PERBAIKAN: Menambahkan info detail penolakan (Nama Program, Tanggal, Status)
+                    $namaBansos = JenisBansos::find($cekDaftar->id_bansos)->nama_bansos ?? 'Bantuan';
+                    $tgl = $cekDaftar->tgl_pengajuan ? Carbon::parse($cekDaftar->tgl_pengajuan)->format('d M Y') : '-';
+                    $pesanBlokir = "Pengajuan gagal karena NIK keluarga ini sudah terdaftar pada program {$namaBansos} periode {$periodeAktif->nama_periode} (Tgl: {$tgl}) dengan status: {$cekDaftar->status_verifikasi_admin}.";
                 }
 
                 $riwayatLama = Pengajuan::where('nik', $ak->nik)->whereIn('status_verifikasi_admin', ['Layak', 'Siap Keputusan'])->latest('id_periode')->first();
                 if ($riwayatLama && $riwayatLama->id_periode == ($periodeAktif->id - 1)) {
                     $statusBlokirKK = true;
-                    $pesanBlokir = "Ditolak! Keluarga ini baru saja menerima bantuan pada periode sebelumnya. Pemerataan mengharuskan adanya jeda 1 periode.";
+                    // PERBAIKAN: Menambahkan info program sebelumnya
+                    $namaBansosLama = JenisBansos::find($riwayatLama->id_bansos)->nama_bansos ?? 'Bantuan';
+                    $pesanBlokir = "Ditolak! Keluarga ini menerima {$namaBansosLama} pada periode sebelumnya. Harus jeda 1 periode untuk asas pemerataan.";
                 }
 
                 // C. PENERAPAN STATUS
@@ -135,20 +139,13 @@ class PengajuanController extends Controller
                 return $posA <=> $posB;
             });
 
-            // Tentukan peran si pendaftar (warga yang NIK-nya diketik di kolom pencarian)
-            $peranPendaftar = 'Anggota Keluarga';
-            foreach ($listKeluarga as $lk) {
-                if ($lk['nik'] === $warga->nik) {
-                    $peranPendaftar = $lk['peran']; break;
-                }
-            }
-
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'nik_pendaftar' => $warga->nik, 
-                    'nama_pendaftar' => $warga->nama_lengkap, 
-                    'peran_pendaftar' => $peranPendaftar,
+                    // PERBAIKAN: Selalu memaksakan NIK dan Nama Pendaftar ke Kepala Keluarga
+                    'nik_pendaftar' => $kepalaKeluarga->nik, 
+                    'nama_pendaftar' => $kepalaKeluarga->nama_lengkap, 
+                    'peran_pendaftar' => 'Kepala Keluarga (Terdeteksi Otomatis)',
                     'no_kk' => $warga->no_kk,
                     'alamat' => $warga->alamat_lengkap . " RT " . $warga->rt . " RW " . $warga->rw,
                     'jumlah_keluarga' => $anggotaKeluarga->count(),
@@ -194,9 +191,13 @@ class PengajuanController extends Controller
                         ->first();
                         
         if ($cekDoubleKK) {
+            // PERBAIKAN: Info penolakan detail di sisi Store (Server-Side)
             $namaPendaftarTerdahulu = Warga::where('nik', $cekDoubleKK->nik)->value('nama_lengkap');
+            $namaBansos = JenisBansos::find($cekDoubleKK->id_bansos)->nama_bansos ?? 'Bantuan';
+            $tgl = $cekDoubleKK->tgl_pengajuan ? Carbon::parse($cekDoubleKK->tgl_pengajuan)->format('d M Y') : '-';
+
             return redirect()->back()
-                ->with('error', "PENDAFTARAN DITOLAK! 1 KK hanya boleh 1 pengajuan. Keluarga dengan KK ini sudah diajukan atas nama {$namaPendaftarTerdahulu} pada periode ini.")
+                ->with('error', "PENDAFTARAN DITOLAK! 1 KK hanya boleh 1 pengajuan. Pengajuan gagal karena KK ini sudah terdaftar atas nama {$namaPendaftarTerdahulu} pada program {$namaBansos} periode {$periodeAktif->nama_periode} (Tgl: {$tgl}) dengan status: {$cekDoubleKK->status_verifikasi_admin}.")
                 ->withInput();
         }
 

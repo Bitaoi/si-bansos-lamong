@@ -64,18 +64,14 @@ class WargaController extends Controller
     {
         $warga = Warga::where('nik', $nik)->firstOrFail();
         
-        // 1. Ambil semua anggota keluarga berdasarkan KK yang sama, urutkan dari yang tertua
         $anggotaKeluarga = Warga::where('no_kk', $warga->no_kk)
                             ->orderBy('tanggal_lahir', 'asc')
                             ->get();
 
-        // 2. LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (DISEMPURNAKAN)
-        // Kepala Keluarga: Laki-laki tertua. Jika tidak ada laki-laki, ambil orang tertua di KK.
         $kepalaKeluarga = $anggotaKeluarga->filter(function($item) {
             return in_array(strtolower($item->jenis_kelamin), ['l', 'laki-laki', 'laki - laki']);
         })->first() ?? $anggotaKeluarga->first();
 
-        // Istri: Perempuan tertua yang BUKAN Kepala Keluarga, dan status perkawinannya BUKAN "Belum Kawin"
         $istri = $anggotaKeluarga->filter(function($item) use ($kepalaKeluarga) {
             $isPerempuan = in_array(strtolower($item->jenis_kelamin), ['p', 'perempuan']);
             $bukanKk = $item->nik !== $kepalaKeluarga->nik;
@@ -83,25 +79,21 @@ class WargaController extends Controller
             return $isPerempuan && $bukanKk && $sudahKawin;
         })->first();
 
-        // 3. Terapkan peran otomatis ke masing-masing anggota keluarga
         foreach ($anggotaKeluarga as $ak) {
             $peran = $ak->status_keluarga;
 
-            // Jika status kependudukan di database masih kosong/umum, lakukan klasifikasi pintar
             if (in_array($peran, ['Belum Diisi', '-', 'Anggota Keluarga', null, ''])) {
                 if ($ak->nik === $kepalaKeluarga->nik) {
                     $peran = ($anggotaKeluarga->count() == 1) ? 'Kepala Keluarga (Mandiri)' : 'Kepala Keluarga';
                 } elseif ($istri && $ak->nik === $istri->nik) {
                     $peran = 'Istri';
                 } else {
-                    // REVISI UTAMA: Mengubah dari label "Anak" menjadi "Anggota Keluarga" agar lebih universal & akurat
                     $peran = 'Anggota Keluarga';
                 }
             }
             $ak->peran_otomatis = $peran;
         }
 
-        // 4. Urutkan Tampilan di Form: Kepala Keluarga -> Istri -> Anggota Keluarga lainnya
         $urutanPeran = ['Kepala Keluarga (Mandiri)' => 1, 'Kepala Keluarga' => 2, 'Istri' => 3, 'Anggota Keluarga' => 4];
         $anggotaKeluarga = $anggotaKeluarga->sortBy(function($ak) use ($urutanPeran) {
             return $urutanPeran[$ak->peran_otomatis] ?? 5;
@@ -182,17 +174,26 @@ class WargaController extends Controller
         }
     }
     
+    // =========================================================================
+    // MENU DATA WARGA (UNTUK RT)
+    // =========================================================================
     public function indexRT(Request $request)
     {
         $user = auth()->user();
         if ($user->role !== 'RT') { abort(403); }
 
         $wilayah = explode('/', $user->wilayah_rt_rw);
-        $rt = $wilayah[0] ?? '-'; 
-        $rw = $wilayah[1] ?? '-'; 
+        $rt = isset($wilayah[0]) ? str_pad(trim($wilayah[0]), 3, '0', STR_PAD_LEFT) : '000';
+        $rw = isset($wilayah[1]) ? str_pad(trim($wilayah[1]), 3, '0', STR_PAD_LEFT) : '000';
 
         $keyword = $request->get('search');
-        $query = Warga::where('rt', $rt);
+        
+        // PERBAIKAN FATAL: Memfilter kombinasi ketat RT dan RW, serta antisipasi format impor Excel
+        $query = Warga::where(function($q) use ($rt) {
+            $q->where('rt', $rt)->orWhere('rt', (int)$rt);
+        })->where(function($q) use ($rw) {
+            $q->where('rw', $rw)->orWhere('rw', (int)$rw);
+        });
 
         if ($keyword) {
             $query->where(function($q) use ($keyword) {

@@ -9,7 +9,7 @@ use App\Models\JenisBansos;
 use App\Models\User;
 use App\Models\Warga;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaWilayah; // Disesuaikan dengan nama model yang Anda gunakan
+use App\Models\KuotaWilayah; 
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
@@ -27,7 +27,6 @@ class DashboardController extends Controller
             abort(403, 'Akses Ditolak. Halaman ini khusus Admin.');
         }
 
-        // 1. Manajemen Periode (Menggantikan Filter Bulan & Tahun)
         $dataPeriodes = PeriodeBansos::orderBy('id', 'desc')->get();
         $periodeIdFilter = $request->get('id_periode');
 
@@ -39,7 +38,6 @@ class DashboardController extends Controller
 
         $idPeriode = $periodeTerpilih ? $periodeTerpilih->id : null;
 
-        // 2. Statistik Pengajuan Berdasarkan Periode
         $totalPengajuan     = Pengajuan::where('id_periode', $idPeriode)->count();
         $menungguVerifikasi = Pengajuan::where('id_periode', $idPeriode)
                                        ->whereIn('status_verifikasi_admin', ['Proses', 'Verifikasi Lapangan', 'Menunggu Musdes', 'Siap Keputusan'])->count();
@@ -47,7 +45,6 @@ class DashboardController extends Controller
                                        ->where('status_verifikasi_admin', 'Layak')->count();
         $totalWarga         = Warga::count(); 
 
-        // 3. Monitoring Kuota Wilayah Berjenjang (Seluruh RT)
         $monitoringKuota = KuotaWilayah::with('jenisBansos')
                             ->where('id_periode', $idPeriode)
                             ->orderBy('rw')->orderBy('rt')
@@ -58,9 +55,8 @@ class DashboardController extends Controller
                                 return $q;
                             });
 
-        $jadwals = $idPeriode ? \App\Models\JadwalBansos::all() : collect(); // Sesuaikan jika jadwal terikat periode
+        $jadwals = $idPeriode ? \App\Models\JadwalBansos::all() : collect(); 
 
-        // 4. Tabel Status Pengajuan Terkini di Periode Tersebut
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
                             ->where('id_periode', $idPeriode)
                             ->latest('tgl_pengajuan')
@@ -107,7 +103,6 @@ class DashboardController extends Controller
 
         if ($user->role !== 'RT') { abort(403, 'Akses Ditolak. Halaman ini khusus Ketua RT.'); }
 
-        // 1. Manajemen Periode
         $dataPeriodes = PeriodeBansos::orderBy('id', 'desc')->get();
         $periodeIdFilter = $request->get('id_periode');
 
@@ -120,10 +115,19 @@ class DashboardController extends Controller
         $idPeriode = $periodeTerpilih ? $periodeTerpilih->id : null;
 
         $wilayah = explode('/', $user->wilayah_rt_rw ?? '000/000');
-        $rt = $wilayah[0] ?? ''; 
-        $rw = $wilayah[1] ?? ''; 
+        // Standarisasi format RT/RW menjadi 3 digit (Misal: '001')
+        $rt = isset($wilayah[0]) ? str_pad(trim($wilayah[0]), 3, '0', STR_PAD_LEFT) : '000'; 
+        $rw = isset($wilayah[1]) ? str_pad(trim($wilayah[1]), 3, '0', STR_PAD_LEFT) : '000'; 
         
-        $wargaSaya          = Warga::where('rt', $rt)->count(); 
+        // PERBAIKAN FATAL: Memfilter kombinasi RT dan RW, serta mendeteksi angka murni hasil Impor Excel
+        $wargaSaya = Warga::where(function($q) use ($rt) {
+                                $q->where('rt', $rt)->orWhere('rt', (int)$rt);
+                            })
+                            ->where(function($q) use ($rw) {
+                                $q->where('rw', $rw)->orWhere('rw', (int)$rw);
+                            })
+                            ->count(); 
+
         $totalUsulanSaya    = Pengajuan::where('id_user_pengusul', $user->id_user)->where('id_periode', $idPeriode)->count();
         $menungguVerifikasi = Pengajuan::where('id_user_pengusul', $user->id_user)
                                       ->where('id_periode', $idPeriode)
@@ -132,10 +136,9 @@ class DashboardController extends Controller
                                   ->where('id_periode', $idPeriode)
                                   ->where('status_verifikasi_admin', 'Layak')->count();
 
-        // 2. Monitoring Kuota Khusus RT Tersebut
         $kuotaRTSaya = KuotaWilayah::with('jenisBansos')
                             ->where('id_periode', $idPeriode)
-                            ->where('rt', $rt)
+                            ->where('rt', $rt) // Di kuota_wilayahs sudah standar, aman langsung where()
                             ->where('rw', $rw)
                             ->get()
                             ->map(function($q) {
@@ -143,7 +146,6 @@ class DashboardController extends Controller
                                 return $q;
                             });
 
-        // 3. Tabel Status Pengajuan Terkini
         $pengajuanTerbaru = Pengajuan::with(['warga', 'jenisBansos'])
                             ->where('id_user_pengusul', $user->id_user)
                             ->where('id_periode', $idPeriode)
@@ -314,8 +316,8 @@ class DashboardController extends Controller
         $periodeId = $request->get('id_periode');
         $periode = PeriodeBansos::find($periodeId);
         $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua Periode';
-        $namaBulan = $namaPeriode; // Menggunakan variabel namaBulan agar view PDF tidak error
-        $tahunFilter = ''; // Dikosongkan agar tampilan PDF lebih rapi tanpa mengulang tahun
+        $namaBulan = $namaPeriode; 
+        $tahunFilter = ''; 
 
         $query = Pengajuan::with(['warga', 'jenisBansos'])->orderBy('tgl_pengajuan', 'asc');
         if ($periodeId) {
@@ -337,7 +339,7 @@ class DashboardController extends Controller
         $periodeId = $request->get('id_periode');
         $periode = PeriodeBansos::find($periodeId);
         $namaPeriode = $periode ? str_replace(' ', '_', $periode->nama_periode) : 'Semua Periode';
-        $namaBulan = $namaPeriode; // Menjaga kompatibilitas dengan view PDF lama
+        $namaBulan = $namaPeriode; 
         $tahunFilter = '';
 
         $query = Pengajuan::with(['warga', 'jenisBansos'])

@@ -45,7 +45,6 @@
         .step.rejected .step-icon { background: #dc3545; color: white; border-color: #f8d7da; }
         .step-label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
         
-        .img-evidence { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; cursor: zoom-in;}
         .timeline-doc { border-left: 3px solid var(--warna-utama); padding-left: 15px; margin-bottom: 15px; }
 
         .table-breakdown thead { background: #f8fafc; }
@@ -55,15 +54,27 @@
         /* Modal / form improvements */
         .section-card { background: #fff; border: 1px solid #eef2ff; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
         .section-title { font-size: 0.85rem; font-weight: 700; color: var(--warna-paling-gelap); margin-bottom: 8px; }
-        .thumb-grid img { height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid #e6eef8; cursor: pointer; transition: transform 0.18s ease-in-out; }
-        .thumb-grid img:hover { transform: translateY(-3px) scale(1.03); }
-        .img-evidence { cursor: pointer; transition: transform 0.18s ease-in-out; }
-        .img-evidence:hover { transform: scale(1.02); }
+        
+        /* PERBAIKAN: Penyeragaman Ukuran Gambar Observasi */
+        .img-evidence, .gallery-thumb, .thumb-grid img {
+            width: 100% !important;
+            height: 120px !important;
+            object-fit: cover !important;
+            border-radius: 8px;
+            border: 1px solid #e6eef8;
+            cursor: zoom-in;
+            transition: transform 0.18s ease-in-out, box-shadow 0.18s;
+        }
+        .img-evidence:hover, .gallery-thumb:hover, .thumb-grid img:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-color: var(--warna-utama);
+        }
 
         @media(min-width: 768px) {
-            .thumb-grid img { height: 140px; }
-            .img-evidence { height: 160px; object-fit: cover; }
+            .img-evidence, .gallery-thumb, .thumb-grid img { height: 150px !important; }
         }
+
         .file-note { font-size: 0.78rem; color: #667085; }
         .accordion-button { padding: 0.5rem 1rem; font-size: 0.92rem; }
         .modal-body { max-height: calc(100vh - 230px); overflow: auto; }
@@ -285,11 +296,11 @@
                                                     <strong class="d-block small text-dark mb-2">{{ $kategoriNama }}</strong>
                                                     <div class="row g-2">
                                                         @foreach($kumpulanFoto as $foto)
-                                                                        <div class="col-4 col-md-3 text-center">
-                                                                            <a href="#" data-src="{{ asset('storage/'.$foto) }}" class="d-block position-relative image-preview-link">
-                                                                                <img loading="lazy" src="{{ asset('storage/'.$foto) }}" class="shadow-sm w-100 gallery-thumb" alt="Bukti {{ $kategoriNama }}" style="border-radius: 8px; border: 1px solid #ced4da;">
-                                                                            </a>
-                                                                        </div>
+                                                            <div class="col-4 col-md-3 text-center">
+                                                                <a href="#" data-src="{{ asset('storage/'.$foto) }}" class="d-block position-relative image-preview-link">
+                                                                    <img loading="lazy" src="{{ asset('storage/'.$foto) }}" class="shadow-sm w-100 gallery-thumb" alt="Bukti {{ $kategoriNama }}">
+                                                                </a>
+                                                            </div>
                                                         @endforeach
                                                     </div>
                                                 </div>
@@ -728,16 +739,16 @@
         if (clearBtn) clearBtn.addEventListener('click', () => { if (searchInput) searchInput.value=''; if (statusFilter) statusFilter.value=''; applyFilters(); });
     });
 </script>
-<!-- Image preview modal -->
+
 <div class="modal fade" id="imagePreviewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content bg-transparent border-0">
             <div class="modal-body p-0 position-relative">
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10;"></button>
                 <div class="d-flex align-items-center justify-content-center p-3 bg-white rounded">
-                    <img id="previewImage" src="" alt="Preview" class="img-fluid rounded shadow-sm">
+                    <img id="previewImage" src="" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height: 85vh; width: auto; object-fit: contain;">
                 </div>
-                <div id="previewCaption" class="text-center file-note mt-2"></div>
+                <div id="previewCaption" class="text-center file-note mt-2 text-white"></div>
             </div>
         </div>
     </div>

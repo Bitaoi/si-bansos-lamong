@@ -51,28 +51,31 @@
         .category-header { background: #f1f5f9; font-weight: 700; color: var(--warna-paling-gelap); font-size: 0.75rem; text-transform: uppercase; }
         .subtotal-row { background: rgba(125, 136, 220, 0.1); font-weight: 700; font-size: 0.8rem; }
 
-        /* Modal / form improvements */
         .section-card { background: #fff; border: 1px solid #eef2ff; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
         .section-title { font-size: 0.85rem; font-weight: 700; color: var(--warna-paling-gelap); margin-bottom: 8px; }
         
-        /* PERBAIKAN: Penyeragaman Ukuran Gambar Observasi */
-        .img-evidence, .gallery-thumb, .thumb-grid img {
-            width: 100% !important;
-            height: 120px !important;
-            object-fit: cover !important;
-            border-radius: 8px;
-            border: 1px solid #e6eef8;
-            cursor: zoom-in;
-            transition: transform 0.18s ease-in-out, box-shadow 0.18s;
+        /* ========================================================= */
+        /* PERBAIKAN POIN 2: UKURAN THUMBNAIL DIPERBESAR & SERAGAM   */
+        /* ========================================================= */
+        .img-evidence, .gallery-thumb, .thumb-grid img { 
+            width: 100% !important; 
+            height: 150px !important; /* Jauh lebih besar dari sebelumnya */
+            object-fit: cover !important; 
+            border-radius: 8px !important; 
+            border: 2px solid #e2e8f0 !important; 
+            cursor: zoom-in !important; 
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important; 
         }
-        .img-evidence:hover, .gallery-thumb:hover, .thumb-grid img:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-color: var(--warna-utama);
+        .img-evidence:hover, .gallery-thumb:hover, .thumb-grid img:hover { 
+            transform: translateY(-5px) scale(1.03) !important; 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15) !important;
+            border-color: var(--warna-utama) !important;
+            z-index: 10;
+            position: relative;
         }
 
         @media(min-width: 768px) {
-            .img-evidence, .gallery-thumb, .thumb-grid img { height: 150px !important; }
+            .img-evidence, .gallery-thumb, .thumb-grid img { height: 200px !important; } /* Sangat besar di Desktop */
         }
 
         .file-note { font-size: 0.78rem; color: #667085; }
@@ -251,12 +254,16 @@
                                 <div class="section-title"><i class="bi bi-camera-fill me-2 text-primary"></i> FOTO KONDISI RUMAH - BERKAS RT</div>
                                 <div class="row g-3 text-center mb-0">
                                     <div class="col-6">
-                                        <a href="#" data-src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="image-preview-link"><img loading="lazy" src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence gallery-thumb" alt="Foto Tampak Depan"></a>
+                                        <a href="#" data-src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="image-preview-link d-block">
+                                            <img loading="lazy" src="{{ asset('storage/'.$item->foto_rumah_depan) }}" class="img-evidence gallery-thumb" alt="Foto Tampak Depan">
+                                        </a>
                                         <small class="d-block mt-2 fw-bold text-muted">Tampak Depan</small>
                                     </div>
                                     <div class="col-6">
                                         @if($item->foto_rumah_dalam)
-                                            <a href="#" data-src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="image-preview-link"><img loading="lazy" src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence gallery-thumb" alt="Foto Interior"></a>
+                                            <a href="#" data-src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="image-preview-link d-block">
+                                                <img loading="lazy" src="{{ asset('storage/'.$item->foto_rumah_dalam) }}" class="img-evidence gallery-thumb" alt="Foto Interior">
+                                            </a>
                                             <small class="d-block mt-2 fw-bold text-muted">Interior / Dalam</small>
                                         @else
                                             <div class="bg-light d-flex align-items-center justify-content-center border text-muted small" style="height: 150px; border-radius: 8px;">Tanpa Foto Interior</div>
@@ -270,7 +277,7 @@
                                 @php $se = $item->surveiEkonomi; @endphp
                                 <section class="section-card">
                                     <div class="section-title"><i class="bi bi-images me-2 text-primary"></i> BUKTI FOTO OBSERVASI LAPANGAN</div>
-                                    <div class="bg-light p-2 rounded border thumb-grid">
+                                    <div class="bg-light p-3 rounded border thumb-grid">
                                         @php
                                             $bacaFoto = function($data) {
                                                 if (empty($data)) return [];
@@ -292,11 +299,11 @@
 
                                         @foreach($galeri as $kategoriNama => $kumpulanFoto)
                                             @if(is_array($kumpulanFoto) && count($kumpulanFoto) > 0)
-                                                <div class="mb-3">
-                                                    <strong class="d-block small text-dark mb-2">{{ $kategoriNama }}</strong>
-                                                    <div class="row g-2">
+                                                <div class="mb-4">
+                                                    <strong class="d-block text-dark mb-2 px-1 border-start border-3 border-primary ps-2">{{ $kategoriNama }}</strong>
+                                                    <div class="row g-3">
                                                         @foreach($kumpulanFoto as $foto)
-                                                            <div class="col-4 col-md-3 text-center">
+                                                            <div class="col-6 col-md-4 text-center">
                                                                 <a href="#" data-src="{{ asset('storage/'.$foto) }}" class="d-block position-relative image-preview-link">
                                                                     <img loading="lazy" src="{{ asset('storage/'.$foto) }}" class="shadow-sm w-100 gallery-thumb" alt="Bukti {{ $kategoriNama }}">
                                                                 </a>
@@ -741,14 +748,14 @@
 </script>
 
 <div class="modal fade" id="imagePreviewModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
-            <div class="modal-body p-0 position-relative">
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10;"></button>
-                <div class="d-flex align-items-center justify-content-center p-3 bg-white rounded">
-                    <img id="previewImage" src="" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height: 85vh; width: auto; object-fit: contain;">
+            <div class="modal-body p-0 position-relative text-center">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1050; padding: 10px;"></button>
+                <div class="d-flex align-items-center justify-content-center p-2 bg-dark bg-opacity-75 rounded-3">
+                    <img id="previewImage" src="" alt="Preview" class="rounded shadow-lg" style="width: 100%; height: 85vh; object-fit: contain;">
                 </div>
-                <div id="previewCaption" class="text-center file-note mt-2 text-white"></div>
+                <div id="previewCaption" class="text-center mt-3 text-white fw-bold fs-5 text-shadow"></div>
             </div>
         </div>
     </div>

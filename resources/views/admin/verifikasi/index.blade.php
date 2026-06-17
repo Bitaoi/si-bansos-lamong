@@ -54,12 +54,9 @@
         .section-card { background: #fff; border: 1px solid #eef2ff; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
         .section-title { font-size: 0.85rem; font-weight: 700; color: var(--warna-paling-gelap); margin-bottom: 8px; }
         
-        /* ========================================================= */
-        /* PERBAIKAN POIN 2: UKURAN THUMBNAIL DIPERBESAR & SERAGAM   */
-        /* ========================================================= */
         .img-evidence, .gallery-thumb, .thumb-grid img { 
             width: 100% !important; 
-            height: 150px !important; /* Jauh lebih besar dari sebelumnya */
+            height: 150px !important; 
             object-fit: cover !important; 
             border-radius: 8px !important; 
             border: 2px solid #e2e8f0 !important; 
@@ -75,13 +72,17 @@
         }
 
         @media(min-width: 768px) {
-            .img-evidence, .gallery-thumb, .thumb-grid img { height: 200px !important; } /* Sangat besar di Desktop */
+            .img-evidence, .gallery-thumb, .thumb-grid img { height: 200px !important; }
         }
 
         .file-note { font-size: 0.78rem; color: #667085; }
         .accordion-button { padding: 0.5rem 1rem; font-size: 0.92rem; }
         .modal-body { max-height: calc(100vh - 230px); overflow: auto; }
         .control-aside { position: sticky; top: 20px; }
+        
+        /* Cursor styling untuk mode drag/zoom */
+        #previewImage { cursor: grab; }
+        #previewImage:active { cursor: grabbing; }
     </style>
 </head>
 <body>
@@ -750,12 +751,21 @@
 <div class="modal fade" id="imagePreviewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
-            <div class="modal-body p-0 position-relative text-center">
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1050; padding: 10px;"></button>
-                <div class="d-flex align-items-center justify-content-center p-2 bg-dark bg-opacity-75 rounded-3">
-                    <img id="previewImage" src="" alt="Preview" class="rounded shadow-lg" style="width: 100%; height: 85vh; object-fit: contain;">
+            <div class="modal-body p-0 position-relative text-center overflow-hidden rounded-4 bg-dark bg-opacity-75" style="height: 85vh;">
+                
+                <div class="position-absolute top-0 start-0 m-3 d-flex gap-2" style="z-index: 1060;">
+                    <button type="button" class="btn btn-light shadow-sm px-3" id="zoomInBtn" title="Zoom In"><i class="bi bi-zoom-in"></i></button>
+                    <button type="button" class="btn btn-light shadow-sm px-3" id="zoomOutBtn" title="Zoom Out"><i class="bi bi-zoom-out"></i></button>
+                    <button type="button" class="btn btn-light shadow-sm px-3" id="zoomResetBtn" title="Reset Ukuran"><i class="bi bi-arrow-counterclockwise"></i></button>
                 </div>
-                <div id="previewCaption" class="text-center mt-3 text-white fw-bold fs-5 text-shadow"></div>
+                
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1060; padding: 12px; background-color: rgba(0,0,0,0.5);"></button>
+                
+                <div class="d-flex align-items-center justify-content-center w-100 h-100 p-2">
+                    <img id="previewImage" src="" alt="Preview" class="shadow-lg" style="max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.1s ease-out;">
+                </div>
+                
+                <div id="previewCaption" class="position-absolute bottom-0 start-50 translate-middle-x mb-4 text-white fw-bold fs-5 text-shadow" style="z-index: 1060; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);"></div>
             </div>
         </div>
     </div>
@@ -768,18 +778,90 @@
         const previewCaption = document.getElementById('previewCaption');
         const bsModal = new bootstrap.Modal(modalEl);
 
+        let currentScale = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+
+        // Fungsi Reset Transformasi
+        function updateTransform() {
+            previewImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
+        function resetZoomState() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        // Listener untuk membuka modal
         document.querySelectorAll('.image-preview-link').forEach(link => {
             link.addEventListener('click', function(e){
                 e.preventDefault();
                 const src = this.dataset.src || this.querySelector('img')?.src;
                 const alt = this.querySelector('img')?.alt || '';
                 if (src) {
+                    resetZoomState(); // Pastikan reset setiap buka gambar baru
                     previewImage.src = src;
                     previewCaption.textContent = alt;
                     bsModal.show();
                 }
             });
         });
+
+        // ==========================================
+        // Logika Mouse Scroll (Wheel) untuk Zoom
+        // ==========================================
+        previewImage.addEventListener('wheel', (e) => {
+            e.preventDefault(); // Mencegah modal ikut ke-scroll
+            if (e.deltaY < 0) {
+                currentScale += 0.15; // Scroll Up -> Zoom In
+            } else {
+                currentScale -= 0.15; // Scroll Down -> Zoom Out
+            }
+            // Batasi Zoom minimal 0.5x dan maksimal 5x
+            currentScale = Math.max(0.5, Math.min(currentScale, 5));
+            updateTransform();
+        });
+
+        // ==========================================
+        // Logika Drag/Geser Gambar (Panning)
+        // ==========================================
+        previewImage.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Cegah default drag bawaan browser
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateTransform();
+        });
+
+        // ==========================================
+        // Tombol Kontrol Manual Zoom
+        // ==========================================
+        document.getElementById('zoomInBtn').addEventListener('click', () => {
+            currentScale = Math.min(currentScale + 0.3, 5);
+            updateTransform();
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', () => {
+            currentScale = Math.max(currentScale - 0.3, 0.5);
+            updateTransform();
+        });
+
+        document.getElementById('zoomResetBtn').addEventListener('click', resetZoomState);
+        
+        // Reset state jika modal ditutup via area luar atau tombol X
+        modalEl.addEventListener('hidden.bs.modal', resetZoomState);
     });
 </script>
 </body>

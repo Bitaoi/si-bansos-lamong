@@ -9,7 +9,7 @@ use App\Models\JenisBansos;
 use App\Models\Galeri;
 use App\Models\JadwalBansos;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaWilayah; // PERBAIKAN: Gunakan KuotaWilayah
+use App\Models\KuotaWilayah;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -23,7 +23,13 @@ class HomeController extends Controller
         $perempuan = Warga::where('jenis_kelamin', 'LIKE', 'P%')->count();
 
         // 2. Data Jadwal dan Galeri
-        $jadwal = JadwalBansos::all();
+        $periodeAktif = PeriodeBansos::where('status', 'Aktif')->first();
+        
+        // PERBAIKAN: Menarik jadwal sesuai periode aktif atau jadwal global (agar tidak kosong)
+        $jadwal = $periodeAktif 
+            ? JadwalBansos::where('id_periode', $periodeAktif->id)->orWhereNull('id_periode')->get()
+            : JadwalBansos::whereNull('id_periode')->get();
+            
         $hariIni = date('d');
         $galeriStatis = Galeri::latest()->take(3)->get();
 
@@ -116,9 +122,13 @@ class HomeController extends Controller
 
     public function infoBansos(Request $request)
     {
-        // 1. Ambil Periode dan Jadwal yang sedang aktif
+        // 1. Ambil Periode yang sedang aktif
         $periode = PeriodeBansos::where('status', 'Aktif')->first();
-        $jadwals = $periode ? JadwalBansos::where('id_periode', $periode->id)->get() : collect();
+        
+        // PERBAIKAN: Tarik jadwal yang terikat periode aktif ATAU yang bersifat Global (id_periode null) agar tabel tidak kosong
+        $jadwals = $periode 
+            ? JadwalBansos::where('id_periode', $periode->id)->orWhereNull('id_periode')->get() 
+            : JadwalBansos::whereNull('id_periode')->get();
         
         // 2. Ambil Semua Jenis Bansos untuk Dropdown
         $semuaBansos = JenisBansos::where('status', 'Aktif')->get();
@@ -134,10 +144,10 @@ class HomeController extends Controller
             $bansosTerpilih = JenisBansos::find($request->jenis_bantuan);
             
             if ($bansosTerpilih && $periode) {
-                // PERBAIKAN: Gunakan KuotaWilayah & kolom kuota_maksimal, kuota_terpakai
+                // Menampilkan tabel dinamis RT sesuai pembagian kuota
                 $rincianKuotaRT = KuotaWilayah::where('id_periode', $periode->id)
                                      ->where('id_bansos', $bansosTerpilih->id)
-                                     ->whereRaw('kuota > terpakai')
+                                     ->orderBy('rw', 'asc')
                                      ->orderBy('rt', 'asc')
                                      ->get();
 

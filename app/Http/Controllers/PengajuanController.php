@@ -67,11 +67,11 @@ class PengajuanController extends Controller
                 ->get();
             
             // =========================================================================
-            // LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (MENGABAIKAN "Belum Diisi")
+            // LOGIKA PENENTUAN STRUKTUR KELUARGA OTOMATIS (IDENTIK DENGAN WARGACONTROLLER)
             // =========================================================================
             // A. Kepala Keluarga: Laki-laki tertua. Jika tidak ada Laki-laki, maka orang tertua (index 0).
             $kepalaKeluarga = $anggotaKeluarga->filter(function($item) {
-                return in_array(strtolower($item->jenis_kelamin), ['L', 'laki-laki','Laki-laki']);
+                return in_array(strtolower($item->jenis_kelamin), ['l', 'laki-laki', 'laki - laki']);
             })->first() ?? $anggotaKeluarga->first();
 
             // B. Istri: Perempuan tertua yang sudah kawin/cerai, dan BUKAN Kepala Keluarga
@@ -92,7 +92,6 @@ class PengajuanController extends Controller
                 $cekDaftar = Pengajuan::where('nik', $ak->nik)->where('id_periode', $periodeAktif->id)->first();
                 if ($cekDaftar) {
                     $statusBlokirKK = true;
-                    // PERBAIKAN: Menambahkan info detail penolakan (Nama Program, Tanggal, Status)
                     $namaBansos = JenisBansos::find($cekDaftar->id_bansos)->nama_bansos ?? 'Bantuan';
                     $tgl = $cekDaftar->tgl_pengajuan ? Carbon::parse($cekDaftar->tgl_pengajuan)->format('d M Y') : '-';
                     $pesanBlokir = "Pengajuan gagal karena NIK keluarga ini sudah terdaftar pada program {$namaBansos} periode {$periodeAktif->nama_periode} (Tgl: {$tgl}) dengan status: {$cekDaftar->status_verifikasi_admin}.";
@@ -101,22 +100,21 @@ class PengajuanController extends Controller
                 $riwayatLama = Pengajuan::where('nik', $ak->nik)->whereIn('status_verifikasi_admin', ['Layak', 'Siap Keputusan'])->latest('id_periode')->first();
                 if ($riwayatLama && $riwayatLama->id_periode == ($periodeAktif->id - 1)) {
                     $statusBlokirKK = true;
-                    // PERBAIKAN: Menambahkan info program sebelumnya
                     $namaBansosLama = JenisBansos::find($riwayatLama->id_bansos)->nama_bansos ?? 'Bantuan';
                     $pesanBlokir = "Ditolak! Keluarga ini menerima {$namaBansosLama} pada periode sebelumnya. Harus jeda 1 periode untuk asas pemerataan.";
                 }
 
-                // C. PENERAPAN STATUS
-                $peran = $ak->hubungan_keluarga;
+                // C. PENERAPAN STATUS HUBUNGAN KELUARGA
+                $peran = $ak->status_keluarga;
 
-                // Jika data dari database 'Belum Diisi', '-', kosong, atau hanya 'Anggota Keluarga'
+                // PERBAIKAN: 'Anggota Keluarga' dimasukkan kembali agar peran dinisbatkan secara otomatis & akurat
                 if (in_array($peran, ['Belum Diisi', '-', 'Anggota Keluarga', null, ''])) {
                     if ($ak->nik === $kepalaKeluarga->nik) {
                         $peran = ($anggotaKeluarga->count() == 1) ? 'Kepala Keluarga (Mandiri)' : 'Kepala Keluarga';
                     } elseif ($istri && $ak->nik === $istri->nik) {
                         $peran = 'Istri';
                     } else {
-                        $peran = 'Anak';
+                        $peran = 'Anggota Keluarga'; // Fallback seragam sesuai halaman data warga admin
                     }
                 }
 
@@ -125,14 +123,14 @@ class PengajuanController extends Controller
                     'nama' => $ak->nama_lengkap,
                     'peran' => $peran,
                     'umur' => $ak->tanggal_lahir ? Carbon::parse($ak->tanggal_lahir)->age . ' Thn' : '-',
-                    'status_kawin' => $ak->status_kawin, 
+                    'status_kawin' => $ak->status_perkawinan, 
                     'sudah_daftar' => $cekDaftar ? true : false,
                     'status_pengajuan' => $cekDaftar ? $cekDaftar->status_verifikasi_admin : 'Belum Ada',
                 ];
             }
 
-            // D. Urutkan Tampilan: Kepala Keluarga di atas, Istri, lalu Anak
-            $urutanPeran = ['Kepala Keluarga (Mandiri)' => 1, 'Kepala Keluarga' => 2, 'Istri' => 3, 'Anak' => 4];
+            // D. Urutkan Tampilan: Kepala Keluarga di atas, Istri, lalu Anggota Keluarga
+            $urutanPeran = ['Kepala Keluarga (Mandiri)' => 1, 'Kepala Keluarga' => 2, 'Istri' => 3, 'Anggota Keluarga' => 4];
             usort($listKeluarga, function($a, $b) use ($urutanPeran) {
                 $posA = $urutanPeran[$a['peran']] ?? 5;
                 $posB = $urutanPeran[$b['peran']] ?? 5;
@@ -142,10 +140,10 @@ class PengajuanController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    // PERBAIKAN: Selalu memaksakan NIK dan Nama Pendaftar ke Kepala Keluarga
+                    // Selalu memaksakan NIK dan Nama Pendaftar ke Kepala Keluarga
                     'nik_pendaftar' => $kepalaKeluarga->nik, 
                     'nama_pendaftar' => $kepalaKeluarga->nama_lengkap, 
-                    'peran_pendaftar' => 'Kepala Keluarga (Terdeteksi Otomatis)',
+                    'peran_pendaftar' => 'Kepala Keluarga',
                     'no_kk' => $warga->no_kk,
                     'alamat' => $warga->alamat_lengkap . " RT " . $warga->rt . " RW " . $warga->rw,
                     'jumlah_keluarga' => $anggotaKeluarga->count(),
@@ -191,7 +189,6 @@ class PengajuanController extends Controller
                         ->first();
                         
         if ($cekDoubleKK) {
-            // PERBAIKAN: Info penolakan detail di sisi Store (Server-Side)
             $namaPendaftarTerdahulu = Warga::where('nik', $cekDoubleKK->nik)->value('nama_lengkap');
             $namaBansos = JenisBansos::find($cekDoubleKK->id_bansos)->nama_bansos ?? 'Bantuan';
             $tgl = $cekDoubleKK->tgl_pengajuan ? Carbon::parse($cekDoubleKK->tgl_pengajuan)->format('d M Y') : '-';

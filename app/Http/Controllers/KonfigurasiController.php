@@ -87,9 +87,9 @@ class KonfigurasiController extends Controller
 
         // 4. Eksekusi penyimpanan (Update jika sudah ada, Create jika data baru)
         if ($cekKuota) {
-            // Jika data alokasi sudah ada, akumulasikan kuota_maksimal-nya
+            // PERBAIKAN: Timpa (replace) nilai kuota lama dengan nilai baru secara langsung
             $cekKuota->update([
-                'kuota' => $cekKuota->kuota + $request->kuota
+                'kuota' => $request->kuota
             ]);
         } else {
             // Jika benar-benar baru, gunakan KuotaWilayah::create

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisBansos;
 use App\Models\PeriodeBansos;
-use App\Models\KuotaWilayah;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +33,6 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        // PERBAIKAN: Nama-nama ini sekarang sudah 100% SAMA dengan name="..." di HTML form
         $request->validate([
             'id_periode'        => 'required|exists:periode_bansos,id',
             'nama_bansos'       => 'required|string|max:100',
@@ -71,11 +68,10 @@ class JenisBansosController extends Controller
             'kriteria_desil'    => json_encode($request->kriteria_desil ?? []) 
         ];
         
-        $jenisBansos = JenisBansos::create($data);
+        JenisBansos::create($data);
 
-        $this->distributeKuotaRT($jenisBansos, $request->id_periode);
-
-        return redirect()->route('jenis-bansos.index')->with('success', 'Program Bansos berhasil ditambahkan!');
+        // Auto-distribusi dihapus, kembali menjadi sistem input manual
+        return redirect()->route('jenis-bansos.index')->with('success', 'Program Bansos berhasil ditambahkan! Silakan atur alokasi kuota secara manual di Pusat Konfigurasi.');
     }
 
     // 4. FORM EDIT
@@ -94,7 +90,6 @@ class JenisBansosController extends Controller
     {
         if (Auth::user()->role !== 'Admin') { abort(403); }
 
-        // PERBAIKAN: Disamakan dengan form HTML
         $request->validate([
             'id_periode'        => 'required|exists:periode_bansos,id',
             'nama_bansos'       => 'required|string|max:100',
@@ -132,8 +127,6 @@ class JenisBansosController extends Controller
         
         $jenisBansos->update($data);
 
-        $this->distributeKuotaRT($jenisBansos, $request->id_periode);
-
         return redirect()->route('jenis-bansos.index')->with('success', 'Data Program Bansos berhasil diperbarui!');
     }
 
@@ -146,38 +139,5 @@ class JenisBansosController extends Controller
         $bansos->delete();
 
         return redirect()->route('jenis-bansos.index')->with('success', 'Data Program Bansos berhasil dihapus!');
-    }
-
-    private function distributeKuotaRT($jenisBansos, $idPeriode)
-    {
-        $usersRT = User::where('role', 'RT')->get();
-        $jumlahRT = $usersRT->count();
-        $totalKuota = $jenisBansos->kuota;
-
-        if ($jumlahRT > 0 && $totalKuota > 0) {
-            
-            $kuotaDasar = (int) floor($totalKuota / $jumlahRT);
-            $sisaKuota = $totalKuota % $jumlahRT;
-
-            foreach ($usersRT as $index => $rt) {
-                $wilayah = explode('/', $rt->wilayah_rt_rw);
-                $rt_val = isset($wilayah[0]) ? str_pad(trim($wilayah[0]), 3, '0', STR_PAD_LEFT) : '000';
-                $rw_val = isset($wilayah[1]) ? str_pad(trim($wilayah[1]), 3, '0', STR_PAD_LEFT) : '000';
-
-                $kuotaFinal = $kuotaDasar + ($index < $sisaKuota ? 1 : 0);
-
-                KuotaWilayah::updateOrCreate(
-                    [
-                        'id_periode' => $idPeriode,
-                        'id_bansos'  => $jenisBansos->id,
-                        'rt'         => $rt_val,
-                        'rw'         => $rw_val,
-                    ],
-                    [
-                        'kuota'      => $kuotaFinal,
-                    ]
-                );
-            }
-        }
     }
 }

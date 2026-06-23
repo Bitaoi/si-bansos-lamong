@@ -104,7 +104,7 @@
                                             <td><span class="badge {{ $p->status == 'Aktif' ? 'bg-success' : 'bg-secondary' }}">{{ $p->status }}</span></td>
                                             <td class="text-end">
                                                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill me-1" data-bs-toggle="modal" data-bs-target="#modalKuotaRT{{ $p->id }}">
-                                                    <i class="bi bi-person-fill-gear me-1"></i> Kuota RT
+                                                    <i class="bi bi-person-fill-gear me-1"></i> Input Kuota RT
                                                 </button>
                                                 <form action="{{ route('admin.periode.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus?');">
                                                     @csrf @method('DELETE')
@@ -133,7 +133,7 @@
                                     <tbody>
                                         @forelse($jadwals as $j)
                                         <tr>
-                                            <td><span class="badge bg-secondary">{{ $j->periode->nama_periode ?? 'Global' }}</span></td>
+                                            <td><span class="badge bg-secondary">{{ $j->periode->nama_periode ?? 'Global / Semua' }}</span></td>
                                             <td class="fw-bold">{{ $j->nama_tahapan }}</td>
                                             <td>Tgl {{ $j->hari_mulai }} s/d {{ $j->hari_selesai }}</td>
                                             <td><span class="badge" style="background-color: {{ $j->warna_bg }}; color: white;">{{ $j->warna_bg }}</span></td>
@@ -420,6 +420,15 @@
             </div>
             <div class="modal-body p-4">
                 <div class="mb-3">
+                    <label class="form-label">Hubungkan Ke Target Periode <span class="text-danger">*</span></label>
+                    <select name="id_periode" class="form-select" required>
+                        <option value="">-- Pilih Periode Bantuan --</option>
+                        @foreach($periodes as $p)
+                            <option value="{{ $p->id }}" {{ $p->status == 'Aktif' ? 'selected' : '' }}>{{ $p->nama_periode }} {{ $p->status == 'Aktif' ? '(Aktif Berjalan)' : '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label class="form-label">Nama Tahapan</label>
                     <input type="text" name="nama_tahapan" class="form-control" required>
                 </div>
@@ -478,79 +487,86 @@
 
 @foreach($periodes as $p)
 <div class="modal fade" id="modalKuotaRT{{ $p->id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4 text-dark">
-            <div class="modal-header bg-light border-bottom px-4 pb-3">
-                <div>
-                    <h5 class="fw-bold mb-0"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Distribusi Jatah Kuota RT</h5>
-                    <small class="text-muted">Periode: {{ $p->nama_periode }}</small>
-                </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form action="{{ route('admin.konfigurasi.store-kuota-rt') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 text-dark">
+            @csrf
+            <input type="hidden" name="id_periode" value="{{ $p->id }}">
+            
+            <div class="modal-header bg-light border-bottom-0 pb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-person-fill-gear text-primary me-2"></i>Input Kuota Manual RT</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             
-            <div class="modal-body p-4 bg-white" style="max-height: 65vh; overflow-y: auto;">
-                @php
-                    // Mengambil kuota dari DB dan mengelompokkan berdasarkan Program Bansos (id_bansos)
-                    $kuotaPeriodeIni = \App\Models\KuotaWilayah::where('id_periode', $p->id)->get()->groupBy('id_bansos');
-                @endphp
+            <div class="modal-body p-4">
+                <div class="alert alert-primary border-0 p-3 small mb-4 rounded-3 bg-opacity-10 text-primary fw-medium">
+                    <i class="bi bi-info-circle-fill me-1"></i> Tentukan kuota masing-masing RT secara spesifik untuk periode <strong>{{ $p->nama_periode }}</strong>.
+                </div>
 
-                @forelse($kuotaPeriodeIni as $id_bansos => $kuotaGroup)
-                    @php
-                        $bansosModel = $kuotaGroup->first()->jenisBansos;
-                        $namaBansos = $bansosModel->nama_bansos ?? 'Program Bantuan';
-                        $kuotaGlobalDesa = $bansosModel->kuota ?? 0;
-                        $totalRT = $kuotaGroup->count();
-                    @endphp
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Pilih Program Bantuan <span class="text-danger">*</span></label>
+                        <select name="id_bansos" class="form-select border-secondary" required>
+                            <option value="">-- Pilih Jenis Bansos --</option>
+                            @foreach($jenisBansos as $b)
+                                <option value="{{ $b->id }}">{{ $b->kode_bansos }} - {{ $b->nama_bansos }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     
-                    <div class="card mb-4 border border-secondary border-opacity-25 shadow-sm">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3">
-                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-gift-fill text-primary me-2"></i>{{ $namaBansos }}</h6>
-                            <span class="badge bg-primary px-3 py-2 rounded-pill fw-bold shadow-sm">Kuota Utama Desa: {{ $kuotaGlobalDesa }} KPM</span>
-                        </div>
-                        <div class="p-2 bg-light bg-opacity-50 small border-bottom border-secondary border-opacity-10 text-muted">
-                            <i class="bi bi-info-circle me-1 text-info"></i> Sistem telah mendistribusikan kuota ini secara otomatis ke seluruh <b>{{ $totalRT }} RT aktif</b>.
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover align-middle mb-0 text-center" style="font-size: 0.85rem;">
-                                <thead class="table-light text-secondary">
-                                    <tr>
-                                        <th class="py-2">Wilayah (RT/RW)</th>
-                                        <th class="py-2">Jatah Kuota RT</th>
-                                        <th class="py-2">Sudah Terpakai</th>
-                                        <th class="py-2">Sisa Kuota RT</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($kuotaGroup->sortBy(['rt', 'rw']) as $k)
-                                    <tr>
-                                        <td class="fw-bold py-2">RT {{ $k->rt }} / RW {{ $k->rw }}</td>
-                                        <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-1 rounded-pill">{{ $k->kuota }} KPM</span></td>
-                                        <td><span class="badge bg-secondary rounded-pill px-3">{{ $k->terpakai }}</span></td>
-                                        <td>
-                                            @if(($k->kuota - $k->terpakai) > 0)
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1 rounded-pill">{{ $k->kuota - $k->terpakai }} KPM</span>
-                                            @else
-                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-1 rounded-pill">Habis</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                    <div class="col-md-8">
+                        <label class="form-label">Ketua RT Penerima Kuota <span class="text-danger">*</span></label>
+                        <select name="id_user" class="form-select border-secondary" required>
+                            <option value="">-- Pilih Wilayah RT / RW --</option>
+                            @foreach($daftar_rt as $rt)
+                                <option value="{{ $rt->id_user }}">RT {{ $rt->wilayah_rt_rw ?? '-' }} ({{ $rt->nama_lengkap }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Jatah Kuota <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="kuota" class="form-control border-secondary" min="1" placeholder="0" required>
+                            <span class="input-group-text fw-bold">KPM</span>
                         </div>
                     </div>
-                @empty
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-diagram-3 display-3 text-secondary opacity-50 d-block mb-2"></i>
-                        Sistem sedang memproses pembagian kuota RT atau belum ada program bansos yang dihubungkan ke periode ini.
-                    </div>
-                @endforelse
+                </div>
+
+                <hr class="border-secondary opacity-25">
+                
+                <h6 class="fw-bold mb-3"><i class="bi bi-list-check me-2"></i>Riwayat Alokasi Manual Saat Ini</h6>
+                <div class="table-responsive" style="max-height: 250px;">
+                    <table class="table table-sm table-hover text-center align-middle" style="font-size: 0.85rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="py-2">Program</th>
+                                <th class="py-2">Wilayah (RT/RW)</th>
+                                <th class="py-2">Total Ditetapkan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $alokasiP = $kuotaWilayah->where('id_periode', $p->id);
+                            @endphp
+                            @forelse($alokasiP as $a)
+                            <tr>
+                                <td class="fw-bold">{{ $a->jenisBansos->kode_bansos ?? '-' }}</td>
+                                <td>RT {{ $a->rt }} / RW {{ $a->rw }}</td>
+                                <td><span class="badge bg-primary rounded-pill px-3">{{ $a->kuota }}</span></td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="3" class="text-muted py-3">Belum ada kuota manual yang diinputkan untuk periode ini.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="modal-footer bg-light border-top-0 py-3 pe-4">
-                <button type="button" class="btn btn-secondary rounded-pill px-5 fw-bold shadow-sm" data-bs-dismiss="modal">Tutup Rincian</button>
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Tutup</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm"><i class="bi bi-save me-1"></i> Simpan Kuota</button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 @endforeach

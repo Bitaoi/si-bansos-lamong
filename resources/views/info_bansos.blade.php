@@ -77,41 +77,55 @@
                             </div>
                         </div>
                         
-                        @if($statusKetersediaan == 'Tersedia')
-                            <p class="small text-dark mb-4 bg-success bg-opacity-10 p-3 rounded-3 border border-success border-opacity-25">
-                                <i class="bi bi-info-circle-fill text-success me-1"></i> Kuota untuk program ini <b>MASIH TERSEDIA</b> pada wilayah administrasi Rukun Tetangga (RT) di bawah ini. Silakan hubungi Ketua RT setempat untuk mengajukan berkas.
-                            </p>
+                        @if($statusKetersediaan == 'Tersedia' || $statusKetersediaan == 'Kuota Penuh')
+                            
+                            @if($statusKetersediaan == 'Tersedia')
+                                <p class="small text-dark mb-4 bg-success bg-opacity-10 p-3 rounded-3 border border-success border-opacity-25">
+                                    <i class="bi bi-info-circle-fill text-success me-1"></i> Kuota untuk program ini <b>MASIH TERSEDIA</b> pada beberapa wilayah Rukun Tetangga (RT) di bawah ini. Silakan hubungi Ketua RT terkait.
+                                </p>
+                            @else
+                                <p class="small text-danger mb-4 bg-danger bg-opacity-10 p-3 rounded-3 border border-danger border-opacity-25">
+                                    <i class="bi bi-x-circle-fill text-danger me-1"></i> Mohon maaf, jatah kuota pengusulan program bantuan ini sudah <b>HABIS TERISI PENUH</b> di seluruh wilayah RT desa.
+                                </p>
+                            @endif
 
                             <div class="card border border-light-subtle shadow-sm rounded-3">
-                                <div class="card-header bg-light fw-bold text-dark"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Daftar Wilayah RT yang Menyediakan Jatah Kuota</div>
+                                <div class="card-header bg-light fw-bold text-dark"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Daftar Wilayah RT dan Ketersediaan Kuota</div>
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0 text-center">
                                         <thead class="table-light text-secondary small">
                                             <tr>
-                                                <th>Nomor Rukun Tetangga (RT)</th>
-                                                <th>Nomor Rukun Warga (RW)</th>
+                                                <th>Nomor Wilayah (RW/RT)</th>
+                                                <th>Total Kuota</th>
+                                                <th>Sudah Terpakai</th>
                                                 <th>Sisa Jatah Alokasi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @forelse($rincianKuotaRT as $k)
                                             <tr>
-                                                <td class="fw-bold text-dark">RT {{ $k->rt }}</td>
-                                                <td>RW {{ $k->rw }}</td>
-                                                <td><span class="badge bg-success rounded-pill px-3 py-1">{{ $k->kuota - $k->terpakai }} KK / KPM</span></td>
+                                                <td class="fw-bold text-dark">RW {{ $k->rw }} / RT {{ $k->rt }}</td>
+                                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-1 rounded-pill">{{ $k->kuota }} KPM</span></td>
+                                                <td><span class="badge bg-secondary rounded-pill px-3 py-1">{{ $k->terpakai }}</span></td>
+                                                <td>
+                                                    @if(($k->kuota - $k->terpakai) > 0)
+                                                        <span class="badge bg-success rounded-pill px-3 py-1">{{ $k->kuota - $k->terpakai }} KK / KPM</span>
+                                                    @else
+                                                        <span class="badge bg-danger rounded-pill px-3 py-1">Penuh / Habis</span>
+                                                    @endif
+                                                </td>
                                             </tr>
                                             @empty
-                                            <tr><td colspan="3" class="text-center py-3 text-muted">Tidak ditemukan kuota aktif untuk tingkat wilayah RT.</td></tr>
+                                            <tr><td colspan="4" class="text-center py-3 text-muted">Data kuota wilayah belum didistribusikan oleh Pemerintah Desa.</td></tr>
                                             @endforelse
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        @elseif($statusKetersediaan == 'Kuota Penuh')
-                            <p class="small text-danger mb-0 bg-danger bg-opacity-10 p-3 rounded-3 border border-danger border-opacity-25">Mohon maaf, jatah kuota pengusulan program bantuan ini sudah habis terisi penuh di seluruh wilayah desa.</p>
                         @else
                             <p class="small text-danger mb-0 bg-danger bg-opacity-10 p-3 rounded-3 border border-danger border-opacity-25">Program bantuan sosial ini belum dibuka jatah kuotanya oleh Pemerintah Desa pada periode berjalan.</p>
                         @endif
+
                     </div>
                 </div>
             </div>
